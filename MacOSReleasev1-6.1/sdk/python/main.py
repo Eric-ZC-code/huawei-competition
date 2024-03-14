@@ -73,8 +73,12 @@ if __name__ == "__main__":
     Init()
     for zhen in range(1, 15001):
         id = Input()
+        if zhen ==1:
+
+            sys.stderr.write("123")
         for i in range(robot_num):
             print("move", i, random.randint(0, 3))
             sys.stdout.flush()
         print("OK")
         sys.stdout.flush()
+        sys.stderr.flush()
