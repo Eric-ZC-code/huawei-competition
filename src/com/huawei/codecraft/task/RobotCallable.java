@@ -1,8 +1,8 @@
 package com.huawei.codecraft.task;
 
+import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
-import com.huawei.codecraft.enums.Command;
 import com.huawei.codecraft.wrapper.GoodsInfo;
 
 import java.util.List;

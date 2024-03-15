@@ -1,0 +1,50 @@
+package com.huawei.codecraft.entities;
+
+public class Command {
+    private String cmd;
+    private Integer actorId;
+    private Integer para2;
+
+    public Command(String cmd, Integer actorId, Integer para2) {
+        this.cmd = cmd;
+        this.actorId = actorId;
+        this.para2 = para2;
+    }
+
+    public static Command move(Integer actorId, Integer dir){
+        return new Command("move",actorId,dir);
+    }
+    public static Command get(Integer actorId){
+        return new Command("get",actorId,null);
+    }
+    public static Command pull(Integer actorId){
+        return new Command("pull",actorId,null);
+    }
+    public static Command ship(Integer actorId, Integer para2 ){
+        return new Command("ship",actorId,para2);
+    }
+    public static Command go(Integer actorId){
+        return new Command("go",actorId,null);
+    }
+
+    @Override
+    public String toString() {
+        String s = this.cmd + " ";
+        if (this.actorId== null) {
+            return "ignore";
+        }
+        s += (this.actorId+" ");
+        if (this.para2 != null) {
+            s += this.para2;
+        }
+        return s;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Command.move(1, 2));
+        System.out.println(Command.get(1));
+        System.out.println(Command.pull(1));
+        System.out.println(Command.ship(1, 2));
+        System.out.println(Command.go(1));
+    }
+}
