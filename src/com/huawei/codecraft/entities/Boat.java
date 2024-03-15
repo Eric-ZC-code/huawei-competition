@@ -4,6 +4,20 @@ public class Boat {
     private int num;
     private int pos;
     private int status;
+    private int capacity;
+
+    public Boat(int capacity) {
+        this.capacity = capacity;
+    }
+
+    public int capacity() {
+        return capacity;
+    }
+
+    public Boat setCapacity(int capacity) {
+        this.capacity = capacity;
+        return this;
+    }
 
     public int num() {
         return num;
