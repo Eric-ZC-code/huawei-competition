@@ -26,11 +26,13 @@ public class RobotCallable implements Callable {
         synchronized (robot){
             if(robot.flags().get(frame)){
                 // 该帧已经被处理过了
+                logger.info("Processed, then skip this frame");
                 return null;
             }
             else {
                 robot.flags().put(frame,true);
             }
+
             if (!robot.containsCommand()) {
                 // 目前机器人没有被分配任务,并且任务缓存中没有堆积的任务
                 // 则去搜索最近的货物，然后规划路径
