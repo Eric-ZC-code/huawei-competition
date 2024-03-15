@@ -3,3 +3,5 @@
 *.iml
 .idea
 **/output/**
+**/out/**
+MacOSReleasev1-6.1/replayer/
