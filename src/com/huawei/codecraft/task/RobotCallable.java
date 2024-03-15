@@ -12,7 +12,7 @@ import java.util.concurrent.Callable;
 public class RobotCallable implements Callable {
     private static final MyLogger logger= MyLogger.getLogger("RobotCallable");
     private Integer frame;
-    private Robot robot;
+    private final Robot robot;
     private GoodsInfo goodsInfo;
     public RobotCallable(Robot robot, GoodsInfo goodsInfo,Integer frame) {
         this.robot = robot;
@@ -39,6 +39,7 @@ public class RobotCallable implements Callable {
 
                 if (nearestGood != null) {
                     List<Command> path = goodsInfo.getFullPath(robot, nearestGood, null);
+
                     logger.info("Robot "+robot.id()+" generating tasks: "+path);
                     robot.setCurrentCommand(path);
                 }

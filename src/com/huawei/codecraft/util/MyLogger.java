@@ -44,6 +44,10 @@ public class MyLogger {
     public void info(String message, Object... args) {
         logger.log(Level.INFO, message, args);
     }
+    public void info(String message){
+        logger.info(message);
+    }
+
     public void warning(String message, Object... args) {
         logger.log(Level.WARNING, message, args);
     }
