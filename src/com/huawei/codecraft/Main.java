@@ -105,11 +105,11 @@ public class Main {
 
         for (int zhen = 1; zhen <= 15000; zhen++) {
             int id = mainInstance.input();
-            if (zhen == 1) {
-                for (char[] ele : mainInstance.ch) {
-                    System.err.println(String.valueOf(ele));
-                }
-            }
+//            if (zhen == 1) {
+//                for (char[] ele : mainInstance.ch) {
+//                    System.err.println(String.valueOf(ele));
+//                }
+//            }
 
             for (Robot robot : mainInstance.robot) {
                 mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.goodsInfo));
