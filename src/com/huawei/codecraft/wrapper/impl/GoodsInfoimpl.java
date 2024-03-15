@@ -49,8 +49,6 @@ public class GoodsInfoimpl extends GoodsInfo {
     }
 
     public List<Pair> mazePathBFS(char[][] maze, int startX, int startY, int endX, int endY) {
-        int rows = maze.length;
-        int cols = maze[0].length;
         Set<Pair> visited = new HashSet<>();
         Queue<Pair> queue = new LinkedList<>();
         List<Pair> path = new ArrayList<>();
