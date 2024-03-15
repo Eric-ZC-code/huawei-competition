@@ -3,18 +3,18 @@ package com.huawei.codecraft.task;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
-import com.huawei.codecraft.wrapper.GoodsInfo;
+import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.List;
 import java.util.concurrent.Callable;
 
 public class RobotCallable implements Callable {
     private Robot robot;
-    private GoodsInfo goodsInfo;
+    private MapInfo mapInfo;
 
-    public RobotCallable(Robot robot, GoodsInfo goodsInfo) {
+    public RobotCallable(Robot robot, MapInfo mapInfo) {
         this.robot = robot;
-        this.goodsInfo = goodsInfo;
+        this.mapInfo = mapInfo;
     }
 
     @Override
@@ -27,10 +27,10 @@ public class RobotCallable implements Callable {
                 // 目前机器人没有被分配任务,并且任务缓存中没有堆积的任务
                 // 则去搜索最近的货物，然后规划路径
                 // 只有等待任务分配完成后才能开始执行。
-                Good nearestGood = goodsInfo.findNearestGood(robot);
+                Good nearestGood = mapInfo.findBestGood(robot);
 //                System.err.println("Robot "+robot.id()+" generating tasks");
                 if (nearestGood != null) {
-                    List<Command> path = goodsInfo.getFullPath(robot, nearestGood, null);
+                    List<Command> path = mapInfo.getFullPath(robot, nearestGood, null);
                     robot.setCurrentCommand(path);
                 }
             }else {

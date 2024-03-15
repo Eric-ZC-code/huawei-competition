@@ -7,14 +7,12 @@ package com.huawei.codecraft;
 
 import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Boat;
-import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.task.RobotCallable;
 import com.huawei.codecraft.util.MessageCenter;
-import com.huawei.codecraft.wrapper.GoodsInfo;
-import com.huawei.codecraft.wrapper.impl.GoodsInfoimpl;
+import com.huawei.codecraft.wrapper.MapInfo;
+import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
 
-import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,7 +30,7 @@ public class Main {
 
     private int money, boatCapacity, id;
     private char[][] ch = new char[n][n];
-    private GoodsInfo goodsInfo= new GoodsInfoimpl();
+    private MapInfo mapInfo = new MapInfoimpl();
     private Robot[] robot = new Robot[robotNum + 10];
     private Berth[] berth = new Berth[berthNum + 10];
     private Boat[] boat = new Boat[10];
@@ -76,11 +74,11 @@ public class Main {
             int y = scanf.nextInt();
             int val = scanf.nextInt();
             try {
-                goodsInfo.addGood(x, y, val);
+                mapInfo.addGood(x, y, val);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
-            goodsInfo.addGood(x, y, val);
+            mapInfo.addGood(x, y, val);
         }
         for (int i = 0; i < robotNum; i++) {
             robot[i].setCarrying(scanf.nextInt())
@@ -113,7 +111,7 @@ public class Main {
 //            }
 
             for (Robot robot : mainInstance.robot) {
-                mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.goodsInfo));
+                mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.mapInfo));
             }
             System.out.println("OK");
             MessageCenter.reset();
