@@ -43,15 +43,15 @@ public class Test {
         }
         System.out.println(map.length);
         System.out.println(map[0].length);
-//        GoodsInfo GoodsInfoimpl = new GoodsInfoimpl();
-//        GoodsInfoimpl.setMap(map);
-//        int startX = 1, startY = 1;
-//        int endX = 5, endY = 5;
-//        Robot robot = new Robot(startX, startY);
-//        Good good = new Good(endX, endY, 10);
-//        Berth berth = new Berth(6, 1, 1, 1);
-//        List<Command> path = GoodsInfoimpl.getFullPath(robot, good, berth);
-//        System.out.println("Path: " + path);
+        GoodsInfo GoodsInfoimpl = new GoodsInfoimpl();
+        GoodsInfoimpl.setMap(map);
+        int startX = 36, startY = 173;
+        int endX = 44, endY = 194;
+        Robot robot = new Robot(startX, startY);
+        Good good = new Good(endX, endY, 10);
+        Berth berth = new Berth(6, 1, 1, 1);
+        List<Command> path = GoodsInfoimpl.getFullPath(robot, good, berth);
+        System.out.println("Path: " + path);
     }
 
 

@@ -91,4 +91,13 @@ public class Robot {
         this.status = status;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Robot{" +
+                "id=" + id +
+                ", x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }
