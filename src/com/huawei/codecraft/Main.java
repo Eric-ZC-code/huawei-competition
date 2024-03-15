@@ -51,8 +51,8 @@ public class Main {
             berth[id] = new Berth();
             berth[id].setX(scanf.nextInt())
                      .setY(scanf.nextInt())
-                     .setTransport_time(scanf.nextInt())
-                     .setLoading_speed(scanf.nextInt());
+                     .setTransportTime(scanf.nextInt())
+                     .setLoadingSpeed(scanf.nextInt());
         }
         this.boat_capacity = scanf.nextInt();
 
@@ -114,14 +114,12 @@ public class Main {
             for (Robot robot : mainInstance.robot) {
                 mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.goodsInfo));
             }
-//            Random rand = new Random();
-//            for (int i = 0; i < robot_num; i++)
-//                System.out.printf("move %d %d" + System.lineSeparator(), i, rand.nextInt(4) % 4);
             System.out.println("OK");
             MessageCenter.reset();
             System.out.flush();
             System.err.flush();
         }
+
         System.exit(0);
 
 
