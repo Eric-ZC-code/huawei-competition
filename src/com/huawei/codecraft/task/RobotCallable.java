@@ -30,7 +30,7 @@ public class RobotCallable implements Callable {
                 Good nearestGood = goodsInfo.findNearestGood(robot);
 //                System.err.println("Robot "+robot.id()+" generating tasks");
                 if (nearestGood != null) {
-                    List<Command> path = goodsInfo.getPath(robot, nearestGood);
+                    List<Command> path = goodsInfo.getFullPath(robot, nearestGood, null);
                     robot.setCurrentCommand(path);
                 }
             }else {

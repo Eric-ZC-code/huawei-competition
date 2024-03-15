@@ -1,5 +1,6 @@
 package com.huawei.codecraft.wrapper.impl;
 
+import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
@@ -24,7 +25,7 @@ public class GoodsInfoimpl extends GoodsInfo {
     }
 
     @Override
-    public List<Command> getPath(Robot robot, Good good) {
+    public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
         List<Pair> path = mazePathBFS(this.map, robot.x(), robot.y(), good.x(), good.y());
         List<Command> movePath = new ArrayList<>();
         int id = robot.id();
@@ -103,6 +104,22 @@ public class GoodsInfoimpl extends GoodsInfo {
      */
     @Override
     public synchronized void acquireGood(Robot robot, Good good) {
+
+    }
+
+    @Override
+    public void getRobotToGoodPath(Robot robot, Berth berth) {
+
+    }
+
+    @Override
+    public void getRobotToBerthPath(Robot robot, Good good) {
+
+    }
+
+
+    @Override
+    public void getGood(Robot robot, Good good) {
 
     }
 

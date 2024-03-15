@@ -1,5 +1,6 @@
 package com.huawei.codecraft.wrapper;
 
+import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
@@ -29,6 +30,9 @@ public abstract class GoodsInfo {
         availableGoods.add(new Good(x, y, value));
     }
     abstract public Good findNearestGood(Robot robot);
-    abstract public List<Command> getPath(Robot robot, Good good);
+    abstract public List<Command> getFullPath(Robot robot, Good good, Berth berth);
     abstract public void acquireGood(Robot robot, Good good);
+    abstract public void getRobotToGoodPath(Robot robot, Berth berth);
+    abstract public void getRobotToBerthPath(Robot robot, Good good);
+    abstract public void getGood(Robot robot, Good good);
 }
