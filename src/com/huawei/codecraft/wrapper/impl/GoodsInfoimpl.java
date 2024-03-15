@@ -19,55 +19,84 @@ public class GoodsInfoimpl extends GoodsInfo {
                 nearestGood = availableGood;
             }
         }
-        System.err.println("nearest good: x:" + nearestGood.x() + " y:" + nearestGood.y() + " value:" + nearestGood.value());
+//        System.err.println("nearest good: x:" + nearestGood.x() + " y:" + nearestGood.y() + " value:" + nearestGood.value());
         return nearestGood;
     }
 
     @Override
     public List<Command> getPath(Robot robot, Good good) {
-        // bfs 寻找目标货物
-        char[][] map = this.map;
-        int x = robot.x();
-        int y = robot.y();
-        int rows = map.length;
-        int cols = map[0].length;
-        int[][] directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
-
-        Triple start = new Triple(x, y, new ArrayList<Command>());
-        Deque<Triple> queue = new ArrayDeque<>();
-        Set<String> visited = new HashSet<>();
-        queue.offer(start);
-        visited.add(x + "," + y);
-
-        while (!queue.isEmpty()) {
-            Triple t = queue.poll();
-
-            if (t.x == good.x() && t.y == good.y()) {
-                System.err.println("Robot path found: " + t.path);
-                return t.path;
-            }
-
-            for (int i = 0; i < directions.length; i++) {
-                int dx = directions[i][0];
-                int dy = directions[i][1];
-                int nx = t.x + dx;
-                int ny = t.y + dy;
-
-                if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && !isObstacle(nx, ny) && !visited.contains(nx + "," + ny)) {
-                    Command newCommand = Command.move(robot.id(), i);
-                    t.path.add(newCommand);
-                    Triple newTriple = new Triple(nx, ny, t.path);
-                    queue.offer(newTriple);
-                    visited.add(nx + "," + ny);
+        List<Pair> path = mazePathBFS(this.map, robot.x(), robot.y(), good.x(), good.y());
+        List<Command> movePath = new ArrayList<>();
+        int id = robot.id();
+        for (int i = 1; i < path.size(); i++) {
+            Pair prev = path.get(i - 1);
+            Pair cur = path.get(i);
+            if (prev.x == cur.x) {
+                if (prev.y < cur.y) {
+                    movePath.add(Command.move(id, 0));
+                } else {
+                    movePath.add(Command.move(id, 1));
+                }
+            } else {
+                if (prev.x >= cur.x) {
+                    movePath.add(Command.move(id, 2));
+                } else {
+                    movePath.add(Command.move(id, 3));
                 }
             }
         }
-
-        System.err.println("Robot path not found");
-        // 找不到移动路径返回空列表
-        return new ArrayList<>();
+        return movePath;
     }
 
+    public List<Pair> mazePathBFS(char[][] maze, int startX, int startY, int endX, int endY) {
+        int rows = maze.length;
+        int cols = maze[0].length;
+        Set<Pair> visited = new HashSet<>();
+        Queue<Pair> queue = new LinkedList<>();
+        List<Pair> path = new ArrayList<>();
+        Map<Pair, Pair> parent = new HashMap<>();
+
+        Pair start = new Pair(startX, startY);
+        queue.offer(start);
+        visited.add(start);
+
+        while (!queue.isEmpty()) {
+            Pair pos = queue.poll();
+            if (pos.x == endX && pos.y == endY) {
+                while (parent.get(pos) != null) {
+                    path.add(pos);
+                    pos = parent.get(pos);
+                }
+                path.add(start);
+                Collections.reverse(path);
+                return path;
+            } else {
+                List<Pair> nbs = possibleNeighbours(maze, pos.x, pos.y);
+                for (Pair nb : nbs) {
+                    if (!visited.contains(nb)) {
+                        visited.add(nb);
+                        queue.offer(nb);
+                        parent.put(nb, pos);
+                    }
+                }
+            }
+        }
+        path.add(new Pair(-1, -1)); // Path not found indicator
+        return path;
+    }
+
+    private List<Pair> possibleNeighbours(char[][] maze, int x, int y) {
+        int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        List<Pair> neighbours = new ArrayList<>();
+        for (int[] dir : dirs) {
+            int nx = x + dir[0];
+            int ny = y + dir[1];
+            if (nx >= 0 && nx < maze.length && ny >= 0 && ny < maze[0].length && !isObstacle(nx, ny)){
+                neighbours.add(new Pair(nx, ny));
+            }
+        }
+        return neighbours;
+    }
 
     /**
      * acquire good synchronously
@@ -83,13 +112,26 @@ public class GoodsInfoimpl extends GoodsInfo {
         return this.map[x][y] == '#' || this.map[x][y] == '*' || this.map[x][y] == 'B';
     }
 
-    private class Triple {
+
+    static class Pair {
         int x, y;
-        List<Command> path;
-        Triple (int x, int y,  List<Command> path) {
+
+        public Pair(int x, int y) {
             this.x = x;
             this.y = y;
-            this.path = path;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            Pair pair = (Pair) obj;
+            return x == pair.x && y == pair.y;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y);
         }
     }
 }
