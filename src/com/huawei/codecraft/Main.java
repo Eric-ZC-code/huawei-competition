@@ -26,15 +26,15 @@ import java.util.concurrent.Executors;
  */
 public class Main {
     private static final int n = 200;
-    private static final int robot_num = 10;
-    private static final int berth_num = 10;
+    private static final int robotNum = 10;
+    private static final int berthNum = 10;
     private static final int N = 210;
 
-    private int money, boat_capacity, id;
+    private int money, boatCapacity, id;
     private char[][] ch = new char[n][n];
     private GoodsInfo goodsInfo= new GoodsInfoimpl();
-    private Robot[] robot = new Robot[robot_num + 10];
-    private Berth[] berth = new Berth[berth_num + 10];
+    private Robot[] robot = new Robot[robotNum + 10];
+    private Berth[] berth = new Berth[berthNum + 10];
     private Boat[] boat = new Boat[10];
 
     private ExecutorService robotExecutor = Executors.newFixedThreadPool(10);
@@ -46,7 +46,7 @@ public class Main {
             line = line.replace('A', '.');
             ch[i] = line.toCharArray();
         }
-        for (int i = 0; i < berth_num; i++) {
+        for (int i = 0; i < berthNum; i++) {
             int id = scanf.nextInt();
             berth[id] = new Berth();
             berth[id].setX(scanf.nextInt())
@@ -54,10 +54,10 @@ public class Main {
                      .setTransportTime(scanf.nextInt())
                      .setLoadingSpeed(scanf.nextInt());
         }
-        this.boat_capacity = scanf.nextInt();
+        this.boatCapacity = scanf.nextInt();
 
         // init robots
-        for (int i = 0; i < robot_num; i++) {
+        for (int i = 0; i < robotNum; i++) {
             robot[i] = new Robot();
         }
         String okk = scanf.nextLine();
@@ -80,7 +80,7 @@ public class Main {
             }
             goodsInfo.addGood(x, y, val);
         }
-        for (int i = 0; i < robot_num; i++) {
+        for (int i = 0; i < robotNum; i++) {
             robot[i].setCarrying(scanf.nextInt())
                     .setX(scanf.nextInt())
                     .setY(scanf.nextInt())
