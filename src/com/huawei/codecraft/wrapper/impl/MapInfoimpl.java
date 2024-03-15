@@ -5,8 +5,6 @@ import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.util.MyLogger;
-import com.huawei.codecraft.wrapper.GoodsInfo;
-import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.*;
