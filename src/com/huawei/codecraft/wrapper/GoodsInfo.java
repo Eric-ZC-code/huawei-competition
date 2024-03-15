@@ -4,6 +4,7 @@ import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.Command;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -11,6 +12,7 @@ import java.util.PriorityQueue;
 public abstract class GoodsInfo {
     protected PriorityQueue<Good> availableGoods = new PriorityQueue<>(Comparator.reverseOrder());
     protected PriorityQueue<Good> acquiredGoods = new PriorityQueue<>(10, Comparator.reverseOrder());
+    protected Character[][] map = new Character[200][200];
 
     public Good getMostValuableGood() {
         return availableGoods.poll();
