@@ -40,7 +40,7 @@ public class GoodsInfoimpl extends GoodsInfo {
         visited.add(x + "," + y);
 
         while (!queue.isEmpty()) {
-            Triple t = queue.poll();;
+            Triple t = queue.poll();
 
             if (t.x == good.x() && t.y == good.y()) {
                 System.err.println("Robot path found: " + t.path);
@@ -83,7 +83,7 @@ public class GoodsInfoimpl extends GoodsInfo {
         return this.map[x][y] == '#' || this.map[x][y] == '*' || this.map[x][y] == 'B';
     }
 
-    class Triple {
+    private class Triple {
         int x, y;
         List<Command> path;
         Triple (int x, int y,  List<Command> path) {
