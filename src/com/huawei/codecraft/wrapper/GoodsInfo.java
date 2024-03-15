@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 public abstract class GoodsInfo {
-    private PriorityQueue<Good> availableGoods = new PriorityQueue<>(Comparator.reverseOrder());
-    private PriorityQueue<Good> acquiredGoods = new PriorityQueue<>(10, Comparator.reverseOrder());
+    protected PriorityQueue<Good> availableGoods = new PriorityQueue<>(Comparator.reverseOrder());
+    protected PriorityQueue<Good> acquiredGoods = new PriorityQueue<>(10, Comparator.reverseOrder());
 
     public Good getMostValuableGood() {
         return availableGoods.poll();
