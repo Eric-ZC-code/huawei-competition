@@ -16,10 +16,13 @@ import com.huawei.codecraft.wrapper.GoodsInfo;
 import com.huawei.codecraft.wrapper.impl.GoodsInfoimpl;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
@@ -37,23 +40,26 @@ public class Main {
     private static final int berthNum = 10;
     private static final int N = 210;
 
+    private HashMap<Integer,Integer> robotFrameRec = new HashMap<>();
     private int money, boatCapacity, id;
     private char[][] ch = new char[n][n];
     private GoodsInfo goodsInfo= new GoodsInfoimpl();
-    private Robot[] robot = new Robot[robotNum + 10];
-    private Berth[] berth = new Berth[berthNum + 10];
-    private Boat[] boat = new Boat[10];
+    private Robot[] robot = new Robot[robotNum];
+    private Berth[] berth = new Berth[berthNum];
+    private Boat[] boat = new Boat[5];
 
     private ExecutorService robotExecutor = Executors.newFixedThreadPool(10);
 
     private void init() {
         logger.info("init");
+
         Scanner scanf = new Scanner(System.in);
         for (int i = 0; i < n; i++) {
             String line = scanf.nextLine();
             line = line.replace('A', '.');
             ch[i] = line.toCharArray();
         }
+        goodsInfo.setMap(ch);
         for (int i = 0; i < berthNum; i++) {
             int id = scanf.nextInt();
             berth[id] = new Berth();
@@ -69,6 +75,7 @@ public class Main {
         // init robots
         for (int i = 0; i < robotNum; i++) {
             robot[i] = new Robot();
+            robotFrameRec.put(i,0);
         }
         String okk = scanf.nextLine();
         System.out.println("OK");
@@ -125,7 +132,27 @@ public class Main {
             }
 
             for (Robot robot : mainInstance.robot) {
-                mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.goodsInfo,frame));
+                HashMap<Integer, Integer> record = mainInstance.robotFrameRec;
+                if (record.get(robot.id())<frame){
+
+//                    Future future = mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.goodsInfo, frame));
+                    final int passFrame = frame;
+//                    record.put(robot.id(), passFrame);
+                    CompletableFuture.supplyAsync(()-> {
+                        try {
+                            return new RobotCallable(robot, mainInstance.goodsInfo, passFrame).call();
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).thenAccept((result)->{
+
+                        synchronized (record) { // 确保线程安全
+                            record.put(robot.id(), passFrame);
+                        }
+                    });
+
+                }
+
             }
             System.out.println("OK");
             MessageCenter.reset();
