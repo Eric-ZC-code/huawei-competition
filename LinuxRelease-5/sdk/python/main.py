@@ -1,49 +1,34 @@
+import sys, random
 
-import sys
-import random
+from robot import Robot
+from boat import Boat
+from berth import Berth
+from good import Good
+from utils import robots_paths, write_log
+
+
 n = 200
 robot_num = 10
 berth_num = 10
 N = 210
-class Robot:
-    def __init__(self, startX=0, startY=0, goods=0, status=0, mbx=0, mby=0):
-        self.x = startX
-        self.y = startY
-        self.goods = goods
-        self.status = status
-        self.mbx = mbx
-        self.mby = mby
 
-robot = [Robot() for _ in range(robot_num + 10)]
-
-class Berth:
-    def __init__(self, x=0, y=0, transport_time=0, loading_speed=0):
-        self.x = x
-        self.y = y
-        self.transport_time = transport_time
-        self.loading_speed = loading_speed
-
-berth = [Berth() for _ in range(berth_num + 10)]
-
-class Boat:
-    def __init__(self, num=0, pos=0, status=0):
-        self.num = num
-        self.pos = pos
-        self.status = status
-
-boat = [Boat() for _ in range(10)]
-
+robot = [Robot() for _ in range(robot_num)]
+berth = [Berth() for _ in range(berth_num)]
+boat = [Boat() for _ in range(5)]
 
 money = 0
 boat_capacity = 0
 id = 0
-ch = []
-gds = [[0 for _ in range(N)] for _ in range(N)]
+ch = [] # map
+gds = [[0 for _ in range(N)] for _ in range(N)] # goods map
+valid_goods = [] # store goods' positions
+paths = {} # store robots' paths
+
 
 def Init():
     for i in range(0, n):
         line = input()
-        ch.append([c for c in line.split(sep=" ")])
+        ch.append([c for c in line])
     for i in range(berth_num):
         line = input()
         berth_list = [int(c) for c in line.split(sep=" ")]
@@ -54,14 +39,19 @@ def Init():
         berth[id].loading_speed = berth_list[4]
     boat_capacity = int(input())
     okk = input()
-    print("OK")
+    print(okk)
     sys.stdout.flush()
+
+
+# input a frame
 def Input():
     id, money = map(int, input().split(" "))
     num = int(input())
     for i in range(num):
         x, y, val = map(int, input().split())
         gds[x][y] = val
+        good = Good(x, y, 0, val)
+        valid_goods.append(good) # store goods
     for i in range(robot_num):
         robot[i].goods, robot[i].x, robot[i].y, robot[i].status = map(int, input().split())
     for i in range(5):
@@ -69,12 +59,29 @@ def Input():
     okk = input()
     return id
 
-if __name__ == "__main__":
+
+if __name__ == "__main__":  
     Init()
     for zhen in range(1, 15001):
         id = Input()
+
+        if len(paths) == 0:
+            paths = robots_paths(ch, robot, valid_goods)
+
         for i in range(robot_num):
-            print("move", i, random.randint(0, 3))
-            sys.stdout.flush()
+            
+            # move the robot to the good
+            if paths.get(robot[i]):
+                move = paths[robot[i]].pop(0) # get the next move
+                print("move", i, move)
+                sys.stdout.flush()
+
+            # the robot gets the good
+            if paths.get(robot[i]) and len(paths[robot[i]]) == 0:
+                print("get", i)
+                robot[i].goods = 1
+                sys.stdout.flush()         
+            
+
         print("OK")
         sys.stdout.flush()
