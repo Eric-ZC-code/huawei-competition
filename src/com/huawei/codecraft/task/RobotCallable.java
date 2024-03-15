@@ -28,14 +28,14 @@ public class RobotCallable implements Callable {
                 // 则去搜索最近的货物，然后规划路径
                 // 只有等待任务分配完成后才能开始执行。
                 Good nearestGood = goodsInfo.findNearestGood(robot);
-                System.err.println("Robot "+robot.id()+" generating tasks");
+//                System.err.println("Robot "+robot.id()+" generating tasks");
                 if (nearestGood != null) {
                     List<Command> path = goodsInfo.getPath(robot, nearestGood);
                     robot.setCurrentCommand(path);
                 }
             }else {
                 // 有任务则执行任务
-                System.err.println("Robot "+robot.id()+" executing tasks");
+//                System.err.println("Robot "+robot.id()+" executing tasks");
                 robot.executeAll();
             }
 
