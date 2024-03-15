@@ -22,7 +22,7 @@ public class MyLogger {
             fh.setFormatter(new Formatter() {
                 @Override
                 public String format(LogRecord record) {
-                    String formatStr = MessageFormat.format(record.getMessage(), record.getParameters());
+
 
 
 
@@ -30,8 +30,7 @@ public class MyLogger {
                                          record.getLevel(),
                                          record.getLoggerName(),
                                          record.getMillis(),
-                                         record.getMessage(),
-                                         formatStr);
+                                         record.getMessage());
                 }
             });
             logger.addHandler(fh);

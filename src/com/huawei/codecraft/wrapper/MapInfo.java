@@ -4,7 +4,6 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,7 +14,7 @@ public abstract class MapInfo {
     protected PriorityQueue<Good> availableGoods = new PriorityQueue<>(Comparator.reverseOrder());
     protected PriorityQueue<Good> acquiredGoods = new PriorityQueue<>(10, Comparator.reverseOrder());
     protected char[][] map = new char[200][200];
-    protected List<Berth> berths = new ArrayList<>();
+    protected Berth[] berths = new Berth[10];
 
     public PriorityQueue<Good> availableGoods() {
         return availableGoods;
@@ -44,11 +43,11 @@ public abstract class MapInfo {
         return this;
     }
 
-    public List<Berth> berths() {
+    public Berth[] berths() {
         return berths;
     }
 
-    public MapInfo setBerths(List<Berth> berths) {
+    public MapInfo setBerths(Berth[] berths) {
         this.berths = berths;
         return this;
     }
@@ -66,8 +65,9 @@ public abstract class MapInfo {
     abstract public Berth findBestBerth(Good good);
     abstract public List<Command> getFullPath(Robot robot, Good good, Berth berth);
     abstract public List<Command> getRobotToGoodPath(Robot robot, Good good);
-    abstract public List<Command> getGoodToBerthPath(Good good, Berth berth);
+    abstract public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot);
     abstract public Command getGood(Robot robot, Good good);
     abstract public void acquireGood(Robot robot, Good good);
+    abstract public Command pullGood(Robot robot, Good good, Berth berth);
 
 }

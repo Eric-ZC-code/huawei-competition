@@ -1,5 +1,6 @@
 package com.huawei.codecraft.task;
 
+import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
@@ -8,13 +9,11 @@ import com.huawei.codecraft.util.MyLogger;
 
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class RobotCallable implements Callable {
     private static final MyLogger logger= MyLogger.getLogger("RobotCallable");
-    private Robot robot;
-    private MapInfo mapInfo;
+    private final Robot robot;
+    private final MapInfo mapInfo;
 
     public RobotCallable(Robot robot, MapInfo mapInfo) {
         this.robot = robot;
@@ -32,9 +31,9 @@ public class RobotCallable implements Callable {
                 // 则去搜索最近的货物，然后规划路径
                 // 只有等待任务分配完成后才能开始执行。
                 Good nearestGood = mapInfo.findBestGood(robot);
-//                System.err.println("Robot "+robot.id()+" generating tasks");
-                if (nearestGood != null) {
-                    List<Command> path = mapInfo.getFullPath(robot, nearestGood, null);
+                Berth nearestBerth = mapInfo.findBestBerth(nearestGood);
+                if (nearestGood != null && nearestBerth != null) {
+                    List<Command> path = mapInfo.getFullPath(robot, nearestGood, nearestBerth);
                     robot.setCurrentCommand(path);
                 }
             }else {
@@ -47,7 +46,6 @@ public class RobotCallable implements Callable {
             return null;
 
         }
-
 
     }
 }

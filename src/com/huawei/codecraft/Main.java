@@ -10,18 +10,13 @@ import com.huawei.codecraft.entities.Boat;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.task.RobotCallable;
 import com.huawei.codecraft.util.MessageCenter;
+import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
 
-import java.io.IOException;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 /**
  * Main
@@ -33,13 +28,12 @@ public class Main {
     private static final int n = 200;
     private static final int robotNum = 10;
     private static final int berthNum = 10;
-    private static final int N = 210;
 
     private int money, boatCapacity, id;
     private char[][] ch = new char[n][n];
     private MapInfo mapInfo = new MapInfoimpl();
-    private Robot[] robot = new Robot[robotNum + 10];
-    private Berth[] berth = new Berth[berthNum + 10];
+    private Robot[] robot = new Robot[robotNum];
+    private Berth[] berth = new Berth[berthNum];
     private Boat[] boat = new Boat[10];
 
     private ExecutorService robotExecutor = Executors.newFixedThreadPool(10);
@@ -68,6 +62,9 @@ public class Main {
         for (int i = 0; i < robotNum; i++) {
             robot[i] = new Robot();
         }
+        // init mapInfo
+        mapInfo.setMap(ch);
+        mapInfo.setBerths(berth);
         String okk = scanf.nextLine();
         System.out.println("OK");
         System.out.flush();

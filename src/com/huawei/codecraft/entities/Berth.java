@@ -48,4 +48,14 @@ public class Berth {
         this.loadingSpeed = loadingSpeed;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Berth{" +
+                "x=" + x +
+                ", y=" + y +
+                ", transportTime=" + transportTime +
+                ", loadingSpeed=" + loadingSpeed +
+                '}';
+    }
 }

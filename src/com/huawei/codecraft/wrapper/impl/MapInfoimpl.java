@@ -4,11 +4,13 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.*;
 
 public class MapInfoimpl extends MapInfo {
+    private MyLogger logger = MyLogger.getLogger("MapInfoimpl");
     @Override
     public Good findBestGood(Robot robot) {
         int minDistance = Integer.MAX_VALUE;
@@ -28,6 +30,7 @@ public class MapInfoimpl extends MapInfo {
         int minDistance = Integer.MAX_VALUE;
         Berth BestBerth = null;
         for (Berth berth : this.berths) {
+            logger.info("Berth: " + berth);
             int manhattanDistance = Math.abs(good.x() - berth.x()) + Math.abs(good.y() - berth.y());
             if (minDistance > manhattanDistance) {
                 minDistance = manhattanDistance;
@@ -39,13 +42,27 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
+        if (good.isAcquired()) {
+            return new ArrayList<>();
+        }
+
         List<Command> pathToGood = getRobotToGoodPath(robot, good);
         Command getGood = getGood(robot, good);
-        List<Command> pathToBerth = getGoodToBerthPath(good, berth);
+        List<Command> pathToBerth = getGoodToBerthPath(good, berth, robot);
+
+        // if pathToGood or pathToBerth is empty, return empty list
+        if (pathToGood.isEmpty() || pathToBerth.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        acquireGood(robot, good);
 
         List<Command> fullPath = new ArrayList<>(pathToGood);
         fullPath.add(getGood);
         fullPath.addAll(pathToBerth);
+
+        Command pullGood = pullGood(robot, good, berth);
+        fullPath.add(pullGood);
 
         return fullPath;
     }
@@ -97,16 +114,6 @@ public class MapInfoimpl extends MapInfo {
         return neighbours;
     }
 
-    /**
-     * acquire good synchronously
-     * @param robot
-     * @param good
-     */
-    @Override
-    public synchronized void acquireGood(Robot robot, Good good) {
-
-    }
-
     @Override
     public List<Command> getRobotToGoodPath(Robot robot, Good good) {
         List<Pair> path = mazePathBFS(this.map, robot.x(), robot.y(), good.x(), good.y());
@@ -115,29 +122,47 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
-    public List<Command> getGoodToBerthPath(Good good, Berth berth) {
+    public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot) {
         List<Pair> path = mazePathBFS(this.map, good.x(), good.y(), berth.x(), berth.y());
-        List<Command> movePath = pathTransform(path, 0);
+        List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
 
     @Override
     public Command getGood(Robot robot, Good good) {
-        // TODO(need to be implemented with Lock)
-        if (robot.x() == good.x() && robot.y() == good.y()) {
+        if (robot.x() != good.x() || robot.y() != good.y()) {
             robot.setStatus(1); // robot is acquiring good
             availableGoods.remove(good); // remove good from available goods
             acquiredGoods.add(good); // add good to acquired goods
             good.setAcquired(true); // set good acquired
+            return Command.get(robot.id());
         }
 
-        return Command.get(robot.id());
+        return Command.ignore();
+    }
+    /**
+     * acquire good synchronously
+     * @param robot
+     * @param good
+     */
+    @Override
+    public synchronized void acquireGood(Robot robot, Good good) {
+        acquiredGoods.remove(good); // remove good from acquired goods
+        good.setAcquired(false); // set good not acquired
     }
 
+    @Override
+    public Command pullGood(Robot robot, Good good, Berth berth) {
+        if (robot.x() == berth.x() && robot.y() == berth.y()) {
+            robot.setStatus(0); // robot is pulling good
+            return Command.pull(robot.id());
+        }
 
+        return Command.ignore();
+    }
 
     private boolean isObstacle(int x, int y) {
-        return this.map[x][y] == '#' || this.map[x][y] == '*';
+        return this.map[x][y] == '#' || this.map[x][y] == '*' || this.map[x][y] == 'A';
     }
 
     // transform path to move commands
@@ -161,6 +186,7 @@ public class MapInfoimpl extends MapInfo {
                 }
             }
         }
+        logger.info("Move Path: " + movePath);
         return movePath;
     }
 
