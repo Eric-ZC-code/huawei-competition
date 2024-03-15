@@ -54,7 +54,7 @@ public class GoodsInfoimpl extends GoodsInfo {
                 int ny = t.y + dy;
 
                 if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && !isObstacle(nx, ny) && !visited.contains(nx + "," + ny)) {
-                    Command newCommand = Command.MOVE.setActorId(robot.id()).setPara2(i);
+                    Command newCommand = Command.move(robot.id(), i);
                     t.path.add(newCommand);
                     Triple newTriple = new Triple(nx, ny, t.path);
                     queue.offer(newTriple);
