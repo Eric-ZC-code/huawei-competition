@@ -1,10 +1,11 @@
 package com.huawei.codecraft.task;
 
+import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.wrapper.MapInfo;
 import com.huawei.codecraft.util.MyLogger;
-import com.huawei.codecraft.wrapper.GoodsInfo;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -13,10 +14,10 @@ public class RobotCallable implements Callable {
     private static final MyLogger logger= MyLogger.getLogger("RobotCallable");
     private Integer frame;
     private final Robot robot;
-    private GoodsInfo goodsInfo;
-    public RobotCallable(Robot robot, GoodsInfo goodsInfo,Integer frame) {
+    private final MapInfo mapInfo;
+    public RobotCallable(Robot robot, MapInfo mapInfo,Integer frame) {
         this.robot = robot;
-        this.goodsInfo = goodsInfo;
+        this.mapInfo = mapInfo;
         this.frame = frame;
     }
 
@@ -37,13 +38,12 @@ public class RobotCallable implements Callable {
                 // 目前机器人没有被分配任务或者发生碰撞
                 // 则去搜索最近的货物，然后规划路径
                 // 只有等待任务分配完成后才能开始执行。
-                Good nearestGood = goodsInfo.findNearestGood(robot);
-
-                if (nearestGood != null) {
-                    List<Command> path = goodsInfo.getFullPath(robot, nearestGood, null);
-
-                    logger.info("Robot "+robot.id()+" generating tasks: "+path);
+                Good nearestGood = mapInfo.findBestGood(robot);
+                Berth nearestBerth = mapInfo.findBestBerth(nearestGood);
+                if (nearestGood != null && nearestBerth != null) {
+                    List<Command> path = mapInfo.getFullPath(robot, nearestGood, nearestBerth);
                     robot.setCurrentCommand(path);
+                    logger.info("Robot"+robot.id()+"task: "+path);
                 }
             }else {
                 // 有任务则执行任务
