@@ -12,7 +12,7 @@ public class Robot {
     private int id;
     private int x, y, carrying;
     private int status;
-    private ArrayDeque<Command> currentCommand;
+    private ArrayDeque<Command> currentCommand = new ArrayDeque<>();
 
     public Robot() {}
 
@@ -34,8 +34,8 @@ public class Robot {
         return currentCommand.pop();
     }
 
-    public Robot setCurrentCommand(ArrayDeque<Command> currentCommand) {
-        this.currentCommand = currentCommand;
+    public Robot setCurrentCommand(Iterable<Command> currentCommand) {
+        currentCommand.forEach(this::addCommand);
         return this;
     }
 
