@@ -1,9 +1,8 @@
 package com.huawei.codecraft.wrapper;
 
-import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
-import jdk.internal.util.xml.impl.Pair;
+import com.huawei.codecraft.enums.Command;
 
 import java.util.List;
 import java.util.PriorityQueue;

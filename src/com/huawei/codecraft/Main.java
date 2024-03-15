@@ -71,7 +71,8 @@ public class Main {
             robot[i].setCarrying(scanf.nextInt())
                     .setX(scanf.nextInt())
                     .setY(scanf.nextInt())
-                    .setStatus(scanf.nextInt());
+                    .setStatus(scanf.nextInt())
+                    .setId(i);
         }
         for (int i = 0; i < 5; i++) {
             boat[i] = new Boat();
