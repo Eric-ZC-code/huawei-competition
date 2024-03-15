@@ -4,11 +4,13 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.GoodsInfo;
 
 import java.util.*;
 
 public class GoodsInfoimpl extends GoodsInfo {
+    private static final MyLogger logger = MyLogger.getLogger("GoodsInfoimpl");
     @Override
     public Good findNearestGood(Robot robot) {
         int minDistance = Integer.MAX_VALUE;
@@ -20,7 +22,7 @@ public class GoodsInfoimpl extends GoodsInfo {
                 nearestGood = availableGood;
             }
         }
-//        System.err.println("nearest good: x:" + nearestGood.x() + " y:" + nearestGood.y() + " value:" + nearestGood.value());
+        logger.info("Good: "+nearestGood.toString());
         return nearestGood;
     }
 
