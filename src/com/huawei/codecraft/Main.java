@@ -11,13 +11,19 @@ import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.task.RobotCallable;
 import com.huawei.codecraft.util.MessageCenter;
+import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.GoodsInfo;
 import com.huawei.codecraft.wrapper.impl.GoodsInfoimpl;
 
+import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /**
  * Main
@@ -25,6 +31,7 @@ import java.util.concurrent.Executors;
  * @since 2024-02-05
  */
 public class Main {
+    private static final MyLogger logger = MyLogger.getLogger(Main.class.getName());
     private static final int n = 200;
     private static final int robotNum = 10;
     private static final int berthNum = 10;
@@ -40,6 +47,7 @@ public class Main {
     private ExecutorService robotExecutor = Executors.newFixedThreadPool(10);
 
     private void init() {
+        logger.info("init");
         Scanner scanf = new Scanner(System.in);
         for (int i = 0; i < n; i++) {
             String line = scanf.nextLine();
