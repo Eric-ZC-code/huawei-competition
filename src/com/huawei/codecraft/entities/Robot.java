@@ -1,7 +1,7 @@
 package com.huawei.codecraft.entities;
 
 
-import com.huawei.codecraft.enums.Command;
+import com.huawei.codecraft.util.MessageCenter;
 
 import java.util.ArrayDeque;
 
@@ -10,7 +10,7 @@ public class Robot {
     private int id;
     private int x, y, carrying;
     private int status;
-    private ArrayDeque<Command> currentCommand;
+    private ArrayDeque<Command> currentCommand = new ArrayDeque<>();
 
     public Robot() {}
 
@@ -18,13 +18,22 @@ public class Robot {
         this.x = startX;
         this.y = startY;
     }
+    public boolean containsCommand(){
+        return !currentCommand.isEmpty();
+    }
 
     public ArrayDeque<Command> currentCommand() {
         return currentCommand;
     }
+    public void addCommand(Command command){
+        currentCommand.add(command);
+    }
+    public Command popCommand(){
+        return currentCommand.pop();
+    }
 
-    public Robot setCurrentCommand(ArrayDeque<Command> currentCommand) {
-        this.currentCommand = currentCommand;
+    public Robot setCurrentCommand(Iterable<Command> currentCommand) {
+        currentCommand.forEach(this::addCommand);
         return this;
     }
 
@@ -67,26 +76,19 @@ public class Robot {
     public int status() {
         return status;
     }
-    public void moveLeft(){
-        System.out.println(Command.MOVE_LEFT.setActorId(this.id));
-    }
-    public void moveRight(){
-        System.out.println(Command.MOVE_RIGHT.setActorId(this.id));
-    }
-    public void moveUp(){
-        System.out.println(Command.MOVE_UP.setActorId(this.id));
-    }
-    public void moveDown(){
-        System.out.println(Command.MOVE_DOWN.setActorId(this.id));
-    }
 
     public void executeAll(){
+        while (containsCommand()){
+            Command command = popCommand();
+            if(!MessageCenter.send(command)){
+                this.currentCommand.addFirst(command);
+            }
 
+        }
     }
 
     public Robot setStatus(int status) {
         this.status = status;
         return this;
     }
-
 }

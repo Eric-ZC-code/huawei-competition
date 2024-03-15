@@ -1,16 +1,16 @@
 package com.huawei.codecraft.wrapper;
 
+import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
-import com.huawei.codecraft.enums.Command;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
 public abstract class GoodsInfo {
-    private PriorityQueue<Good> availableGoods = new PriorityQueue<>(Comparator.reverseOrder());
-    private PriorityQueue<Good> acquiredGoods = new PriorityQueue<>(10, Comparator.reverseOrder());
+    protected PriorityQueue<Good> availableGoods = new PriorityQueue<>(Comparator.reverseOrder());
+    protected PriorityQueue<Good> acquiredGoods = new PriorityQueue<>(10, Comparator.reverseOrder());
 
     public Good getMostValuableGood() {
         return availableGoods.poll();
