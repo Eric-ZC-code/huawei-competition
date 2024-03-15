@@ -117,40 +117,42 @@ public class Main {
 
         for (int frame = 1; frame <= 15000; frame++) {
             int id = mainInstance.input();
-            if (frame == 1) {
-                for (Robot robot : mainInstance.robot) {
-
-                    System.err.println(robot);
-                }
-                mainInstance.mapInfo.availableGoods().forEach(System.err::println);
-                for (Berth berth : mainInstance.berth) {
-                    System.err.println(berth);
-                }
-                System.err.flush();
-            }
+//            if (frame == 1) {
+//                for (Robot robot : mainInstance.robot) {
+//
+//                    System.err.println(robot);
+//                }
+//                mainInstance.mapInfo.availableGoods().forEach(System.err::println);
+//                for (Berth berth : mainInstance.berth) {
+//                    System.err.println(berth);
+//                }
+//                System.err.flush();
+//            }
 
             for (Robot robot : mainInstance.robot) {
-                HashMap<Integer, Integer> record = mainInstance.robotFrameRec;
-                if (record.get(robot.id())<frame){
+//                HashMap<Integer, Integer> record = mainInstance.robotFrameRec;
+                Future future = mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.mapInfo, frame));
+
+//                if (frame-record.get(robot.id())<=1){
+////
+////                    Future future = mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.mapInfo, frame));
+//                    final int passFrame = frame;
+////                    record.put(robot.id(), passFrame);
+//                    CompletableFuture.supplyAsync(()-> {
+//                        try {
+//                            return new RobotCallable(robot, mainInstance.mapInfo, passFrame).call();
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                            return null;
+//                        }
+//                    }).thenAccept((result)->{
 //
-//                    Future future = mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.mapInfo, frame));
-                    final int passFrame = frame;
-//                    record.put(robot.id(), passFrame);
-                    CompletableFuture.supplyAsync(()-> {
-                        try {
-                            return new RobotCallable(robot, mainInstance.mapInfo, passFrame).call();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            return null;
-                        }
-                    }).thenAccept((result)->{
-
-                        synchronized (record) { // 确保线程安全
-                            record.put(robot.id(), passFrame);
-                        }
-                    });
-
-                }
+//                        synchronized (record) { // 确保线程安全
+//                            record.put(robot.id(), passFrame);
+//                        }
+//                    });
+//
+//                }
 
             }
             System.out.println("OK");
