@@ -122,6 +122,7 @@ public class Main {
             System.out.flush();
             System.err.flush();
         }
+        System.exit(0);
 
 
     }
