@@ -5,7 +5,7 @@ import com.huawei.codecraft.entities.Command;
 public class MessageCenter {
     public static MyLogger logger = MyLogger.getLogger("MessageCenter");
     public static int sentMsg=0;
-    private static final int maxMsg = 1000;
+    private static final int maxMsg = 30;
 
     public static synchronized void add(){
         sentMsg++;
