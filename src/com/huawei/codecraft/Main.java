@@ -55,7 +55,9 @@ public class Main {
                      .setLoadingSpeed(scanf.nextInt());
         }
         this.boatCapacity = scanf.nextInt();
-
+        for (int i = 0; i < 5; i++) {
+            boat[i] = new Boat(boatCapacity);
+        }
         // init robots
         for (int i = 0; i < robotNum; i++) {
             robot[i] = new Robot();
@@ -88,7 +90,6 @@ public class Main {
                     .setId(i);
         }
         for (int i = 0; i < 5; i++) {
-            boat[i] = new Boat();
             boat[i].setStatus(scanf.nextInt())
                     .setPos(scanf.nextInt());
         }
