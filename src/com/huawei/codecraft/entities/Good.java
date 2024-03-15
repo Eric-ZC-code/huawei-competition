@@ -7,6 +7,16 @@ public class Good implements Comparator,Comparable{
     private int x;
     private int y;
     private int value;
+    private boolean acquired = false;
+
+    public boolean acquired() {
+        return acquired;
+    }
+
+    public Good setAcquired(boolean acquired) {
+        this.acquired = acquired;
+        return this;
+    }
 
     public int x() {
         return x;
