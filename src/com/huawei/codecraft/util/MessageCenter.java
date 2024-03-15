@@ -1,6 +1,6 @@
 package com.huawei.codecraft.util;
 
-import com.huawei.codecraft.enums.Command;
+import com.huawei.codecraft.entities.Command;
 
 public class MessageCenter {
     public static int sentMsg=0;

@@ -1,11 +1,9 @@
 package com.huawei.codecraft.entities;
 
 
-import com.huawei.codecraft.enums.Command;
 import com.huawei.codecraft.util.MessageCenter;
 
 import java.util.ArrayDeque;
-import java.util.List;
 
 
 public class Robot {
@@ -77,18 +75,6 @@ public class Robot {
 
     public int status() {
         return status;
-    }
-    public void moveLeft(){
-        System.out.println(Command.MOVE_LEFT.setActorId(this.id));
-    }
-    public void moveRight(){
-        System.out.println(Command.MOVE_RIGHT.setActorId(this.id));
-    }
-    public void moveUp(){
-        System.out.println(Command.MOVE_UP.setActorId(this.id));
-    }
-    public void moveDown(){
-        System.out.println(Command.MOVE_DOWN.setActorId(this.id));
     }
 
     public void executeAll(){
