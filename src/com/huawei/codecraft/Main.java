@@ -90,11 +90,6 @@ public class Main {
             int x = scanf.nextInt();
             int y = scanf.nextInt();
             int val = scanf.nextInt();
-            try {
-                mapInfo.addGood(x, y, val);
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-            }
             mapInfo.addGood(x, y, val);
         }
         for (int i = 0; i < robotNum; i++) {
@@ -137,22 +132,23 @@ public class Main {
             for (Robot robot : mainInstance.robot) {
                 HashMap<Integer, Integer> record = mainInstance.robotFrameRec;
                 if (record.get(robot.id())<frame){
-
-                    Future future = mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.mapInfo, frame));
-                    final int passFrame = frame;
-                    record.put(robot.id(), passFrame);
-//                    CompletableFuture.supplyAsync(()-> {
-//                        try {
-//                            return new RobotCallable(robot, mainInstance.mapInfo, passFrame).call();
-//                        } catch (Exception e) {
-//                            throw new RuntimeException(e);
-//                        }
-//                    }).thenAccept((result)->{
 //
-//                        synchronized (record) { // 确保线程安全
-//                            record.put(robot.id(), passFrame);
-//                        }
-//                    });
+//                    Future future = mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.mapInfo, frame));
+                    final int passFrame = frame;
+//                    record.put(robot.id(), passFrame);
+                    CompletableFuture.supplyAsync(()-> {
+                        try {
+                            return new RobotCallable(robot, mainInstance.mapInfo, passFrame).call();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    }).thenAccept((result)->{
+
+                        synchronized (record) { // 确保线程安全
+                            record.put(robot.id(), passFrame);
+                        }
+                    });
 
                 }
 

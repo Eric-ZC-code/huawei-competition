@@ -8,20 +8,35 @@ import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MapInfoimpl extends MapInfo {
+    private ReadWriteLock rwLock = new ReentrantReadWriteLock();
+
     private MyLogger logger = MyLogger.getLogger("MapInfoimpl");
     @Override
     public Good findBestGood(Robot robot) {
         int minDistance = Integer.MAX_VALUE;
         Good BestGood = null;
-        for (Good availableGood : this.availableGoods) {
-            int manhattanDistance = Math.abs(robot.x() - availableGood.x()) + Math.abs(robot.y() - availableGood.y());
-            if (minDistance > manhattanDistance) {
-                minDistance = manhattanDistance;
-                BestGood = availableGood;
+        rwLock.readLock().lock();
+        try {
+
+
+            for (int i = 0; i < this.availableGoods.size(); i++) {
+                Good availableGood = availableGoods.get(i);
+                int manhattanDistance = Math.abs(robot.x() - availableGood.x()) + Math.abs(robot.y() - availableGood.y());
+                if (minDistance > manhattanDistance) {
+                    minDistance = manhattanDistance;
+                    BestGood = availableGood;
+                }
             }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            rwLock.readLock().unlock();
         }
+
         return BestGood;
     }
 
@@ -29,14 +44,29 @@ public class MapInfoimpl extends MapInfo {
     public Berth findBestBerth(Good good) {
         int minDistance = Integer.MAX_VALUE;
         Berth BestBerth = null;
-        for (Berth berth : this.berths) {
-            logger.info("Berth: " + berth);
-            int manhattanDistance = Math.abs(good.x() - berth.x()) + Math.abs(good.y() - berth.y());
-            if (minDistance > manhattanDistance) {
-                minDistance = manhattanDistance;
-                BestBerth = berth;
+        rwLock.readLock().lock();
+        try{
+            for (int i = 0; i < this.berths.length; i++) {
+                Berth berth = this.berths[i];
+                logger.info("Berth: " + berth);
+                int manhattanDistance = Math.abs(good.x() - berth.x()) + Math.abs(good.y() - berth.y());
+                if (minDistance > manhattanDistance) {
+                    minDistance = manhattanDistance;
+                    BestBerth = berth;
+                }
             }
+
         }
+        catch (Exception e){
+            e.printStackTrace();
+
+        }finally {
+            rwLock.readLock().unlock();
+        }
+
+
+
+
         return BestBerth;
     }
 
@@ -58,8 +88,16 @@ public class MapInfoimpl extends MapInfo {
         if (pathToGood.isEmpty() || pathToBerth.isEmpty()) {
             return new ArrayList<>();
         }
+        rwLock.writeLock().lock();
+        try {
+            acquireGood(robot, good);
 
-        acquireGood(robot, good);
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            rwLock.writeLock().unlock();
+        }
+
 
         List<Command> fullPath = new ArrayList<>(pathToGood);
         fullPath.add(getGood);
@@ -134,13 +172,22 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public Command getGood(Robot robot, Good good) {
-        if (robot.x() != good.x() || robot.y() != good.y()) {
-            robot.setStatus(1); // robot is acquiring good
-            availableGoods.remove(good); // remove good from available goods
-            acquiredGoods.add(good); // add good to acquired goods
-            good.setAcquired(true); // set good acquired
-            return Command.get(robot.id());
+        rwLock.writeLock().lock();
+        try {
+            if (robot.x() != good.x() || robot.y() != good.y()) {
+                robot.setStatus(1); // robot is acquiring good
+                availableGoods.remove(good); // remove good from available goods
+                acquiredGoods.add(good); // add good to acquired goods
+                good.setAcquired(true); // set good acquired
+                return Command.get(robot.id());
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            rwLock.writeLock().unlock();
         }
+
 
         return Command.ignore();
     }
@@ -150,7 +197,7 @@ public class MapInfoimpl extends MapInfo {
      * @param good
      */
     @Override
-    public synchronized void acquireGood(Robot robot, Good good) {
+    public void acquireGood(Robot robot, Good good) {
         acquiredGoods.remove(good); // remove good from acquired goods
         good.setAcquired(false); // set good not acquired
     }
