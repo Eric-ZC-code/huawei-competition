@@ -9,10 +9,15 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Boat;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.task.RobotCallable;
+import com.huawei.codecraft.util.MessageCenter;
 import com.huawei.codecraft.wrapper.GoodsInfo;
 import com.huawei.codecraft.wrapper.impl.GoodsInfoimpl;
 
-import java.util.*;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Main
@@ -26,16 +31,20 @@ public class Main {
     private static final int N = 210;
 
     private int money, boat_capacity, id;
-    private String[] ch = new String[n];
+    private char[][] ch = new char[n][n];
     private GoodsInfo goodsInfo= new GoodsInfoimpl();
     private Robot[] robot = new Robot[robot_num + 10];
     private Berth[] berth = new Berth[berth_num + 10];
     private Boat[] boat = new Boat[10];
 
+    private ExecutorService robotExecutor = Executors.newFixedThreadPool(10);
+
     private void init() {
         Scanner scanf = new Scanner(System.in);
         for (int i = 0; i < n; i++) {
-            ch[i] = scanf.nextLine();
+            String line = scanf.nextLine();
+            line = line.replace('A', '.');
+            ch[i] = line.toCharArray();
         }
         for (int i = 0; i < berth_num; i++) {
             int id = scanf.nextInt();
@@ -46,6 +55,11 @@ public class Main {
                      .setLoading_speed(scanf.nextInt());
         }
         this.boat_capacity = scanf.nextInt();
+
+        // init robots
+        for (int i = 0; i < robot_num; i++) {
+            robot[i] = new Robot();
+        }
         String okk = scanf.nextLine();
         System.out.println("OK");
         System.out.flush();
@@ -64,10 +78,9 @@ public class Main {
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
-//            goodsInfo.addGood(x, y, val);
+            goodsInfo.addGood(x, y, val);
         }
         for (int i = 0; i < robot_num; i++) {
-            robot[i] = new Robot();
             robot[i].setCarrying(scanf.nextInt())
                     .setX(scanf.nextInt())
                     .setY(scanf.nextInt())
@@ -93,17 +106,19 @@ public class Main {
         for (int zhen = 1; zhen <= 15000; zhen++) {
             int id = mainInstance.input();
             if (zhen == 1) {
-
-                for (String ele : mainInstance.ch) {
-                    System.err.println(ele);
-
+                for (char[] ele : mainInstance.ch) {
+                    System.err.println(String.valueOf(ele));
                 }
-
             }
-            Random rand = new Random();
-            for (int i = 0; i < robot_num; i++)
-                System.out.printf("move %d %d" + System.lineSeparator(), i, rand.nextInt(4) % 4);
+
+            for (Robot robot : mainInstance.robot) {
+                mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.goodsInfo));
+            }
+//            Random rand = new Random();
+//            for (int i = 0; i < robot_num; i++)
+//                System.out.printf("move %d %d" + System.lineSeparator(), i, rand.nextInt(4) % 4);
             System.out.println("OK");
+            MessageCenter.reset();
             System.out.flush();
             System.err.flush();
         }
