@@ -13,9 +13,15 @@ import com.huawei.codecraft.util.MessageCenter;
 import com.huawei.codecraft.wrapper.MapInfo;
 import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
 
+import java.io.IOException;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /**
  * Main
@@ -23,6 +29,7 @@ import java.util.concurrent.Executors;
  * @since 2024-02-05
  */
 public class Main {
+    private static final MyLogger logger = MyLogger.getLogger(Main.class.getName());
     private static final int n = 200;
     private static final int robotNum = 10;
     private static final int berthNum = 10;
@@ -38,6 +45,7 @@ public class Main {
     private ExecutorService robotExecutor = Executors.newFixedThreadPool(10);
 
     private void init() {
+        logger.info("init");
         Scanner scanf = new Scanner(System.in);
         for (int i = 0; i < n; i++) {
             String line = scanf.nextLine();
@@ -104,14 +112,11 @@ public class Main {
 
         for (int zhen = 1; zhen <= 15000; zhen++) {
             int id = mainInstance.input();
-            if (zhen == 1) {
-                for (Robot robot : mainInstance.robot) {
-
-                    System.err.println(robot);
-                }
-                mainInstance.goodsInfo.availableGoods().forEach(System.err::println);
-                System.err.flush();
-            }
+//            if (zhen == 1) {
+//                for (char[] ele : mainInstance.ch) {
+//                    System.err.println(String.valueOf(ele));
+//                }
+//            }
 
             for (Robot robot : mainInstance.robot) {
                 mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.mapInfo));

@@ -3,6 +3,7 @@ package com.huawei.codecraft.util;
 import com.huawei.codecraft.entities.Command;
 
 public class MessageCenter {
+    public static MyLogger logger = MyLogger.getLogger("MessageCenter");
     public static int sentMsg=0;
     private static final int maxMsg = 1000;
 
@@ -20,6 +21,7 @@ public class MessageCenter {
         }
         add();
         System.out.println(cmd);
+        logger.info(cmd.toString());
         return true;
 
     }
