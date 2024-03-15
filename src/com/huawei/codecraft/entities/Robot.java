@@ -2,8 +2,10 @@ package com.huawei.codecraft.entities;
 
 
 import com.huawei.codecraft.enums.Command;
+import com.huawei.codecraft.util.MessageCenter;
 
 import java.util.ArrayDeque;
+import java.util.List;
 
 
 public class Robot {
@@ -18,9 +20,18 @@ public class Robot {
         this.x = startX;
         this.y = startY;
     }
+    public boolean containsCommand(){
+        return !currentCommand.isEmpty();
+    }
 
     public ArrayDeque<Command> currentCommand() {
         return currentCommand;
+    }
+    public void addCommand(Command command){
+        currentCommand.add(command);
+    }
+    public Command popCommand(){
+        return currentCommand.pop();
     }
 
     public Robot setCurrentCommand(ArrayDeque<Command> currentCommand) {
@@ -81,12 +92,17 @@ public class Robot {
     }
 
     public void executeAll(){
+        while (containsCommand()){
+            Command command = popCommand();
+            if(!MessageCenter.send(command)){
+                this.currentCommand.addFirst(command);
+            }
 
+        }
     }
 
     public Robot setStatus(int status) {
         this.status = status;
         return this;
     }
-
 }
