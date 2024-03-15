@@ -12,7 +12,12 @@ import java.util.PriorityQueue;
 public abstract class GoodsInfo {
     protected PriorityQueue<Good> availableGoods = new PriorityQueue<>(Comparator.reverseOrder());
     protected PriorityQueue<Good> acquiredGoods = new PriorityQueue<>(10, Comparator.reverseOrder());
-    protected Character[][] map = new Character[200][200];
+    protected char[][] map = new char[200][200];
+
+    public GoodsInfo setMap(char[][] map) {
+        this.map = map;
+        return this;
+    }
 
     public Good getMostValuableGood() {
         return availableGoods.poll();
