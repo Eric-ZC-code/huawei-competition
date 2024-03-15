@@ -33,8 +33,8 @@ public class RobotCallable implements Callable {
                 robot.flags().put(frame,true);
             }
 
-            if (!robot.containsCommand()) {
-                // 目前机器人没有被分配任务,并且任务缓存中没有堆积的任务
+            if (!robot.containsCommand()||robot.status()==0) {
+                // 目前机器人没有被分配任务或者发生碰撞
                 // 则去搜索最近的货物，然后规划路径
                 // 只有等待任务分配完成后才能开始执行。
                 Good nearestGood = goodsInfo.findNearestGood(robot);
