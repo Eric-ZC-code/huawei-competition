@@ -8,46 +8,48 @@ import com.huawei.codecraft.wrapper.GoodsInfo;
 
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class RobotCallable implements Callable {
     private static final MyLogger logger= MyLogger.getLogger("RobotCallable");
+    private Integer frame;
     private Robot robot;
     private GoodsInfo goodsInfo;
-
-    public RobotCallable(Robot robot, GoodsInfo goodsInfo) {
+    public RobotCallable(Robot robot, GoodsInfo goodsInfo,Integer frame) {
         this.robot = robot;
         this.goodsInfo = goodsInfo;
+        this.frame = frame;
     }
 
     @Override
     public Object call() throws Exception {
 
         synchronized (robot){
-//            System.err.println("Robot "+robot.id()+" is running");
-//            System.err.println("Robot "+robot.id()+" contains command: "+robot.containsCommand());
+            if(robot.flags().get(frame)){
+                // 该帧已经被处理过了
+                return null;
+            }
+            else {
+                robot.flags().put(frame,true);
+            }
             if (!robot.containsCommand()) {
                 // 目前机器人没有被分配任务,并且任务缓存中没有堆积的任务
                 // 则去搜索最近的货物，然后规划路径
                 // 只有等待任务分配完成后才能开始执行。
                 Good nearestGood = goodsInfo.findNearestGood(robot);
-//                System.err.println("Robot "+robot.id()+" generating tasks");
 
                 if (nearestGood != null) {
                     List<Command> path = goodsInfo.getFullPath(robot, nearestGood, null);
+                    logger.info("Robot "+robot.id()+" generating tasks: "+path);
                     robot.setCurrentCommand(path);
                 }
             }else {
                 // 有任务则执行任务
-//                System.err.println("Robot "+robot.id()+" executing tasks");
                 logger.info( "Robot "+robot.id()+" executing tasks");
                 robot.executeAll();
             }
 
-            return null;
-
         }
+        return null;
 
 
     }

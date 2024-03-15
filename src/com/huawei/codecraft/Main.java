@@ -91,6 +91,7 @@ public class Main {
             goodsInfo.addGood(x, y, val);
         }
         for (int i = 0; i < robotNum; i++) {
+            // {r1@0x123,r2@0x234...}
             robot[i].setCarrying(scanf.nextInt())
                     .setX(scanf.nextInt())
                     .setY(scanf.nextInt())
@@ -112,16 +113,19 @@ public class Main {
         mainInstance.init();
 
 
-        for (int zhen = 1; zhen <= 15000; zhen++) {
+        for (int frame = 1; frame <= 15000; frame++) {
             int id = mainInstance.input();
-//            if (zhen == 1) {
-//                for (char[] ele : mainInstance.ch) {
-//                    System.err.println(String.valueOf(ele));
-//                }
-//            }
+            if (frame == 1) {
+                for (Robot robot : mainInstance.robot) {
+
+                    System.err.println(robot);
+                }
+                mainInstance.goodsInfo.availableGoods().forEach(System.err::println);
+                System.err.flush();
+            }
 
             for (Robot robot : mainInstance.robot) {
-                mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.goodsInfo));
+                mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.goodsInfo,frame));
             }
             System.out.println("OK");
             MessageCenter.reset();

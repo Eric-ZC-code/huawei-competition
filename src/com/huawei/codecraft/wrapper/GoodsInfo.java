@@ -20,6 +20,10 @@ public abstract class GoodsInfo {
         return this;
     }
 
+    public PriorityQueue<Good> availableGoods() {
+        return availableGoods;
+    }
+
     public Good getMostValuableGood() {
         return availableGoods.poll();
     }

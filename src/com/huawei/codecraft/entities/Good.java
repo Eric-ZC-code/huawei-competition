@@ -73,4 +73,13 @@ public class Good implements Comparator,Comparable{
         }
         return 0;
     }
+
+    @Override
+    public String toString() {
+        return "Good{" +
+                "x=" + x +
+                ", y=" + y +
+                ", value=" + value +
+                '}';
+    }
 }
