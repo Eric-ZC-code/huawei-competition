@@ -26,6 +26,9 @@ public class Command {
     public static Command go(Integer actorId){
         return new Command("go",actorId,null);
     }
+    public static Command ignore(){
+        return new Command("ignore",null,null);
+    }
 
     @Override
     public String toString() {

@@ -4,19 +4,37 @@ package com.huawei.codecraft.entities;
 import com.huawei.codecraft.util.MessageCenter;
 
 import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class Robot {
     private int id;
     private int x, y, carrying;
     private int status;
+    private final Map<Integer,Boolean> flags = new HashMap<>(); //判断这一帧是否做过事情了，一帧只做一件事
+
     private ArrayDeque<Command> currentCommand = new ArrayDeque<>();
 
-    public Robot() {}
+    public Robot() {
+        init();
+    }
 
     public Robot(int startX, int startY) {
         this.x = startX;
         this.y = startY;
+        init();
+        
+    }
+
+    public  Map<Integer, Boolean> flags() {
+        return flags;
+    }
+
+    public void init(){
+        for (int i = 1; i <= 15000; i++) {
+            flags.put(i,false);
+        }
     }
     public boolean containsCommand(){
         return !currentCommand.isEmpty();
@@ -80,15 +98,24 @@ public class Robot {
     public void executeAll(){
         while (containsCommand()){
             Command command = popCommand();
+
             if(!MessageCenter.send(command)){
                 this.currentCommand.addFirst(command);
             }
-
         }
     }
 
     public Robot setStatus(int status) {
         this.status = status;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Robot{" +
+                "id=" + id +
+                ", x=" + x +
+                ", y=" + y +
+                '}';
     }
 }
