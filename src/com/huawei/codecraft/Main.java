@@ -178,7 +178,7 @@ public class Main {
                 }
                 for (int i = 0; i < mainInstance.robot.length; i++) {
                     Robot robot = mainInstance.robot[i];
-                    if(robot.id()==0||robot.id()==9){
+                    if(true){
                         Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(mainInstance.robot[i], mainInstance.mapInfo, frame));
                         mainInstance.robotFuture[i]=submit;
                     }

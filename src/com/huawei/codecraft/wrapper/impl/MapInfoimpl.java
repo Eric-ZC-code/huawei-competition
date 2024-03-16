@@ -88,6 +88,7 @@ public class MapInfoimpl extends MapInfo {
         rwLock.readLock().lock();
         try {
             if (good.acquired()) {
+                logger.info("Good is acquired, return empty list");
                 return new ArrayList<>();
             }
         } catch (Exception e) {
