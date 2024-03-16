@@ -3,11 +3,9 @@ package com.huawei.codecraft.entities;
 
 import com.huawei.codecraft.util.MessageCenter;
 import com.huawei.codecraft.util.MyLogger;
+import com.huawei.codecraft.wrapper.MapInfo;
 
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class Robot {
@@ -103,8 +101,18 @@ public class Robot {
         return status;
     }
 
-    public void executeAll(){
+    public void executeAll(MapInfo map){
         boolean moved = false;
+        Robot[] robots = map.robots();
+        Random rand = new Random();
+        if(havingRobotNearby(robots)){
+
+            int i = rand.nextInt(10);
+            if(i%2==0){
+                logger.info("Robot" + id + " has robot nearby, skip this command by random");
+                return;
+            }
+        }
         while (containsCommand()){
             Command command = popCommand();
             if (command.cmd().equals("move")) {
@@ -139,6 +147,18 @@ public class Robot {
     public void clean(){
         this.currentCommand = new ArrayDeque<>();
     }
+    private boolean havingRobotNearby(Robot [] robots){
+        int maxDistance =4;
+        for (Robot robot : robots) {
+            int dx = Math.abs(robot.x() - x);
+            int dy = Math.abs(robot.y() - y);
+            if(dx+dy<maxDistance){
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     @Override
     public String toString() {

@@ -79,6 +79,7 @@ public class Main {
         // init mapInfo
         mapInfo.setMap(ch);
         mapInfo.setBerths(berth);
+        mapInfo.setRobots(robot);
         String okk = scanf.nextLine();
         System.out.println("OK");
         System.out.flush();

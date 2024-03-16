@@ -13,16 +13,25 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class MapInfo {
-    protected ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    protected final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     protected List<Good> availableGoods = new ArrayList<>();
     protected List<Good> acquiredGoods = new ArrayList<>(10);
     protected char[][] map = new char[200][200];
     protected Berth[] berths = new Berth[10];
+    protected Robot[] robots = null;
 
     public List<Good> availableGoods() {
         return availableGoods;
     }
 
+    public Robot[] robots() {
+        return robots;
+    }
+
+    public MapInfo setRobots(Robot[] robots) {
+        this.robots = robots;
+        return this;
+    }
 
     public List<Good> acquiredGoods() {
         return acquiredGoods;

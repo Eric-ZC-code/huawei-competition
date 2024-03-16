@@ -54,7 +54,7 @@ public class RobotCallable implements Callable {
                 }
                 // 有任务则执行任务
 //                if(robot.id()==0) System.err.printf("%dms\n",(System.currentTimeMillis()-start));
-                robot.executeAll();
+                robot.executeAll(mapInfo);
             }
 
         }
