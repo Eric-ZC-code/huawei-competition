@@ -25,7 +25,7 @@ public class MapInfoimpl extends MapInfo {
             final int size = this.availableGoods.size();
             for (int i = 0; i < size; i++) {
 //                System.err.println(i);
-                Good availableGood = Optional.of(availableGoods.get(i)).get();
+                Good availableGood = Optional.of(this.availableGoods.get(i)).get();
                 int manhattanDistance = Math.abs(robot.x() - availableGood.x()) + Math.abs(robot.y() - availableGood.y());
                 if (minDistance > manhattanDistance) {
                     minDistance = manhattanDistance;
