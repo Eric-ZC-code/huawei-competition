@@ -18,7 +18,6 @@ public class Robot {
 
     private Integer priority; // 优先级 0-9 0最高 9最低
     private final Map<Integer,Boolean> flags = new HashMap<>(); //判断这一帧是否做过事情了，一帧只做一件事
-
     private ArrayDeque<Command> currentCommand = new ArrayDeque<>();
 
     public Robot() {
