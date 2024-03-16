@@ -25,7 +25,6 @@ public class MyLogger {
 
 
 
-
                     return String.format("[%s][%s] %tF %<tT: %s%n",
                                          record.getLevel(),
                                          record.getLoggerName(),
@@ -40,9 +39,13 @@ public class MyLogger {
         }
         return new MyLogger(logger);
     }
-    public void info(String message, Object... args) {
-        logger.log(Level.INFO, message, args);
+//    public void info(String message, Object... args) {
+//        logger.log(Level.INFO, message, args);
+//    }
+    public void info(String message){
+        logger.info(message);
     }
+
     public void warning(String message, Object... args) {
         logger.log(Level.WARNING, message, args);
     }

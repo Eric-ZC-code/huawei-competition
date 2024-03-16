@@ -9,7 +9,7 @@ public class Good implements Comparator,Comparable{
     private int value;
     private boolean acquired = false;
 
-    public boolean isAcquired() {
+    public boolean acquired() {
         return acquired;
     }
 
@@ -17,7 +17,6 @@ public class Good implements Comparator,Comparable{
         this.acquired = acquired;
         return this;
     }
-
 
     public int x() {
         return x;

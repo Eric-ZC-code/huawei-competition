@@ -11,25 +11,25 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 public abstract class MapInfo {
-    protected PriorityQueue<Good> availableGoods = new PriorityQueue<>(Comparator.reverseOrder());
-    protected PriorityQueue<Good> acquiredGoods = new PriorityQueue<>(10, Comparator.reverseOrder());
+    protected List<Good> availableGoods = new ArrayList<>();
+    protected List<Good> acquiredGoods = new ArrayList<>(10);
     protected char[][] map = new char[200][200];
     protected Berth[] berths = new Berth[10];
 
-    public PriorityQueue<Good> availableGoods() {
+    public List<Good> availableGoods() {
         return availableGoods;
     }
 
-    public MapInfo setAvailableGoods(PriorityQueue<Good> availableGoods) {
+    public MapInfo setAvailableGoods(List<Good> availableGoods) {
         this.availableGoods = availableGoods;
         return this;
     }
 
-    public PriorityQueue<Good> acquiredGoods() {
+    public List<Good> acquiredGoods() {
         return acquiredGoods;
     }
 
-    public MapInfo setAcquiredGoods(PriorityQueue<Good> acquiredGoods) {
+    public MapInfo setAcquiredGoods(List<Good> acquiredGoods) {
         this.acquiredGoods = acquiredGoods;
         return this;
     }
@@ -52,9 +52,6 @@ public abstract class MapInfo {
         return this;
     }
 
-    public Good getMostValuableGood() {
-        return availableGoods.poll();
-    }
     public void addGood(Good good) {
         availableGoods.add(good);
     }
