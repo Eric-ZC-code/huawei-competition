@@ -29,6 +29,9 @@ public class Command {
     public static Command ignore(){
         return new Command("ignore",null,null);
     }
+    public boolean isBoatCmd(){
+        return this.cmd.equals("ship")|| this.cmd.equals("go");
+    }
 
     @Override
     public String toString() {

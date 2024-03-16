@@ -9,8 +9,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class MapInfo {
+    protected ReadWriteLock rwLock = new ReentrantReadWriteLock();
     protected List<Good> availableGoods = new ArrayList<>();
     protected List<Good> acquiredGoods = new ArrayList<>(10);
     protected char[][] map = new char[200][200];
@@ -49,10 +52,25 @@ public abstract class MapInfo {
     }
 
     public void addGood(Good good) {
-        availableGoods.add(good);
+        rwLock.writeLock().lock();
+
+        try {
+            availableGoods.add(good);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            rwLock.writeLock().unlock();
+        }
     }
     public void addGood(int x, int y, int value) {
-        availableGoods.add(new Good(x, y, value));
+        rwLock.writeLock().lock();
+        try {
+            availableGoods.add(new Good(x, y, value));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            rwLock.writeLock().unlock();
+        }
     }
     abstract public Good findBestGood(Robot robot);
     abstract public Berth findBestBerth(Good good);

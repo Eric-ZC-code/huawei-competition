@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MapInfoimpl extends MapInfo {
-    private ReadWriteLock rwLock = new ReentrantReadWriteLock();
+
 
     private MyLogger logger = MyLogger.getLogger("MapInfoimpl");
     @Override
