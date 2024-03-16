@@ -10,10 +10,13 @@ import java.util.*;
 
 public class Robot {
     private static final MyLogger logger = MyLogger.getLogger("Robot");
+    private final int yieldDistance = 5;
     private int id;
     private int x, y, carrying;
     private int status;
     private boolean shouldCarry = false;
+
+    private Integer priority; // 优先级 0-9 0最高 9最低
     private final Map<Integer,Boolean> flags = new HashMap<>(); //判断这一帧是否做过事情了，一帧只做一件事
 
     private ArrayDeque<Command> currentCommand = new ArrayDeque<>();
@@ -22,11 +25,21 @@ public class Robot {
         init();
     }
 
-    public Robot(int startX, int startY) {
+    public Robot(int startX, int startY,Integer priority) {
         this.x = startX;
         this.y = startY;
+        this.priority = priority;
         init();
         
+    }
+
+    public Integer priority() {
+        return priority;
+    }
+
+    public Robot setPriority(Integer priority) {
+        this.priority = priority;
+        return this;
     }
 
     public  Map<Integer, Boolean> flags() {
@@ -105,7 +118,8 @@ public class Robot {
         boolean moved = false;
         Robot[] robots = map.robots();
         Random rand = new Random();
-        if(havingRobotNearby(robots)){
+        Robot nearby = havingRobotNearby(robots);
+        if(nearby!=null){
 
             int i = rand.nextInt(10);
             if(i%2==0){
@@ -134,6 +148,8 @@ public class Robot {
                 } else if (command.cmd().equals("pull")) {
                     shouldCarry = false;
 
+                } else if (command.cmd().equals("move")) {
+                    map.map()[x][y] = '.';
                 }
 
             }
@@ -147,16 +163,19 @@ public class Robot {
     public void clean(){
         this.currentCommand = new ArrayDeque<>();
     }
-    private boolean havingRobotNearby(Robot [] robots){
-        int maxDistance =4;
+    private Robot havingRobotNearby(Robot [] robots){
+
         for (Robot robot : robots) {
+            if(robot.id()==this.id){
+                continue;
+            }
             int dx = Math.abs(robot.x() - x);
             int dy = Math.abs(robot.y() - y);
-            if(dx+dy<maxDistance){
-                return true;
+            if(dx+dy<yieldDistance){
+                return robot;
             }
         }
-        return false;
+        return null;
     }
 
 
@@ -168,4 +187,5 @@ public class Robot {
                 ", y=" + y +
                 '}';
     }
+
 }
