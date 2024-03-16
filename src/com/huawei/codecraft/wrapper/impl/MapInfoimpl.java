@@ -98,11 +98,11 @@ public class MapInfoimpl extends MapInfo {
             rwLock.writeLock().unlock();
         }
 
-
         List<Command> fullPath = new ArrayList<>(pathToGood);
         fullPath.add(getGood);
         fullPath.addAll(pathToBerth);
 
+        // pull good
         Command pullGood = pullGood(robot, good, berth);
         fullPath.add(pullGood);
 
@@ -174,21 +174,15 @@ public class MapInfoimpl extends MapInfo {
     public Command getGood(Robot robot, Good good) {
         rwLock.writeLock().lock();
         try {
-            if (robot.x() != good.x() || robot.y() != good.y()) {
-                robot.setStatus(1); // robot is acquiring good
-                availableGoods.remove(good); // remove good from available goods
-                acquiredGoods.add(good); // add good to acquired goods
-                good.setAcquired(true); // set good acquired
-                return Command.get(robot.id());
-            }
-
+            availableGoods.remove(good);
+            acquiredGoods.add(good);
+            good.setAcquired(true);
+            return Command.get(robot.id());
         }catch (Exception e){
             e.printStackTrace();
         }finally {
             rwLock.writeLock().unlock();
         }
-
-
         return Command.ignore();
     }
     /**
@@ -204,11 +198,15 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public Command pullGood(Robot robot, Good good, Berth berth) {
-        if (robot.x() == berth.x() && robot.y() == berth.y()) {
-            robot.setStatus(0); // robot is pulling good
+        rwLock.writeLock().lock();
+        try {
+            acquiredGoods.remove(good);
             return Command.pull(robot.id());
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            rwLock.writeLock().unlock();
         }
-
         return Command.ignore();
     }
 
