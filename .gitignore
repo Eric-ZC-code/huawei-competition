@@ -8,3 +8,4 @@ MacOSReleasev1-6.1/replayer
 out/**
 **/log.*
 **/log_*
+**/*.zip

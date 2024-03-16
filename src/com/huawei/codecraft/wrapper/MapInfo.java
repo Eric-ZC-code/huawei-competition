@@ -6,23 +6,31 @@ import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class MapInfo {
-    protected ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    protected final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     protected List<Good> availableGoods = new ArrayList<>();
     protected List<Good> acquiredGoods = new ArrayList<>(10);
     protected char[][] map = new char[200][200];
-    protected Berth[] berths = new Berth[10];
+    protected Berth[] berths = new Berth[5];
+    protected Robot[] robots = null;
 
     public List<Good> availableGoods() {
         return availableGoods;
     }
 
+    public Robot[] robots() {
+        return robots;
+    }
+
+    public MapInfo setRobots(Robot[] robots) {
+        this.robots = robots;
+        return this;
+    }
 
     public List<Good> acquiredGoods() {
         return acquiredGoods;
@@ -47,7 +55,11 @@ public abstract class MapInfo {
     }
 
     public MapInfo setBerths(Berth[] berths) {
-        this.berths = berths;
+        for (int i = 0; i < berths.length; i++) {
+            if (i%2 == 0){
+                this.berths[i/2] = berths[i];
+            }
+        }
         return this;
     }
 
@@ -73,13 +85,14 @@ public abstract class MapInfo {
         }
     }
     abstract public Good findBestGood(Robot robot);
-    abstract public Berth findBestBerth(Good good);
+    abstract public Berth findBestBerth(int x, int y);
     abstract public List<Command> getFullPath(Robot robot, Good good, Berth berth);
     abstract public List<Command> getRobotToGoodPath(Robot robot, Good good);
     abstract public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot);
+    abstract public List<Command> getRobotToBerthPath(Robot robot, Berth berth);
     abstract public Command getGood(Robot robot, Good good);
-    abstract public void acquireGood(Robot robot, Good good);
     abstract public Command pullGood(Robot robot, Good good, Berth berth);
     abstract public Integer getAvailableBerth();
-
+    abstract public Integer getMatchedBerth(Integer berthId);
+    abstract public void addItem(int x, int y, char c);
 }

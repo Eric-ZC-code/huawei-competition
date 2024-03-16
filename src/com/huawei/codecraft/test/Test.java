@@ -46,7 +46,7 @@ public class Test {
         MapInfoimpl.setMap(map);
         int startX = 36, startY = 173;
         int endX = 44, endY = 194;
-        Robot robot = new Robot(startX, startY);
+        Robot robot = new Robot(startX, startY,10);
         Good good = new Good(endX, endY, 10);
         Berth berth = new Berth(1,2, 187, 1, 1);
         List<Command> path = MapInfoimpl.getFullPath(robot, good, berth);

@@ -2,30 +2,43 @@ package com.huawei.codecraft.entities;
 
 
 import com.huawei.codecraft.util.MessageCenter;
+import com.huawei.codecraft.util.MyLogger;
+import com.huawei.codecraft.wrapper.MapInfo;
 
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 public class Robot {
+    private static final MyLogger logger = MyLogger.getLogger("Robot");
+    private final int yieldDistance = 5;
     private int id;
     private int x, y, carrying;
     private int status;
     private boolean shouldCarry = false;
-    private final Map<Integer,Boolean> flags = new HashMap<>(); //判断这一帧是否做过事情了，一帧只做一件事
 
+    private Integer priority; // 优先级 0-9 0最高 9最低
+    private final Map<Integer,Boolean> flags = new HashMap<>(); //判断这一帧是否做过事情了，一帧只做一件事
     private ArrayDeque<Command> currentCommand = new ArrayDeque<>();
 
     public Robot() {
         init();
     }
 
-    public Robot(int startX, int startY) {
+    public Robot(int startX, int startY,Integer priority) {
         this.x = startX;
         this.y = startY;
+        this.priority = priority;
         init();
         
+    }
+
+    public Integer priority() {
+        return priority;
+    }
+
+    public Robot setPriority(Integer priority) {
+        this.priority = priority;
+        return this;
     }
 
     public  Map<Integer, Boolean> flags() {
@@ -44,16 +57,11 @@ public class Robot {
     public ArrayDeque<Command> currentCommand() {
         return currentCommand;
     }
-    public void addCommand(Command command){
-        currentCommand.add(command);
+    public void fillCommand(List<Command> commands){
+        commands.forEach(this.currentCommand::add);
     }
     public Command popCommand(){
         return currentCommand.pop();
-    }
-
-    public Robot setCurrentCommand(Iterable<Command> currentCommand) {
-        currentCommand.forEach(this::addCommand);
-        return this;
     }
 
     public int x() {
@@ -105,18 +113,42 @@ public class Robot {
         return status;
     }
 
-    public void executeAll(){
+    public void executeAll(MapInfo map){
+        boolean moved = false;
+        Robot[] robots = map.robots();
+        Random rand = new Random();
+        Robot nearby = havingRobotNearby(robots);
+        if(nearby!=null){
+
+            int i = rand.nextInt(10);
+            if(i%2==0){
+                logger.info("Robot" + id + " has robot nearby, skip this command by random");
+                return;
+            }
+        }
         while (containsCommand()){
             Command command = popCommand();
+            if (command.cmd().equals("move")) {
+                if (moved) {
+                    logger.info("Robot" + id + " moved, skip this command");
+                    this.currentCommand.addFirst(command);
+                    break;
+
+                }
+                moved = true;
+            }
 
             if(!MessageCenter.send(command)){
                 this.currentCommand.addFirst(command);
+                break;
             }else {
                 if(command.cmd().equals("get")){
                     shouldCarry = true;
                 } else if (command.cmd().equals("pull")) {
                     shouldCarry = false;
 
+                } else if (command.cmd().equals("move")) {
+                    map.map()[x][y] = '.';
                 }
 
             }
@@ -130,6 +162,21 @@ public class Robot {
     public void clean(){
         this.currentCommand = new ArrayDeque<>();
     }
+    private Robot havingRobotNearby(Robot [] robots){
+
+        for (Robot robot : robots) {
+            if(robot.id()==this.id){
+                continue;
+            }
+            int dx = Math.abs(robot.x() - x);
+            int dy = Math.abs(robot.y() - y);
+            if(dx+dy<yieldDistance){
+                return robot;
+            }
+        }
+        return null;
+    }
+
 
     @Override
     public String toString() {
@@ -139,4 +186,5 @@ public class Robot {
                 ", y=" + y +
                 '}';
     }
+
 }
