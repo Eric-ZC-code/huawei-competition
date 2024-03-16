@@ -1,5 +1,6 @@
 package com.huawei.codecraft.task;
 
+import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Boat;
 import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
@@ -30,7 +31,8 @@ public class BoatCallable implements Callable {
                 if(boat.pos()==-1){
                     //船在 前往虚拟点
                     Integer availableBerth = mapInfo.getAvailableBerth();
-                    logger.info("Berth:"+availableBerth);
+//                    logger.info("Berth:"+availableBerth);
+//                    Integer availableBerth = mapInfo.berths()[0].id();
                     Optional.ofNullable(availableBerth)
                             .ifPresent(boat::ship);
                 }

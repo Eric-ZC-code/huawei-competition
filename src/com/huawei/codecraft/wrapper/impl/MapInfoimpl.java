@@ -85,11 +85,15 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
-        synchronized (good){
+        rwLock.readLock().lock();
+        try {
             if (good.acquired()) {
                 return new ArrayList<>();
             }
-
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            rwLock.readLock().unlock();
         }
 
 
@@ -100,15 +104,6 @@ public class MapInfoimpl extends MapInfo {
         // if pathToGood or pathToBerth is empty, return empty list
         if (pathToGood.isEmpty() || pathToBerth.isEmpty()) {
             return new ArrayList<>();
-        }
-        rwLock.writeLock().lock();
-        try {
-            acquireGood(robot, good);
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
-            rwLock.writeLock().unlock();
         }
 
         List<Command> fullPath = new ArrayList<>(pathToGood);
@@ -199,17 +194,6 @@ public class MapInfoimpl extends MapInfo {
         }
         return Command.ignore();
     }
-    /**
-     * acquire good synchronously
-     * @param robot
-     * @param good
-     */
-    @Override
-    public void acquireGood(Robot robot, Good good) {
-        acquiredGoods.add(good);
-        good.setAcquired(false); // set good not acquired
-    }
-
     @Override
     public Command pullGood(Robot robot, Good good, Berth berth) {
         rwLock.writeLock().lock();

@@ -2,13 +2,16 @@ package com.huawei.codecraft.entities;
 
 
 import com.huawei.codecraft.util.MessageCenter;
+import com.huawei.codecraft.util.MyLogger;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 public class Robot {
+    private static final MyLogger logger = MyLogger.getLogger("Robot");
     private int id;
     private int x, y, carrying;
     private int status;
@@ -44,16 +47,11 @@ public class Robot {
     public ArrayDeque<Command> currentCommand() {
         return currentCommand;
     }
-    public void addCommand(Command command){
-        currentCommand.add(command);
+    public void fillCommand(List<Command> commands){
+        commands.forEach(this.currentCommand::add);
     }
     public Command popCommand(){
         return currentCommand.pop();
-    }
-
-    public Robot setCurrentCommand(Iterable<Command> currentCommand) {
-        currentCommand.forEach(this::addCommand);
-        return this;
     }
 
     public int x() {
@@ -106,11 +104,22 @@ public class Robot {
     }
 
     public void executeAll(){
+        boolean moved = false;
         while (containsCommand()){
             Command command = popCommand();
+            if (command.cmd().equals("move")) {
+                if (moved) {
+                    logger.info("Robot" + id + " moved, skip this command");
+                    this.currentCommand.addFirst(command);
+                    break;
+
+                }
+                moved = true;
+            }
 
             if(!MessageCenter.send(command)){
                 this.currentCommand.addFirst(command);
+                break;
             }else {
                 if(command.cmd().equals("get")){
                     shouldCarry = true;

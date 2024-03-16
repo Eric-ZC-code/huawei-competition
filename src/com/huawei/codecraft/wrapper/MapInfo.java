@@ -78,7 +78,6 @@ public abstract class MapInfo {
     abstract public List<Command> getRobotToGoodPath(Robot robot, Good good);
     abstract public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot);
     abstract public Command getGood(Robot robot, Good good);
-    abstract public void acquireGood(Robot robot, Good good);
     abstract public Command pullGood(Robot robot, Good good, Berth berth);
     abstract public Integer getAvailableBerth();
 

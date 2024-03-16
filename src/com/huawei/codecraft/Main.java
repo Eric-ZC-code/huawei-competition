@@ -19,10 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
@@ -38,7 +35,7 @@ public class Main {
     private static final int n = 200;
     private static final int robotNum = 10;
     private static final int berthNum = 10;
-
+    private static final int processTime = 10;
     private HashMap<Integer, Integer> robotFrameRec = new HashMap<>();
     private int money, boatCapacity, id;
     private char[][] ch = new char[n][n];
@@ -46,7 +43,8 @@ public class Main {
     private Robot[] robot = new Robot[robotNum];
     private Berth[] berth = new Berth[berthNum];
     private Boat[] boat = new Boat[5];
-
+    private Future<Robot>[] robotFuture = new Future[robotNum];
+    private Future<Boat>[] boatFuture = new Future[5];
     private ExecutorService robotExecutor = Executors.newFixedThreadPool(10);
     private ExecutorService boatExecutor = Executors.newFixedThreadPool(5);
 
@@ -87,6 +85,7 @@ public class Main {
     }
 
     private int input() {
+//        MessageCenter.open();
         Scanner scanf = new Scanner(System.in);
         this.id = scanf.nextInt();
         this.money = scanf.nextInt();
@@ -114,71 +113,104 @@ public class Main {
         return id;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
 
         Main mainInstance = new Main();
+        try {
 
-        mainInstance.init();
 
+            mainInstance.init();
 
-        for (int frame = 1; frame <= 14998; frame++) {
-            int id = mainInstance.input();
-            if (frame == 1) {
-//                for (Robot robot : mainInstance.robot) {
+            long l1 = System.currentTimeMillis();
+            int skip = 2;
+            for (int frame = 1; frame <= 15000; frame++) {
+
+                int id = mainInstance.input();
+                System.err.println("frame: "+id);
+                // 一个简易的计时器保证输出中心在processtime之前关闭输出，保证不丢失输出
+    //            if(frame==50){
+    //                System.err.println("time: "+(System.currentTimeMillis()-l1));
+    //            }
+//                CompletableFuture.supplyAsync(()->{
+//                    long l= System.currentTimeMillis() ;
+//                    try {
 //
-//                    System.err.println(robot);
-//                }
-//                mainInstance.mapInfo.availableGoods().forEach(System.err::println);
-//                for (Berth berth : mainInstance.berth) {
-//                    System.err.println(berth);
-//                }
-                for (Boat boat : mainInstance.boat) {
-                    System.err.println(boat);
+//                        Thread.sleep(processTime);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                    return l ;
+//                }).whenComplete((result,e)->{
+//                    logger.info("weak up");
+//                    if(e!=null){
+//                        e.printStackTrace();
+//                    }
+//    //                long end = System.currentTimeMillis();
+//    //                System.err.printf("%dms\n",(end-result));
+//                    logger.info("close message center");
+//                    MessageCenter.close();
+//                });
+
+
+
+
+                if (frame == 1) {
+    //                for (Robot robot : mainInstance.robot) {
+    //
+    //                    System.err.println(robot);
+    //                }
+    //                mainInstance.mapInfo.availableGoods().forEach(System.err::println);
+    //                for (Berth berth : mainInstance.berth) {
+    //                    System.err.println(berth);
+    //                }
+//                    for (Boat boat : mainInstance.boat) {
+//                        System.err.println(boat);
+//                    }
+//                    System.err.flush();
                 }
+                if ((frame-1)%500==0){
+                    logger.info("try to ship");
+                    for (int i = 0; i < mainInstance.boat.length; i++) {
+
+                        Future submit = mainInstance.boatExecutor.submit(new BoatCallable(mainInstance.boat[i], mainInstance.mapInfo, frame));
+                        mainInstance.boatFuture[i]=submit;
+                    }
+                }
+                for (int i = 0; i < mainInstance.robot.length; i++) {
+                    Robot robot = mainInstance.robot[i];
+                    if(robot.id()==0||robot.id()==9){
+                        Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(mainInstance.robot[i], mainInstance.mapInfo, frame));
+                        mainInstance.robotFuture[i]=submit;
+                    }
+                }
+                for (int i = 0; i < mainInstance.robot.length; i++) {
+                    if (mainInstance.robotFuture[i]==null) {
+                        continue;
+                    }
+                    mainInstance.robotFuture[i].get();
+                    logger.info("[frame:"+ id+" ]Robot "+i+ "completed");
+                }
+                for (int i = 0; i < mainInstance.boat.length; i++) {
+                    mainInstance.boatFuture[i].get();
+                    logger.info("[frame:"+ id+" ]Boat "+i+ "completed");
+                }
+                System.out.println("OK");
+                MessageCenter.reset();
+                System.out.flush();
                 System.err.flush();
-            }
-            if ((frame-1)%500==0){
-                logger.info("try to ship");
-                for (Boat boat : mainInstance.boat) {
-                    mainInstance.boatExecutor.submit(new BoatCallable(boat, mainInstance.mapInfo, frame));
-                }
-            }
 
-            for (Robot robot : mainInstance.robot) {
-//                HashMap<Integer, Integer> record = mainInstance.robotFrameRec;
-                mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.mapInfo, frame));
-
-//                if (frame-record.get(robot.id())<=1){
-////
-////                    Future future = mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.mapInfo, frame));
-//                    final int passFrame = frame;
-////                    record.put(robot.id(), passFrame);
-//                    CompletableFuture.supplyAsync(()-> {
-//                        try {
-//                            return new RobotCallable(robot, mainInstance.mapInfo, passFrame).call();
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                            return null;
-//                        }
-//                    }).thenAccept((result)->{
-//
-//                        synchronized (record) { // 确保线程安全
-//                            record.put(robot.id(), passFrame);
-//                        }
-//                    });
-//
-//                }
             }
 
 
-            System.out.println("OK");
-            MessageCenter.reset();
-            System.out.flush();
-            System.err.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            mainInstance.robotExecutor.shutdown();
+            mainInstance.boatExecutor.shutdown();
+
+            System.exit(0);
         }
-        mainInstance.robotExecutor.shutdown();
-        mainInstance.boatExecutor.shutdown();
-        System.exit(0);
+
 
     }
 
