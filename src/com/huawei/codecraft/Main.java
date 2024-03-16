@@ -8,6 +8,7 @@ package com.huawei.codecraft;
 import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Boat;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.task.BoatCallable;
 import com.huawei.codecraft.task.RobotCallable;
 import com.huawei.codecraft.util.MessageCenter;
 import com.huawei.codecraft.util.MyLogger;
@@ -38,7 +39,7 @@ public class Main {
     private static final int robotNum = 10;
     private static final int berthNum = 10;
 
-    private HashMap<Integer,Integer> robotFrameRec = new HashMap<>();
+    private HashMap<Integer, Integer> robotFrameRec = new HashMap<>();
     private int money, boatCapacity, id;
     private char[][] ch = new char[n][n];
     private MapInfo mapInfo = new MapInfoimpl();
@@ -47,6 +48,7 @@ public class Main {
     private Boat[] boat = new Boat[5];
 
     private ExecutorService robotExecutor = Executors.newFixedThreadPool(10);
+    private ExecutorService boatExecutor = Executors.newFixedThreadPool(5);
 
     private void init() {
         logger.info("init");
@@ -63,7 +65,9 @@ public class Main {
             berth[id].setX(scanf.nextInt())
                      .setY(scanf.nextInt())
                      .setTransportTime(scanf.nextInt())
-                     .setLoadingSpeed(scanf.nextInt());
+                     .setLoadingSpeed(scanf.nextInt())
+                     .setId(id);
+
         }
         this.boatCapacity = scanf.nextInt();
         for (int i = 0; i < 5; i++) {
@@ -72,7 +76,7 @@ public class Main {
         // init robots
         for (int i = 0; i < robotNum; i++) {
             robot[i] = new Robot();
-            robotFrameRec.put(i,0);
+            robotFrameRec.put(i, 0);
         }
         // init mapInfo
         mapInfo.setMap(ch);
@@ -81,6 +85,7 @@ public class Main {
         System.out.println("OK");
         System.out.flush();
     }
+
     private int input() {
         Scanner scanf = new Scanner(System.in);
         this.id = scanf.nextInt();
@@ -102,7 +107,8 @@ public class Main {
         }
         for (int i = 0; i < 5; i++) {
             boat[i].setStatus(scanf.nextInt())
-                    .setPos(scanf.nextInt());
+                   .setPos(scanf.nextInt())
+                   .setId(i);
         }
         String okk = scanf.nextLine();
         return id;
@@ -115,9 +121,9 @@ public class Main {
         mainInstance.init();
 
 
-        for (int frame = 1; frame <= 15000; frame++) {
+        for (int frame = 1; frame <= 14998; frame++) {
             int id = mainInstance.input();
-//            if (frame == 1) {
+            if (frame == 1) {
 //                for (Robot robot : mainInstance.robot) {
 //
 //                    System.err.println(robot);
@@ -126,12 +132,21 @@ public class Main {
 //                for (Berth berth : mainInstance.berth) {
 //                    System.err.println(berth);
 //                }
-//                System.err.flush();
-//            }
+                for (Boat boat : mainInstance.boat) {
+                    System.err.println(boat);
+                }
+                System.err.flush();
+            }
+            if (frame%5==0){
+                logger.info("try to ship");
+                for (Boat boat : mainInstance.boat) {
+                    mainInstance.boatExecutor.submit(new BoatCallable(boat, mainInstance.mapInfo, frame));
+                }
+            }
 
             for (Robot robot : mainInstance.robot) {
 //                HashMap<Integer, Integer> record = mainInstance.robotFrameRec;
-                Future future = mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.mapInfo, frame));
+                mainInstance.robotExecutor.submit(new RobotCallable(robot, mainInstance.mapInfo, frame));
 
 //                if (frame-record.get(robot.id())<=1){
 ////
@@ -153,14 +168,16 @@ public class Main {
 //                    });
 //
 //                }
-
             }
+
+
             System.out.println("OK");
             MessageCenter.reset();
             System.out.flush();
             System.err.flush();
         }
         mainInstance.robotExecutor.shutdown();
+        mainInstance.boatExecutor.shutdown();
 
     }
 

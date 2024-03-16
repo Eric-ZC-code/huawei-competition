@@ -22,9 +22,10 @@ public class MapInfoimpl extends MapInfo {
         rwLock.readLock().lock();
         try {
 
-
-            for (int i = 0; i < this.availableGoods.size(); i++) {
-                Good availableGood = availableGoods.get(i);
+            final int size = this.availableGoods.size();
+            for (int i = 0; i < size; i++) {
+//                System.err.println(i);
+                Good availableGood = Optional.of(availableGoods.get(i)).get();
                 int manhattanDistance = Math.abs(robot.x() - availableGood.x()) + Math.abs(robot.y() - availableGood.y());
                 if (minDistance > manhattanDistance) {
                     minDistance = manhattanDistance;
@@ -32,6 +33,7 @@ public class MapInfoimpl extends MapInfo {
                 }
             }
         }catch (Exception e){
+            System.err.println("availablegoods: " +availableGoods.get(0)+" "+availableGoods.get(1));
             e.printStackTrace();
         }finally {
             rwLock.readLock().unlock();
@@ -68,6 +70,14 @@ public class MapInfoimpl extends MapInfo {
 
 
         return BestBerth;
+    }
+    public Integer getAvailableBerth(){
+        for (int i = 0; i < berths.length; i++) {
+            if(berths[i].acquired()){
+                return i;
+            }
+        }
+        return null;
     }
 
     @Override

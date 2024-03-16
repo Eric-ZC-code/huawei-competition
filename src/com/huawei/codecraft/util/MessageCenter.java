@@ -21,6 +21,7 @@ public class MessageCenter {
         }
         add();
         System.out.println(cmd);
+        System.out.flush();
         logger.info(cmd.toString());
         return true;
 
