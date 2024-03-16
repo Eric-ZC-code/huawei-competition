@@ -14,7 +14,8 @@ public class MessageCenter {
         sentMsg=0;
     }
     public static boolean send(Command cmd){
-        if(sentMsg>=maxMsg){
+
+        if(!cmd.isBoatCmd()&&sentMsg>=maxMsg){
             //并不能保证不超过maxMsg，但是因为限制为8kb，所以只需要保证发送的命令在maxMsg左右就行
             //故没有做多线程同步
             return false;

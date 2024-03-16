@@ -1,6 +1,7 @@
 package com.huawei.codecraft.entities;
 
 import com.huawei.codecraft.util.MessageCenter;
+import com.huawei.codecraft.util.MyLogger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,7 @@ public class Boat {
     private int status;
     private int capacity;
     private int id;
+    private static MyLogger logger = MyLogger.getLogger("boat");
     private final Map<Integer,Boolean> flags = new HashMap<>(); //判断这一帧是否做过事情了，一帧只做一件事
 
     public Map<Integer, Boolean> flags() {
@@ -80,8 +82,10 @@ public class Boat {
     public boolean ship(Integer berthId){
         if(MessageCenter.send(Command.ship(this.id,berthId))){
             this.pos = berthId;
+            logger.info("Boat "+this.id+" ship msg sent");
             return true;
         }
+        logger.info("Boat"+this.id+" ship msg not sent");
         return false;
     }
 
@@ -99,8 +103,10 @@ public class Boat {
 
         if(MessageCenter.send(Command.go(this.id))){
             this.pos=-1;
+            logger.info("Boat "+this.id+" go msg sent");
             return true;
         }
+        logger.info("Boat "+this.id+" go msg not sent");
         return false;
     }
 }

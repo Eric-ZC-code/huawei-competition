@@ -25,13 +25,13 @@ public class Berth {
         }
         return false;
     }
-    public synchronized boolean release() {
-        if (acquired) {
-            acquired =false;
-            return true;
-        }
-        return false;
-    }
+//    public synchronized boolean release() {
+//        if (acquired) {
+//            acquired =false;
+//            return true;
+//        }
+//        return false;
+//    }
 
 
 

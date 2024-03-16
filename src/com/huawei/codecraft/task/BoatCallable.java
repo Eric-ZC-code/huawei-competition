@@ -1,7 +1,6 @@
 package com.huawei.codecraft.task;
 
 import com.huawei.codecraft.entities.Boat;
-import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 
@@ -22,24 +21,25 @@ public class BoatCallable implements Callable {
     public Object call() throws Exception {
 
         synchronized (boat){
-            logger.info("BoatCallable call");
-
+            logger.info("status: "+ boat.status()+" pos: "+boat.pos());
             if(boat.status()==0){
                 //运输中
                 return null;
             } else if (boat.status()==1) {
+
                 if(boat.pos()==-1){
                     //船在 前往虚拟点
-
-                    Optional.ofNullable(mapInfo.getAvailableBerth())
+                    Integer availableBerth = mapInfo.getAvailableBerth();
+                    logger.info("Berth:"+availableBerth);
+                    Optional.ofNullable(availableBerth)
                             .ifPresent(boat::ship);
                 }
                 else {
                     //船在货物点
 
                     if(boat.go()){
-                        //船到达货物点
-                        mapInfo.berths()[boat.pos()].release();
+                        // 船成功出发去虚拟点，需让出berth
+//                        mapInfo.berths()[boat.pos()].release();
                     }
                 }
             }

@@ -29,6 +29,36 @@ public class Command {
     public static Command ignore(){
         return new Command("ignore",null,null);
     }
+    public boolean isBoatCmd(){
+        return this.cmd.equals("ship")|| this.cmd.equals("go");
+    }
+
+    public String cmd() {
+        return cmd;
+    }
+
+    public Command setCmd(String cmd) {
+        this.cmd = cmd;
+        return this;
+    }
+
+    public Integer actorId() {
+        return actorId;
+    }
+
+    public Command setActorId(Integer actorId) {
+        this.actorId = actorId;
+        return this;
+    }
+
+    public Integer para2() {
+        return para2;
+    }
+
+    public Command setPara2(Integer para2) {
+        this.para2 = para2;
+        return this;
+    }
 
     @Override
     public String toString() {
