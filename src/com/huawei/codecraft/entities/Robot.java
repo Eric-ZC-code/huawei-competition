@@ -12,6 +12,7 @@ public class Robot {
     private int id;
     private int x, y, carrying;
     private int status;
+    private boolean shouldCarry = false;
     private final Map<Integer,Boolean> flags = new HashMap<>(); //判断这一帧是否做过事情了，一帧只做一件事
 
     private ArrayDeque<Command> currentCommand = new ArrayDeque<>();
@@ -91,6 +92,15 @@ public class Robot {
         return this;
     }
 
+    public boolean shouldCarry() {
+        return shouldCarry;
+    }
+
+    public Robot setShouldCarry(boolean shouldCarry) {
+        this.shouldCarry = shouldCarry;
+        return this;
+    }
+
     public int status() {
         return status;
     }
@@ -101,6 +111,14 @@ public class Robot {
 
             if(!MessageCenter.send(command)){
                 this.currentCommand.addFirst(command);
+            }else {
+                if(command.cmd().equals("get")){
+                    shouldCarry = true;
+                } else if (command.cmd().equals("pull")) {
+                    shouldCarry = false;
+
+                }
+
             }
         }
     }
@@ -108,6 +126,9 @@ public class Robot {
     public Robot setStatus(int status) {
         this.status = status;
         return this;
+    }
+    public void clean(){
+        this.currentCommand = new ArrayDeque<>();
     }
 
     @Override
