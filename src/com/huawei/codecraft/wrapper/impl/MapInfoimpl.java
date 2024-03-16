@@ -61,13 +61,9 @@ public class MapInfoimpl extends MapInfo {
         }
         catch (Exception e){
             e.printStackTrace();
-
         }finally {
             rwLock.readLock().unlock();
         }
-
-
-
 
         return BestBerth;
     }
@@ -108,11 +104,11 @@ public class MapInfoimpl extends MapInfo {
             rwLock.writeLock().unlock();
         }
 
-
         List<Command> fullPath = new ArrayList<>(pathToGood);
         fullPath.add(getGood);
         fullPath.addAll(pathToBerth);
 
+        // pull good
         Command pullGood = pullGood(robot, good, berth);
         fullPath.add(pullGood);
 
@@ -175,7 +171,8 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot) {
-        List<Pair> path = mazePathBFS(this.map, good.x(), good.y(), berth.x(), berth.y());
+        Pair berthPoint = findBerthPoint(berth, good);
+        List<Pair> path = mazePathBFS(this.map, good.x(), good.y(), berthPoint.x, berthPoint.y);
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
@@ -184,21 +181,15 @@ public class MapInfoimpl extends MapInfo {
     public Command getGood(Robot robot, Good good) {
         rwLock.writeLock().lock();
         try {
-            if (robot.x() != good.x() || robot.y() != good.y()) {
-                robot.setStatus(1); // robot is acquiring good
-                availableGoods.remove(good); // remove good from available goods
-                acquiredGoods.add(good); // add good to acquired goods
-                good.setAcquired(true); // set good acquired
-                return Command.get(robot.id());
-            }
-
+            availableGoods.remove(good);
+            acquiredGoods.add(good);
+            good.setAcquired(true);
+            return Command.get(robot.id());
         }catch (Exception e){
             e.printStackTrace();
         }finally {
             rwLock.writeLock().unlock();
         }
-
-
         return Command.ignore();
     }
     /**
@@ -208,17 +199,21 @@ public class MapInfoimpl extends MapInfo {
      */
     @Override
     public void acquireGood(Robot robot, Good good) {
-        acquiredGoods.remove(good); // remove good from acquired goods
+        acquiredGoods.add(good);
         good.setAcquired(false); // set good not acquired
     }
 
     @Override
     public Command pullGood(Robot robot, Good good, Berth berth) {
-        if (robot.x() == berth.x() && robot.y() == berth.y()) {
-            robot.setStatus(0); // robot is pulling good
+        rwLock.writeLock().lock();
+        try {
+            acquiredGoods.remove(good);
             return Command.pull(robot.id());
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            rwLock.writeLock().unlock();
         }
-
         return Command.ignore();
     }
 
@@ -251,6 +246,22 @@ public class MapInfoimpl extends MapInfo {
         return movePath;
     }
 
+    private Pair findBerthPoint(Berth berth, Good good) {
+        int minDistance = Integer.MAX_VALUE;
+        Pair bestPoint = null;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                int x = berth.x() + i;
+                int y = berth.y() + j;
+                int ManhattanDistance = Math.abs(x - good.x()) + Math.abs(y - good.y());
+                if (minDistance > ManhattanDistance) {
+                    minDistance = ManhattanDistance;
+                    bestPoint = new Pair(x, y);
+                }
+            }
+        }
+        return bestPoint;
+    }
 
     static class Pair {
         int x, y;
