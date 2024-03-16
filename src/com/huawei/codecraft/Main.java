@@ -103,7 +103,9 @@ public class Main {
                     .setX(scanf.nextInt())
                     .setY(scanf.nextInt())
                     .setStatus(scanf.nextInt())
-                    .setId(i);
+                    .setId(i)
+                    .setPriority(i);
+            mapInfo.addItem(robot[i].x(), robot[i].y(), 'A');
         }
         for (int i = 0; i < 5; i++) {
             boat[i].setStatus(scanf.nextInt())

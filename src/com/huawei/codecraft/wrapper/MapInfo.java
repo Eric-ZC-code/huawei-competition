@@ -93,4 +93,5 @@ public abstract class MapInfo {
     abstract public Command pullGood(Robot robot, Good good, Berth berth);
     abstract public Integer getAvailableBerth();
     abstract public Integer getMatchedBerth(Integer berthId);
+    abstract public void addItem(int x, int y, char c);
 }

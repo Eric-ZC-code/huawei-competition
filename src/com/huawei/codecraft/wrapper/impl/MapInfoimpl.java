@@ -86,6 +86,11 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
+    public void addItem(int x, int y, char c) {
+        this.map[x][y] = c;
+    }
+
+    @Override
     public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
         rwLock.readLock().lock();
         try {
