@@ -14,7 +14,6 @@ public class Robot {
     private int status;
     private boolean shouldCarry = false;
     private final Map<Integer,Boolean> flags = new HashMap<>(); //判断这一帧是否做过事情了，一帧只做一件事
-
     private ArrayDeque<Command> currentCommand = new ArrayDeque<>();
 
     public Robot() {

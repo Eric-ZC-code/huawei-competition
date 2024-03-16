@@ -68,16 +68,10 @@ public class MapInfoimpl extends MapInfo {
 
         return BestBerth;
     }
-    public Integer getAvailableBerth(){
-        for (int i = 0; i < berths.length; i++) {
-//            if(berths[i].acquired()){
-//                return i;
-//            }
-            Random rand = new Random();
-            return rand.nextInt(berths.length);
 
-        }
-        return null;
+    public Integer getAvailableBerth(){
+        Random rand = new Random();
+        return rand.nextInt(berths.length);
     }
 
     @Override
@@ -87,6 +81,7 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
+        // 判断货物是否已经被获取，获取了就返回空的命令数组
         rwLock.readLock().lock();
         try {
             if (good.acquired()) {
@@ -98,25 +93,44 @@ public class MapInfoimpl extends MapInfo {
             rwLock.readLock().unlock();
         }
 
-        List<Command> pathToGood = getRobotToGoodPath(robot, good);
-        Command getGood = getGood(robot, good);
-        List<Command> pathToBerth = getGoodToBerthPath(good, berth, robot);
+        // 寻路逻辑
+        if (robot.carrying() == 0) {
+            logger.info("Robot is not carrying good");
+            List<Command> pathToGood = getRobotToGoodPath(robot, good);
+            Command getGood = getGood(robot, good);
+            List<Command> pathToBerth = getGoodToBerthPath(good, berth, robot);
 
-        // if pathToGood or pathToBerth is empty, return empty list
-        if (pathToGood.isEmpty() || pathToBerth.isEmpty()) {
-            return new ArrayList<>();
+            // if pathToGood or pathToBerth is empty, return empty list
+            if (pathToGood.isEmpty() || pathToBerth.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            List<Command> fullPath = new ArrayList<>(pathToGood);
+            fullPath.add(getGood);
+            fullPath.addAll(pathToBerth);
+
+            // pull good
+            Command pullGood = pullGood(robot, good, berth);
+            fullPath.add(pullGood);
+
+            return fullPath;
+
+        } else if (robot.carrying() == 1) {
+            logger.info("Robot is carrying good");
+            List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
+            if (pathToBerth.isEmpty()) {
+                return new ArrayList<>();
+            }
+            // pull good
+            Command pullGood = pullGood(robot, good, berth);
+            pathToBerth.add(pullGood);
+
+            return pathToBerth;
         }
 
-        List<Command> fullPath = new ArrayList<>(pathToGood);
-        fullPath.add(getGood);
-        fullPath.addAll(pathToBerth);
-
-        // pull good
-        Command pullGood = pullGood(robot, good, berth);
-        fullPath.add(pullGood);
-
-        return fullPath;
+        return new ArrayList<>();
     }
+
 
     public List<Pair> mazePathBFS(char[][] maze, int startX, int startY, int endX, int endY) {
         Set<Pair> visited = new HashSet<>();
@@ -174,8 +188,15 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot) {
-        Pair berthPoint = findBerthPoint(berth, good);
+        Pair berthPoint = findBerthPoint(berth, new Pair(good.x(), good.y()));
         List<Pair> path = mazePathBFS(this.map, good.x(), good.y(), berthPoint.x, berthPoint.y);
+        List<Command> movePath = pathTransform(path, robot.id());
+        return movePath;
+    }
+
+    public List<Command> getRobotToBerthPath(Robot robot, Berth berth) {
+        Pair berthPoint = findBerthPoint(berth, new Pair(robot.x(), robot.y()));
+        List<Pair> path = mazePathBFS(this.map, robot.x(), robot.y(), berthPoint.x, berthPoint.y);
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
@@ -239,14 +260,14 @@ public class MapInfoimpl extends MapInfo {
         return movePath;
     }
 
-    private Pair findBerthPoint(Berth berth, Good good) {
+    private Pair findBerthPoint(Berth berth, Pair pair) {
         int minDistance = Integer.MAX_VALUE;
         Pair bestPoint = null;
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 int x = berth.x() + i;
                 int y = berth.y() + j;
-                int ManhattanDistance = Math.abs(x - good.x()) + Math.abs(y - good.y());
+                int ManhattanDistance = Math.abs(x - pair.x) + Math.abs(y - pair.y);
                 if (minDistance > ManhattanDistance) {
                     minDistance = ManhattanDistance;
                     bestPoint = new Pair(x, y);
