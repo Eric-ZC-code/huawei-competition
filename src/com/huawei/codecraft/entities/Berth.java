@@ -1,5 +1,8 @@
 package com.huawei.codecraft.entities;
 
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 public class Berth {
     private int id;
     private int x;
@@ -7,6 +10,8 @@ public class Berth {
     private int transportTime;
     private int loadingSpeed;
     private boolean acquired = false;
+    private int amount = 0;
+    private Boat boat = null;
     public Berth(){}
     public Berth(int id,int x, int y, int transportTime, int loadingSpeed) {
         this.id = id;
@@ -39,6 +44,15 @@ public class Berth {
         this.id = id;
         return this;
     }
+    public synchronized int amount() {
+        return amount;
+    }
+    public synchronized void load(int amount) {
+        this.amount += amount;
+    }
+    public synchronized void unload(int amount) {
+        this.amount -= amount;
+    }
 
     public int id() {
         return id;
@@ -46,6 +60,15 @@ public class Berth {
 
     public int x() {
         return x;
+    }
+
+    public Boat boat() {
+        return boat;
+    }
+
+    public Berth setBoat(Boat boat) {
+        this.boat = boat;
+        return this;
     }
 
     public Berth setX(int x) {

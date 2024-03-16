@@ -8,6 +8,7 @@ package com.huawei.codecraft;
 import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Boat;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.task.BoatCallable;
 import com.huawei.codecraft.task.RobotCallable;
 import com.huawei.codecraft.util.MessageCenter;
@@ -108,9 +109,9 @@ public class Main {
             mapInfo.addItem(robot[i].x(), robot[i].y(), 'A');
         }
         for (int i = 0; i < 5; i++) {
-            boat[i].setStatus(scanf.nextInt())
-                   .setPos(scanf.nextInt())
-                   .setId(i);
+            Boat boat = this.boat[i].setStatus(scanf.nextInt())
+                                    .setPos(scanf.nextInt())
+                                    .setId(i);
         }
         String okk = scanf.nextLine();
         return id;
@@ -124,8 +125,7 @@ public class Main {
 
             mainInstance.init();
 
-            long l1 = System.currentTimeMillis();
-            int skip = 2;
+//            long l1 = System.currentTimeMillis();
             for (int frame = 1; frame <= 15000; frame++) {
 
                 int id = mainInstance.input();
@@ -162,27 +162,30 @@ public class Main {
     //
     //                    System.err.println(robot);
     //                }
-    //                mainInstance.mapInfo.availableGoods().forEach(System.err::println);
-    //                for (Berth berth : mainInstance.berth) {
-    //                    System.err.println(berth);
-    //                }
-//                    for (Boat boat : mainInstance.boat) {
-//                        System.err.println(boat);
-//                    }
-//                    System.err.flush();
-                }
-                if ((frame-1)%500==0){
-                    logger.info("try to ship");
-                    for (int i = 0; i < mainInstance.boat.length; i++) {
-
-                        Future submit = mainInstance.boatExecutor.submit(new BoatCallable(mainInstance.boat[i], mainInstance.mapInfo, frame));
-                        mainInstance.boatFuture[i]=submit;
+//                    mainInstance.mapInfo.availableGoods().forEach(System.err::println);
+                    for (Berth berth : mainInstance.berth) {
+                        System.err.println(berth);
                     }
+                    for (Boat boat : mainInstance.boat) {
+                        System.err.println(boat);
+                    }
+                    System.err.flush();
                 }
+
                 for (int i = 0; i < mainInstance.robot.length; i++) {
                     Robot robot = mainInstance.robot[i];
-                    if(true){
-                        Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(mainInstance.robot[i], mainInstance.mapInfo, frame));
+                    if(i!=0){
+                        Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
+                                                                                                   mainInstance.mapInfo,
+                                                                                                   frame,
+                                                                                                   GoodStrategy.MANHATTAN));
+                        mainInstance.robotFuture[i]=submit;
+                    }
+                    else {
+                        Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
+                                                                                                   mainInstance.mapInfo,
+                                                                                                   frame,
+                                                                                                   GoodStrategy.RATIO));
                         mainInstance.robotFuture[i]=submit;
                     }
                 }
@@ -192,6 +195,14 @@ public class Main {
                     }
                     mainInstance.robotFuture[i].get();
                     logger.info("[frame:"+ id+" ]Robot "+i+ "completed");
+                }
+                if ((frame-1)%1==0){
+                    logger.info("try to ship");
+                    for (int i = 0; i < mainInstance.boat.length; i++) {
+
+                        Future submit = mainInstance.boatExecutor.submit(new BoatCallable(mainInstance.boat[i], mainInstance.mapInfo, frame));
+                        mainInstance.boatFuture[i]=submit;
+                    }
                 }
                 for (int i = 0; i < mainInstance.boat.length; i++) {
                     mainInstance.boatFuture[i].get();
