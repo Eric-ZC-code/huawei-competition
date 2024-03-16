@@ -63,6 +63,17 @@ public class RobotCallable implements Callable {
 
     }
     public boolean setCmd(Robot robot) {
+        if(robot.carrying()==1){
+
+            Berth nearestBerth = mapInfo.findBestBerth(robot.x(), robot.y());
+            if(nearestBerth==null){
+                return false;
+            }
+            List<Command> path = mapInfo.getFullPath(robot,null ,nearestBerth);
+            robot.fillCommand(path);
+            logger.info("[Frame: " + frame+"]Robot"+robot.id()+"task: "+path);
+            return true;
+        }
         Good nearestGood = mapInfo.findBestGood(robot);
         if(nearestGood==null){
             return false;
