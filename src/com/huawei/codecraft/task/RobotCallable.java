@@ -4,6 +4,7 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.wrapper.MapInfo;
 import com.huawei.codecraft.util.MyLogger;
 
@@ -15,10 +16,12 @@ public class RobotCallable implements Callable {
     private Integer frame;
     private final Robot robot;
     private final MapInfo mapInfo;
-    public RobotCallable(Robot robot, MapInfo mapInfo,Integer frame) {
+    private final GoodStrategy goodStrategy;
+    public RobotCallable(Robot robot, MapInfo mapInfo,Integer frame,GoodStrategy goodStrategy) {
         this.robot = robot;
         this.mapInfo = mapInfo;
         this.frame = frame;
+        this.goodStrategy= goodStrategy;
     }
 
     @Override
@@ -34,7 +37,6 @@ public class RobotCallable implements Callable {
             else {
                 robot.flags().put(frame,true);
             }
-
             if (!robot.containsCommand()||robot.status()==0) {
                 // 目前机器人没有被分配任务或者发生碰撞
                 // 则去搜索最近的货物，然后规划路径
@@ -74,7 +76,7 @@ public class RobotCallable implements Callable {
             logger.info("[Frame: " + frame+"]Robot"+robot.id()+"task: "+path);
             return true;
         }
-        Good nearestGood = mapInfo.findBestGood(robot);
+        Good nearestGood = mapInfo.findBestGood(robot, goodStrategy);
         if(nearestGood==null){
             return false;
         }

@@ -4,6 +4,7 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 
@@ -12,41 +13,97 @@ import java.util.*;
 public class MapInfoimpl extends MapInfo {
 
     private MyLogger logger = MyLogger.getLogger("MapInfoimpl");
+
     @Override
-    public Good findBestGood(Robot robot) {
-        int minDistance = Integer.MAX_VALUE;
-        Good BestGood = null;
+    public Good findBestGood(Robot robot, GoodStrategy goodStrategy) {
+
+        Good bestGood = null;
         rwLock.readLock().lock();
         try {
-
-            final int size = this.availableGoods.size();
-            for (int i = 0; i < size; i++) {
-//                System.err.println(i);
-                Good availableGood = Optional.of(this.availableGoods.get(i)).get();
-                int manhattanDistance = Math.abs(robot.x() - availableGood.x()) + Math.abs(robot.y() - availableGood.y());
-                if (minDistance > manhattanDistance) {
-                    minDistance = manhattanDistance;
-                    BestGood = availableGood;
-                    logger.info("BestGood: " + BestGood);
-                }
+            switch (goodStrategy) {
+                case VALUE:
+                    bestGood = findGoodByValue(robot);
+                    break;
+                case RATIO:
+                    bestGood = findGoodByRatio(robot);
+                    break;
+                default:
+                    bestGood = findGoodByManhattanDistance(robot);
+                    break;
             }
-        }catch (Exception e){
-            logger.info("availablegoods: "+ availableGoods);
+            logger.info("Robot: " + robot.id() + " BestGood: " + bestGood + " [x: " + robot.x() + ", y: " + robot.y() + "]" + "availableGoods: " + availableGoods.size());
+        } catch (Exception e) {
+
+            logger.info("availablegoods: " + availableGoods);
             e.printStackTrace();
-        }finally {
+        } finally {
             rwLock.readLock().unlock();
         }
-        logger.info("BestGood: " + BestGood+ " availableGoods: "+ availableGoods.size());
+        logger.info("BestGood: " + bestGood + " availableGoods: " + availableGoods.size());
 
-        return BestGood;
+        return bestGood;
+    }
+
+    private Good findGoodByRatio(Robot robot) {
+        double max = Double.MIN_VALUE;
+        double valueParam = 1.0;
+        double distanceParam = 1.0;
+        Good bestGood = null;
+        final int size = this.availableGoods.size();
+        for (int i = 0; i < size; i++) {
+            Good availableGood = Optional.of(this.availableGoods.get(i)).get();
+            double value = availableGood.value();
+            double manhattanDistance = Math.abs(robot.x() - availableGood.x()) + Math.abs(robot.y() - availableGood.y());
+            double ratio = 1.0 * (valueParam * value) / (distanceParam * manhattanDistance);
+            if (max < ratio) {
+                max = ratio;
+                bestGood = availableGood;
+            }
+        }
+        return bestGood;
+    }
+
+    private Good findGoodByManhattanDistance(Robot robot) {
+        int minDistance = Integer.MAX_VALUE;
+        Good bestGood = null;
+        final int size = this.availableGoods.size();
+        for (int i = 0; i < size; i++) {
+//                System.err.println(i);
+            Good availableGood = Optional.of(this.availableGoods.get(i)).get();
+            int manhattanDistance = Math.abs(robot.x() - availableGood.x()) + Math.abs(robot.y() - availableGood.y());
+            if (minDistance > manhattanDistance) {
+                minDistance = manhattanDistance;
+                bestGood = availableGood;
+                logger.info("BestGood: " + bestGood);
+            }
+        }
+        return bestGood;
+
+    }
+
+    private Good findGoodByValue(Robot robot) {
+        int max = Integer.MIN_VALUE;
+        Good bestGood = null;
+        final int size = this.availableGoods.size();
+        for (int i = 0; i < size; i++) {
+            Good availableGood = Optional.of(this.availableGoods.get(i)).get();
+            int value = availableGood.value();
+            if (max < value) {
+                max = value;
+                bestGood = availableGood;
+            }
+        }
+        return bestGood;
+
     }
 
     @Override
     public Berth findBestBerth(int x, int y) {
-        int minDistance = Integer.MAX_VALUE;
+
         Berth BestBerth = null;
         rwLock.readLock().lock();
-        try{
+        try {
+            int minDistance = Integer.MAX_VALUE;
             for (int i = 0; i < this.berths.length; i++) {
                 Berth berth = this.berths[i];
                 logger.info("Berth: " + berth);
@@ -57,11 +114,10 @@ public class MapInfoimpl extends MapInfo {
                 }
             }
 
-        }
-        catch (Exception e){
-            logger.info("berths: "+ Arrays.toString(berths));
+        } catch (Exception e) {
+            logger.info("berths: " + Arrays.toString(berths));
             e.printStackTrace();
-        }finally {
+        } finally {
             rwLock.readLock().unlock();
         }
 
@@ -69,7 +125,7 @@ public class MapInfoimpl extends MapInfo {
     }
 
 
-    public Integer getAvailableBerth(){
+    public Integer getAvailableBerth() {
         Random rand = new Random();
         return rand.nextInt(berths.length);
     }
@@ -95,9 +151,9 @@ public class MapInfoimpl extends MapInfo {
                 if (good.acquired()) {
                     return new ArrayList<>();
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 rwLock.readLock().unlock();
             }
 
@@ -123,6 +179,12 @@ public class MapInfoimpl extends MapInfo {
         } else if (robot.carrying() == 1) {
             logger.info("Robot is carrying good");
             List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
+            Pair berthPoint = findBerthPoint(berth, new Pair(robot.x(), robot.y()));
+            if (robot.x() == berthPoint.x && robot.y() == berthPoint.y) {
+                Command pullGood = pullGood(robot, good, berth);
+                pathToBerth.add(pullGood);
+                return pathToBerth;
+            }
             if (pathToBerth.isEmpty()) {
                 return new ArrayList<>();
             }
@@ -177,7 +239,7 @@ public class MapInfoimpl extends MapInfo {
         for (int[] dir : dirs) {
             int nx = x + dir[0];
             int ny = y + dir[1];
-            if (nx >= 0 && nx < maze.length && ny >= 0 && ny < maze[0].length && !isObstacle(nx, ny)){
+            if (nx >= 0 && nx < maze.length && ny >= 0 && ny < maze[0].length && !isObstacle(nx, ny)) {
                 neighbours.add(new Pair(nx, ny));
             }
         }
@@ -214,9 +276,9 @@ public class MapInfoimpl extends MapInfo {
             acquiredGoods.add(good);
             good.setAcquired(true);
             return Command.get(robot.id());
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             rwLock.writeLock().unlock();
         }
         return Command.ignore();
@@ -228,9 +290,9 @@ public class MapInfoimpl extends MapInfo {
         try {
             acquiredGoods.remove(good);
             return Command.pull(robot.id());
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             rwLock.writeLock().unlock();
         }
         return Command.ignore();

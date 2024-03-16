@@ -15,7 +15,6 @@ public class Robot {
     private int x, y, carrying;
     private int status;
     private boolean shouldCarry = false;
-
     private Integer priority; // 优先级 0-9 0最高 9最低
     private final Map<Integer,Boolean> flags = new HashMap<>(); //判断这一帧是否做过事情了，一帧只做一件事
     private ArrayDeque<Command> currentCommand = new ArrayDeque<>();
@@ -119,7 +118,7 @@ public class Robot {
         Random rand = new Random();
         Robot nearby = havingRobotNearby(robots);
         if(nearby!=null){
-
+            //普通的基于priority 避让没有 random效果好
             int i = rand.nextInt(10);
             if(i%2==0){
                 logger.info("Robot" + id + " has robot nearby, skip this command by random");

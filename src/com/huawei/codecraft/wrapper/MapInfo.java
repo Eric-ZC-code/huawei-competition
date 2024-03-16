@@ -4,10 +4,9 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.enums.GoodStrategy;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -55,6 +54,18 @@ public abstract class MapInfo {
     }
 
     public MapInfo setBerths(Berth[] berths) {
+//        PriorityQueue<Berth> queue = new PriorityQueue<>(new Comparator<Berth>() {
+//            @Override
+//            public int compare(Berth b1, Berth b2) {
+//                if (b1.loadingSpeed() < b2.loadingSpeed()) {
+//                    return -1;
+//                } else if (b1.loadingSpeed() > b2.loadingSpeed()) {
+//                    return 1;
+//                } else {
+//                    return 0;
+//                }
+//            }
+//        });
         for (int i = 0; i < berths.length; i++) {
             if (i%2 == 0){
                 this.berths[i/2] = berths[i];
@@ -84,7 +95,7 @@ public abstract class MapInfo {
             rwLock.writeLock().unlock();
         }
     }
-    abstract public Good findBestGood(Robot robot);
+    abstract public Good findBestGood(Robot robot, GoodStrategy strategy);
     abstract public Berth findBestBerth(int x, int y);
     abstract public List<Command> getFullPath(Robot robot, Good good, Berth berth);
     abstract public List<Command> getRobotToGoodPath(Robot robot, Good good);
