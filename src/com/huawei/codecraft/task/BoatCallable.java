@@ -40,7 +40,7 @@ public class BoatCallable implements Callable {
 
                     if(boat.go()){
                         // 船成功出发去虚拟点，需让出berth
-                        mapInfo.berths()[boat.pos()].release();
+//                        mapInfo.berths()[boat.pos()].release();
                     }
                 }
             }

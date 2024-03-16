@@ -30,14 +30,16 @@ public class MapInfoimpl extends MapInfo {
                 if (minDistance > manhattanDistance) {
                     minDistance = manhattanDistance;
                     BestGood = availableGood;
+                    logger.info("BestGood: " + BestGood);
                 }
             }
         }catch (Exception e){
-            System.err.println("availablegoods: " +availableGoods.get(0)+" "+availableGoods.get(1));
+            logger.info("availablegoods: "+ availableGoods);
             e.printStackTrace();
         }finally {
             rwLock.readLock().unlock();
         }
+        logger.info("BestGood: " + BestGood+ " availableGoods: "+ availableGoods.size());
 
         return BestGood;
     }
@@ -60,6 +62,8 @@ public class MapInfoimpl extends MapInfo {
 
         }
         catch (Exception e){
+            logger.info("berths: "+ Arrays.toString(berths));
+            logger.info("good: "+ good);
             e.printStackTrace();
         }finally {
             rwLock.readLock().unlock();
@@ -69,9 +73,12 @@ public class MapInfoimpl extends MapInfo {
     }
     public Integer getAvailableBerth(){
         for (int i = 0; i < berths.length; i++) {
-            if(berths[i].acquired()){
-                return i;
-            }
+//            if(berths[i].acquired()){
+//                return i;
+//            }
+            Random rand = new Random();
+            return rand.nextInt(berths.length);
+
         }
         return null;
     }
