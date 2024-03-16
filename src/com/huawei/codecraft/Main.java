@@ -137,7 +137,7 @@ public class Main {
                 }
                 System.err.flush();
             }
-            if (frame%100==0){
+            if (frame%2==0){
                 logger.info("try to ship");
                 for (Boat boat : mainInstance.boat) {
                     mainInstance.boatExecutor.submit(new BoatCallable(boat, mainInstance.mapInfo, frame));

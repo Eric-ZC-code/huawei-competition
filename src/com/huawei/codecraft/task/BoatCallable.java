@@ -30,7 +30,7 @@ public class BoatCallable implements Callable {
                 if(boat.pos()==-1){
                     //船在 前往虚拟点
                     Integer berth = mapInfo.getAvailableBerth();
-                    logger.info("Boat: "+boat.id());
+                    logger.info("Berth: "+berth);
                     Optional.ofNullable(berth)
                             .ifPresent(boat::ship);
                 }

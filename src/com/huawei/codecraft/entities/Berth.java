@@ -15,17 +15,17 @@ public class Berth {
         this.transportTime = transportTime;
         this.loadingSpeed = loadingSpeed;
     }
-    public synchronized boolean isAcquired() {
+    public boolean isAcquired() {
         return acquired;
     }
-    public synchronized boolean acquired() {
+    public boolean acquired() {
         if (!acquired) {
             acquired =true;
             return true;
         }
         return false;
     }
-    public synchronized boolean release() {
+    public boolean release() {
         if (acquired) {
             acquired =false;
             return true;
