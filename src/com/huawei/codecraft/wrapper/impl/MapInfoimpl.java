@@ -42,7 +42,7 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
-    public Berth findBestBerth(Good good) {
+    public Berth findBestBerth(int x, int y) {
         int minDistance = Integer.MAX_VALUE;
         Berth BestBerth = null;
         rwLock.readLock().lock();
@@ -50,7 +50,7 @@ public class MapInfoimpl extends MapInfo {
             for (int i = 0; i < this.berths.length; i++) {
                 Berth berth = this.berths[i];
                 logger.info("Berth: " + berth);
-                int manhattanDistance = Math.abs(good.x() - berth.x()) + Math.abs(good.y() - berth.y());
+                int manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
                 if (minDistance > manhattanDistance) {
                     minDistance = manhattanDistance;
                     BestBerth = berth;
@@ -60,7 +60,6 @@ public class MapInfoimpl extends MapInfo {
         }
         catch (Exception e){
             logger.info("berths: "+ Arrays.toString(berths));
-            logger.info("good: "+ good);
             e.printStackTrace();
         }finally {
             rwLock.readLock().unlock();
@@ -68,6 +67,7 @@ public class MapInfoimpl extends MapInfo {
 
         return BestBerth;
     }
+
 
     public Integer getAvailableBerth(){
         Random rand = new Random();
@@ -81,21 +81,21 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
-        // 判断货物是否已经被获取，获取了就返回空的命令数组
-        rwLock.readLock().lock();
-        try {
-            if (good.acquired()) {
-                return new ArrayList<>();
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
-            rwLock.readLock().unlock();
-        }
-
         // 寻路逻辑
         if (robot.carrying() == 0) {
             logger.info("Robot is not carrying good");
+            // 判断货物是否已经被获取，获取了就返回空的命令数组
+            rwLock.readLock().lock();
+            try {
+                if (good.acquired()) {
+                    return new ArrayList<>();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                rwLock.readLock().unlock();
+            }
+
             List<Command> pathToGood = getRobotToGoodPath(robot, good);
             Command getGood = getGood(robot, good);
             List<Command> pathToBerth = getGoodToBerthPath(good, berth, robot);
