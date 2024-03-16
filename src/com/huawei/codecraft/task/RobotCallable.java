@@ -39,6 +39,9 @@ public class RobotCallable implements Callable {
                 // 则去搜索最近的货物，然后规划路径
                 // 只有等待任务分配完成后才能开始执行。
                 Good nearestGood = mapInfo.findBestGood(robot);
+                if (nearestGood == null) {
+                    return null;
+                }
                 Berth nearestBerth = mapInfo.findBestBerth(nearestGood);
                 if (nearestGood != null && nearestBerth != null) {
                     List<Command> path = mapInfo.getFullPath(robot, nearestGood, nearestBerth);
