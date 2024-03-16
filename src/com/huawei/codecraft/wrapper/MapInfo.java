@@ -20,10 +20,6 @@ public abstract class MapInfo {
         return availableGoods;
     }
 
-    public MapInfo setAvailableGoods(List<Good> availableGoods) {
-        this.availableGoods = availableGoods;
-        return this;
-    }
 
     public List<Good> acquiredGoods() {
         return acquiredGoods;
@@ -66,5 +62,6 @@ public abstract class MapInfo {
     abstract public Command getGood(Robot robot, Good good);
     abstract public void acquireGood(Robot robot, Good good);
     abstract public Command pullGood(Robot robot, Good good, Berth berth);
+    abstract public Integer getAvailableBerth();
 
 }

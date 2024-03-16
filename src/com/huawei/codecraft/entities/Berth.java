@@ -1,16 +1,47 @@
 package com.huawei.codecraft.entities;
 
 public class Berth {
+    private int id;
     private int x;
     private int y;
     private int transportTime;
     private int loadingSpeed;
+    private boolean acquired = false;
     public Berth(){}
-    public Berth(int x, int y, int transportTime, int loadingSpeed) {
+    public Berth(int id,int x, int y, int transportTime, int loadingSpeed) {
+        this.id = id;
         this.x = x;
         this.y = y;
         this.transportTime = transportTime;
         this.loadingSpeed = loadingSpeed;
+    }
+    public synchronized boolean isAcquired() {
+        return acquired;
+    }
+    public synchronized boolean acquired() {
+        if (!acquired) {
+            acquired =true;
+            return true;
+        }
+        return false;
+    }
+    public synchronized boolean release() {
+        if (acquired) {
+            acquired =false;
+            return true;
+        }
+        return false;
+    }
+
+
+
+    public Berth setId(int id) {
+        this.id = id;
+        return this;
+    }
+
+    public int id() {
+        return id;
     }
 
     public int x() {
@@ -58,4 +89,5 @@ public class Berth {
                 ", loadingSpeed=" + loadingSpeed +
                 '}';
     }
+
 }
