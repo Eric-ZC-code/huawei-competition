@@ -109,9 +109,9 @@ public class Main {
             mapInfo.addItem(robot[i].x(), robot[i].y(), 'A');
         }
         for (int i = 0; i < 5; i++) {
-            boat[i].setStatus(scanf.nextInt())
-                   .setPos(scanf.nextInt())
-                   .setId(i);
+            Boat boat = this.boat[i].setStatus(scanf.nextInt())
+                                    .setPos(scanf.nextInt())
+                                    .setId(i);
         }
         String okk = scanf.nextLine();
         return id;
@@ -129,7 +129,7 @@ public class Main {
             for (int frame = 1; frame <= 15000; frame++) {
 
                 int id = mainInstance.input();
-//                System.err.println("frame: "+id);
+                System.err.println("frame: "+id);
                 // 一个简易的计时器保证输出中心在processtime之前关闭输出，保证不丢失输出
     //            if(frame==50){
     //                System.err.println("time: "+(System.currentTimeMillis()-l1));
@@ -196,7 +196,7 @@ public class Main {
                     mainInstance.robotFuture[i].get();
                     logger.info("[frame:"+ id+" ]Robot "+i+ "completed");
                 }
-                if ((frame-1)%100==0){
+                if ((frame-1)%1==0){
                     logger.info("try to ship");
                     for (int i = 0; i < mainInstance.boat.length; i++) {
 

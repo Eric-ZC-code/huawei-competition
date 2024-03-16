@@ -97,6 +97,22 @@ public class MapInfoimpl extends MapInfo {
 
     }
 
+    public Berth currentBerth(int x, int y) {
+        for (Berth berth : berths) {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+//                    System.err.println("Robot : "+x+" "+y+" Berth " +berth.id()+" : "+berth.x()+" "+berth.y());
+                    if ((berth.x() + i) == x && (berth.y() + j )== y) {
+                        return berth;
+                    }
+                }
+
+            }
+
+        }
+        return null;
+    }
+
     @Override
     public Berth findBestBerth(int x, int y) {
 
@@ -128,11 +144,6 @@ public class MapInfoimpl extends MapInfo {
     public Integer getAvailableBerth() {
         Random rand = new Random();
         return rand.nextInt(berths.length);
-    }
-
-    @Override
-    public Integer getMatchedBerth(Integer berthId) {
-        return berthId;
     }
 
     @Override

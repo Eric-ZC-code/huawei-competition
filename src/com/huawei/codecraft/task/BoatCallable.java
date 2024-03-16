@@ -13,6 +13,7 @@ public class BoatCallable implements Callable {
     private Integer frame;
     private final Boat boat;
     private final MapInfo mapInfo;
+
     public BoatCallable(Boat boat, MapInfo mapInfo,Integer frame) {
         this.boat = boat;
         this.mapInfo = mapInfo;
@@ -22,28 +23,49 @@ public class BoatCallable implements Callable {
     public Object call() throws Exception {
 
         synchronized (boat){
-            logger.info("status: "+ boat.status()+" pos: "+boat.pos());
             if(boat.status()==0){
                 //运输中
                 return null;
             } else if (boat.status()==1) {
 
                 if(boat.pos()==-1){
-                    //船在 前往虚拟点
+                    //船在虚拟点
 //                    Integer availableBerth = mapInfo.getAvailableBerth();
-                    Integer availableBerth = mapInfo.getMatchedBerth(boat.id());
-                    Integer realBerth = 2*availableBerth;
+                    Integer realBerth = 2* boat.id();
                     logger.info("Berth:"+realBerth);
                     Optional.ofNullable(realBerth)
                             .ifPresent(boat::ship);
                 }
                 else {
+
                     //船在货物点
 
-                    if(boat.go()){
-                        // 船成功出发去虚拟点，需让出berth
-//                        mapInfo.berths()[boat.pos()].release();
+                    try {
+                        Berth berth = mapInfo.berths()[boat.pos()/2];
+                        if(berth.boat()==null){
+                            berth.setBoat(boat);
+                        }
+//                        int min = Math.min(berth.loadingSpeed(), berth.amount());
+//                        berth.unload(min);
+                        boat.load(berth.loadingSpeed());
+                        logger.info("Boat " +boat.id()+" amount : "+boat.goodsNum());
+                        if(boat.isFull()){
+                            //船满了 再去虚拟点
+                            if(boat.go()){
+                                // 船成功出发去虚拟点，需让出berth
+                                berth.setBoat(null);
+                            }
+
+                        }else {
+                            return null;
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Boat error");
+                        System.err.flush();
+                        e.printStackTrace();
+                    } finally {
                     }
+
                 }
             }
         }

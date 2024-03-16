@@ -117,6 +117,7 @@ public class Robot {
         Robot[] robots = map.robots();
         Random rand = new Random();
         Robot nearby = havingRobotNearby(robots);
+        Berth[] berths = map.berths();
         if(nearby!=null){
             //普通的基于priority 避让没有 random效果好
             int i = rand.nextInt(10);
@@ -144,7 +145,17 @@ public class Robot {
                 if(command.cmd().equals("get")){
                     shouldCarry = true;
                 } else if (command.cmd().equals("pull")) {
-                    shouldCarry = false;
+                    try {
+                        shouldCarry = false;
+                        Berth berth = map.findBestBerth(this.x, this.y);
+                        if(berth!=null){
+                            berth.load(1);
+                        }
+
+                    } catch (Exception e) {
+                        System.err.println("Robot error: "+e);
+                        e.printStackTrace();
+                    }
 
                 } else if (command.cmd().equals("move")) {
                     map.map()[x][y] = '.';

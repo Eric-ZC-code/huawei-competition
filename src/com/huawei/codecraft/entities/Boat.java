@@ -12,16 +12,10 @@ public class Boat {
     private int status;
     private int capacity;
     private int id;
+    private int goodsNum = 0;
     private static MyLogger logger = MyLogger.getLogger("boat");
-    private final Map<Integer,Boolean> flags = new HashMap<>(); //判断这一帧是否做过事情了，一帧只做一件事
-
-    public Map<Integer, Boolean> flags() {
-        return flags;
-    }
-
     public Boat(int capacity) {
         this.capacity = capacity;
-        init();
     }
 
     public int id() {
@@ -37,15 +31,22 @@ public class Boat {
         this.pos = pos;
         this.capacity = capacity;
     }
-
-    public void init(){
-        for (int i = 1; i <= 15000; i++) {
-            flags.put(i,false);
-        }
-    }
-
     public int capacity() {
         return capacity;
+    }
+
+    public void load(int number){
+        this.goodsNum+=number;
+    }
+
+    public int goodsNum() {
+        return goodsNum;
+    }
+    public boolean isFull(){
+        return goodsNum>=capacity;
+    }
+    public void reset(){
+        goodsNum = 0;
     }
 
     public Boat setCapacity(int capacity) {
@@ -103,6 +104,8 @@ public class Boat {
 
         if(MessageCenter.send(Command.go(this.id))){
             this.pos=-1;
+
+            reset();
             logger.info("Boat "+this.id+" go msg sent");
             return true;
         }
