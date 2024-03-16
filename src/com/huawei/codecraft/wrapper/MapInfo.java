@@ -6,7 +6,6 @@ import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -17,7 +16,7 @@ public abstract class MapInfo {
     protected List<Good> availableGoods = new ArrayList<>();
     protected List<Good> acquiredGoods = new ArrayList<>(10);
     protected char[][] map = new char[200][200];
-    protected Berth[] berths = new Berth[10];
+    protected Berth[] berths = new Berth[5];
 
     public List<Good> availableGoods() {
         return availableGoods;
@@ -47,7 +46,11 @@ public abstract class MapInfo {
     }
 
     public MapInfo setBerths(Berth[] berths) {
-        this.berths = berths;
+        for (int i = 0; i < berths.length; i++) {
+            if (i%2 == 0){
+                this.berths[i/2] = berths[i];
+            }
+        }
         return this;
     }
 
@@ -78,8 +81,7 @@ public abstract class MapInfo {
     abstract public List<Command> getRobotToGoodPath(Robot robot, Good good);
     abstract public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot);
     abstract public Command getGood(Robot robot, Good good);
-    abstract public void acquireGood(Robot robot, Good good);
     abstract public Command pullGood(Robot robot, Good good, Berth berth);
     abstract public Integer getAvailableBerth();
-
+    abstract public Integer getMatchedBerth(Integer berthId);
 }

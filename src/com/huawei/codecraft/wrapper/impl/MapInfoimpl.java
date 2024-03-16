@@ -8,11 +8,8 @@ import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MapInfoimpl extends MapInfo {
-
 
     private MyLogger logger = MyLogger.getLogger("MapInfoimpl");
     @Override
@@ -84,14 +81,22 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
+    public Integer getMatchedBerth(Integer berthId) {
+        return berthId;
+    }
+
+    @Override
     public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
-        synchronized (good){
+        rwLock.readLock().lock();
+        try {
             if (good.acquired()) {
                 return new ArrayList<>();
             }
-
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            rwLock.readLock().unlock();
         }
-
 
         List<Command> pathToGood = getRobotToGoodPath(robot, good);
         Command getGood = getGood(robot, good);
@@ -100,15 +105,6 @@ public class MapInfoimpl extends MapInfo {
         // if pathToGood or pathToBerth is empty, return empty list
         if (pathToGood.isEmpty() || pathToBerth.isEmpty()) {
             return new ArrayList<>();
-        }
-        rwLock.writeLock().lock();
-        try {
-            acquireGood(robot, good);
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
-            rwLock.writeLock().unlock();
         }
 
         List<Command> fullPath = new ArrayList<>(pathToGood);
@@ -198,16 +194,6 @@ public class MapInfoimpl extends MapInfo {
             rwLock.writeLock().unlock();
         }
         return Command.ignore();
-    }
-    /**
-     * acquire good synchronously
-     * @param robot
-     * @param good
-     */
-    @Override
-    public void acquireGood(Robot robot, Good good) {
-        acquiredGoods.add(good);
-        good.setAcquired(false); // set good not acquired
     }
 
     @Override
