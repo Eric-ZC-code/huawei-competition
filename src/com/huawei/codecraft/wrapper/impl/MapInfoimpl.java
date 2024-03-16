@@ -8,11 +8,8 @@ import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MapInfoimpl extends MapInfo {
-
 
     private MyLogger logger = MyLogger.getLogger("MapInfoimpl");
     @Override
@@ -84,6 +81,11 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
+    public Integer getMatchedBerth(Integer berthId) {
+        return berthId;
+    }
+
+    @Override
     public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
         rwLock.readLock().lock();
         try {
@@ -96,7 +98,6 @@ public class MapInfoimpl extends MapInfo {
         } finally {
             rwLock.readLock().unlock();
         }
-
 
         List<Command> pathToGood = getRobotToGoodPath(robot, good);
         Command getGood = getGood(robot, good);
@@ -195,6 +196,7 @@ public class MapInfoimpl extends MapInfo {
         }
         return Command.ignore();
     }
+
     @Override
     public Command pullGood(Robot robot, Good good, Berth berth) {
         rwLock.writeLock().lock();
