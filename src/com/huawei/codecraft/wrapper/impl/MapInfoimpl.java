@@ -171,9 +171,10 @@ public class MapInfoimpl extends MapInfo {
 
 //                return new ArrayList<>();
             }
-
+            // 就算没路也要去acquire这个物品，因为这个物品极有可能对大家来说不可达。这样没人能再拿到这个物品了
             Command getGood = getGood(robot, good);
-            if(getGood == null){
+            //在acquire后再return
+            if(getGood == null|| pathToGood.isEmpty()){
                 return new ArrayList<>();
             }
             List<Command> pathToBerth = getGoodToBerthPath(good, berth, robot);
