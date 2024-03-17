@@ -147,7 +147,7 @@ public class Main {
 
                 int id = mainInstance.input();
                 if(true){
-                    System.err.println("frame: "+id);
+//                    System.err.println("frame: "+id);
                 }
 
                 // 一个简易的计时器保证输出中心在processtime之前关闭输出，保证不丢失输出
@@ -177,20 +177,20 @@ public class Main {
 
 
 
-                if (frame == 1) {
-//                    for (Robot robot : mainInstance.robot) {
-//
-//                        System.err.println(robot);
+//                if (frame == 1) {
+////                    for (Robot robot : mainInstance.robot) {
+////
+////                        System.err.println(robot);
+////                    }
+////                    mainInstance.mapInfo.availableGoods().forEach(System.err::println);
+//                    for (Berth berth : mainInstance.berth) {
+//                        System.err.println(berth);
 //                    }
-//                    mainInstance.mapInfo.availableGoods().forEach(System.err::println);
-                    for (Berth berth : mainInstance.berth) {
-                        System.err.println(berth);
-                    }
-                    for (Boat boat : mainInstance.boat) {
-                        System.err.println(boat);
-                    }
-                    System.err.flush();
-                }
+//                    for (Boat boat : mainInstance.boat) {
+//                        System.err.println(boat);
+//                    }
+//                    System.err.flush();
+//                }
 
                 for (int i = 0; i < mainInstance.robot.length; i++) {
                     Robot robot = mainInstance.robot[i];
