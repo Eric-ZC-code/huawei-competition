@@ -12,32 +12,22 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Robot {
     private static final MyLogger logger = MyLogger.getLogger("Robot");
-    private static ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final int yieldDistance = 5;
     private int id;
     private int x, y, carrying;
     private int status;
-    private int[] acquiredGoods = new int[2];
     private boolean shouldCarry = false;
     private Integer priority; // 优先级 0-9 0最高 9最低
     private ArrayDeque<Command> currentCommand = new ArrayDeque<>();
 
     public Robot() {
-        init();
     }
 
     public Robot(int startX, int startY,Integer priority) {
         this.x = startX;
         this.y = startY;
         this.priority = priority;
-        init();
-        
     }
-    public void init(){
-        acquiredGoods[0] = -1;
-        acquiredGoods[1] = -1;
-    }
-
     public Integer priority() {
         return priority;
     }
