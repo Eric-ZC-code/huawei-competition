@@ -249,6 +249,59 @@ public class MapInfoimpl extends MapInfo {
         }
         return path;
     }
+    public static List<Pair> mazePathAStar(char[][] maze, int startX, int startY, int endX, int endY) {
+        final int[] dx = {0, 1, 0, -1};
+        final int[] dy = {1, 0, -1, 0};
+        int n = maze.length, m = maze[0].length;
+        Map<Pair, Pair> cameFrom = new HashMap<>();
+        Map<Pair, Integer> costSoFar = new HashMap<>();
+        PriorityQueue<Pair> frontier = new PriorityQueue<>((a, b) -> {
+            int costA = costSoFar.getOrDefault(a, Integer.MAX_VALUE) + heuristic(a, endX, endY);
+            int costB = costSoFar.getOrDefault(b, Integer.MAX_VALUE) + heuristic(b, endX, endY);
+            return Integer.compare(costA, costB);
+        });
+
+
+        Pair start = new Pair(startX, startY);
+        Pair end = new Pair(endX, endY);
+        frontier.add(start);
+        cameFrom.put(start, null);
+        costSoFar.put(start, 0);
+
+        while (!frontier.isEmpty()) {
+            Pair current = frontier.poll();
+            if (current.equals(end)) {
+                return reconstructPath(cameFrom, start, end);
+            }
+
+            for (int i = 0; i < 4; i++) {
+                int nextX = current.x + dx[i];
+                int nextY = current.y + dy[i];
+                Pair next = new Pair(nextX, nextY);
+                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && maze[nextX][nextY] == '.' && (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next))) {
+                    frontier.add(next);
+                    cameFrom.put(next, current);
+                    costSoFar.put(next, costSoFar.get(current) + 1);
+                }
+            }
+        }
+
+        return Collections.emptyList(); // 未找到路径时返回空列表
+    }
+    // 启发式函数：曼哈顿距离
+    private static int heuristic(Pair node, int endX, int endY) {
+        return Math.abs(node.x - endX) + Math.abs(node.y - endY);
+    }
+
+    // 重建路径
+    private static List<Pair> reconstructPath(Map<Pair, Pair> cameFrom, Pair start, Pair end) {
+        List<Pair> path = new ArrayList<>();
+        for (Pair at = end; at != null; at = cameFrom.get(at)) {
+            path.add(at);
+        }
+        Collections.reverse(path);
+        return path;
+    }
 
     private List<Pair> possibleNeighbours(char[][] maze, int x, int y) {
         int[][] dirs = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
@@ -265,7 +318,7 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getRobotToGoodPath(Robot robot, Good good) {
-        List<Pair> path = mazePathBFS(this.map, robot.x(), robot.y(), good.x(), good.y());
+        List<Pair> path = mazePathAStar(this.map, robot.x(), robot.y(), good.x(), good.y());
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
@@ -386,6 +439,19 @@ public class MapInfoimpl extends MapInfo {
         @Override
         public int hashCode() {
             return Objects.hash(x, y);
+        }
+    }
+    public static void main(String[] args) {
+        char[][] maze = {
+                {'.', '.', '.', '#', '.', '.', '.'},
+                {'.', '#', '.', '.', '.', '#', '.'},
+                {'.', '#', '.', '#', '.', '.', '.'},
+                {'.', '.', '#', '.', '#', '.', '#'},
+                {'.', '.', '.', '.', '.', '.', '.'},
+        };
+        List<Pair> path = mazePathAStar(maze, 0, 0, 4, 6);
+        for (Pair p : path) {
+            System.out.println(p.x + ", " + p.y);
         }
     }
 }
