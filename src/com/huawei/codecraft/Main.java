@@ -198,14 +198,14 @@ public class Main {
                         Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
                                                                                                    mainInstance.mapInfo,
                                                                                                    frame,
-                                                                                                   GoodStrategy.RATIO));
+                                                                                                   GoodStrategy.MANHATTAN));
                         mainInstance.robotFuture[i]=submit;
                     }
                     else {
                         Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
                                                                                                    mainInstance.mapInfo,
                                                                                                    frame,
-                                                                                                   GoodStrategy.RATIO));
+                                                                                                   GoodStrategy.MANHATTAN));
                         mainInstance.robotFuture[i]=submit;
                     }
                 }

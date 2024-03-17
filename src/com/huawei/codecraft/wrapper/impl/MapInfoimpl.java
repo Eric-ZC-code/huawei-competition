@@ -72,7 +72,7 @@ public class MapInfoimpl extends MapInfo {
                 bestGood = availableGood;
             }
         }
-        if(minDistance>Integer.MAX_VALUE){
+        if(minDistance>100){
             return null;
         }
         return bestGood;
