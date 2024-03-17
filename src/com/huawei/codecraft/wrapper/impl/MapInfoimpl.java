@@ -16,6 +16,9 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public Good findBestGood(Robot robot, GoodStrategy goodStrategy) {
+        if(availableGoods.size()<20){
+            return null;
+        }
 
         Good bestGood = null;
         rwLock.readLock().lock();
@@ -31,7 +34,7 @@ public class MapInfoimpl extends MapInfo {
                     bestGood = findGoodByManhattanDistance(robot);
                     break;
             }
-            logger.info("Robot: " + robot.id() + " BestGood: " + bestGood + " [x: " + robot.x() + ", y: " + robot.y() + "]" + "availableGoods: " + availableGoods.size());
+            logger.info("Robot: " + robot.id() + " BestGood: " + bestGood + " [x: " + robot.x() + ", y: " + robot.y() + "]" + "availableGoods: " + availableGoods.size()+ " acquiredGoods: " + acquiredGoods.size());
         } catch (Exception e) {
 
             logger.info("availablegoods: " + availableGoods);
@@ -74,8 +77,10 @@ public class MapInfoimpl extends MapInfo {
             if (minDistance > manhattanDistance) {
                 minDistance = manhattanDistance;
                 bestGood = availableGood;
-                logger.info("BestGood: " + bestGood);
             }
+        }
+        if(minDistance>Integer.MAX_VALUE){
+            return null;
         }
         return bestGood;
 
@@ -156,6 +161,9 @@ public class MapInfoimpl extends MapInfo {
         // 寻路逻辑
         if (robot.carrying() == 0) {
             logger.info("Robot is not carrying good");
+            if (good == null) {
+                return new ArrayList<>();
+            }
             // 判断货物是否已经被获取，获取了就返回空的命令数组
             rwLock.readLock().lock();
             try {
@@ -169,7 +177,16 @@ public class MapInfoimpl extends MapInfo {
             }
 
             List<Command> pathToGood = getRobotToGoodPath(robot, good);
+            if(pathToGood.isEmpty()){
+                logger.info("Robot "+ robot.id() + " path to good cannot be found. Goods : ("+ good.x()+" "+ good.y()+")");
+
+//                return new ArrayList<>();
+            }
+
             Command getGood = getGood(robot, good);
+            if(getGood == null){
+                return new ArrayList<>();
+            }
             List<Command> pathToBerth = getGoodToBerthPath(good, berth, robot);
 
             // if pathToGood or pathToBerth is empty, return empty list
@@ -190,12 +207,12 @@ public class MapInfoimpl extends MapInfo {
         } else if (robot.carrying() == 1) {
             logger.info("Robot is carrying good");
             List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
-            Pair berthPoint = findBerthPoint(berth, new Pair(robot.x(), robot.y()));
-            if (robot.x() == berthPoint.x && robot.y() == berthPoint.y) {
-                Command pullGood = pullGood(robot, good, berth);
-                pathToBerth.add(pullGood);
-                return pathToBerth;
-            }
+//
+//            if (robot.x() == berthPoint.x && robot.y() == berthPoint.y) {
+//                Command pullGood = pullGood(robot, good, berth);
+//                pathToBerth.add(pullGood);
+//                return pathToBerth;
+//            }
             if (pathToBerth.isEmpty()) {
                 return new ArrayList<>();
             }
@@ -266,14 +283,14 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot) {
-        Pair berthPoint = findBerthPoint(berth, new Pair(good.x(), good.y()));
+        Pair berthPoint = findBerthPoint(berth);
         List<Pair> path = mazePathBFS(this.map, good.x(), good.y(), berthPoint.x, berthPoint.y);
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
 
     public List<Command> getRobotToBerthPath(Robot robot, Berth berth) {
-        Pair berthPoint = findBerthPoint(berth, new Pair(robot.x(), robot.y()));
+        Pair berthPoint = findBerthPoint(berth);
         List<Pair> path = mazePathBFS(this.map, robot.x(), robot.y(), berthPoint.x, berthPoint.y);
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
@@ -283,6 +300,9 @@ public class MapInfoimpl extends MapInfo {
     public Command getGood(Robot robot, Good good) {
         rwLock.writeLock().lock();
         try {
+            if(good.acquired()){
+                return null;
+            }
             availableGoods.remove(good);
             acquiredGoods.add(good);
             good.setAcquired(true);
@@ -292,7 +312,7 @@ public class MapInfoimpl extends MapInfo {
         } finally {
             rwLock.writeLock().unlock();
         }
-        return Command.ignore();
+        return null;
     }
 
     @Override
@@ -337,8 +357,12 @@ public class MapInfoimpl extends MapInfo {
         logger.info("Move Path: " + movePath);
         return movePath;
     }
+    private Pair findBerthPoint(Berth berth){
+        Random rand = new Random();
+        return new Pair(berth.x() + rand.nextInt(4), berth.y() + rand.nextInt(4));
+    }
 
-    private Pair findBerthPoint(Berth berth, Pair pair) {
+    private Pair findBestBerthPoint(Berth berth, Pair pair) {
         int minDistance = Integer.MAX_VALUE;
         Pair bestPoint = null;
         for (int i = 0; i < 4; i++) {

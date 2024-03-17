@@ -78,6 +78,25 @@ public class Main {
             robotFrameRec.put(i, 0);
         }
         // init mapInfo
+//        for (int i = 0; i < ch.length; i++) {
+//            for (int j = 0; j < ch[i].length; j++) {
+//                if(ch[i][j]=='.'){
+//                    if(i-1>=0 && j-1>=0 &&i+1<ch.length&& j+1<ch[i].length){
+//                        int count = 0;
+//                        if(ch[i-1][j]=='#') count++;
+//                        if(ch[i+1][j]=='#') count++;
+//                        if(ch[i][j-1]=='#') count++;
+//                        if(ch[i][j+1]=='#') count++;
+//                        if(count>=2){
+//                            ch[i][j]='#';
+//                            System.err.println("closing the channel");
+//                            System.err.flush();
+//                        }
+//                    }
+//                }
+//            }
+//
+//        }
         mapInfo.setMap(ch);
         mapInfo.setBerths(berth);
         mapInfo.setRobots(robot);
@@ -129,7 +148,10 @@ public class Main {
             for (int frame = 1; frame <= 15000; frame++) {
 
                 int id = mainInstance.input();
-                System.err.println("frame: "+id);
+                if(true){
+                    System.err.println("frame: "+id);
+                }
+
                 // 一个简易的计时器保证输出中心在processtime之前关闭输出，保证不丢失输出
     //            if(frame==50){
     //                System.err.println("time: "+(System.currentTimeMillis()-l1));
@@ -158,10 +180,10 @@ public class Main {
 
 
                 if (frame == 1) {
-    //                for (Robot robot : mainInstance.robot) {
-    //
-    //                    System.err.println(robot);
-    //                }
+//                    for (Robot robot : mainInstance.robot) {
+//
+//                        System.err.println(robot);
+//                    }
 //                    mainInstance.mapInfo.availableGoods().forEach(System.err::println);
                     for (Berth berth : mainInstance.berth) {
                         System.err.println(berth);
@@ -178,7 +200,7 @@ public class Main {
                         Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
                                                                                                    mainInstance.mapInfo,
                                                                                                    frame,
-                                                                                                   GoodStrategy.MANHATTAN));
+                                                                                                   GoodStrategy.RATIO));
                         mainInstance.robotFuture[i]=submit;
                     }
                     else {

@@ -29,12 +29,40 @@ public class Command {
     public static Command ignore(){
         return new Command("ignore",null,null);
     }
+    public static Command yield(){
+        return new Command("yield",null,null);
+    }
     public boolean isBoatCmd(){
         return this.cmd.equals("ship")|| this.cmd.equals("go");
     }
 
     public String cmd() {
         return cmd;
+    }
+    public int[] targetPosition(int x, int y){
+        if (!this.cmd.equals("move")) {
+            return null;
+        }
+        switch (para2()){
+            case 0:
+                //right
+                y++;
+                break;
+            case 1:
+                //left
+                y--;
+                break;
+            case 2:
+                // up
+                x++;
+                break;
+            case 3:
+                // down
+                x--;
+                break;
+        }
+        return new int[]{x,y};
+
     }
 
     public Command setCmd(String cmd) {
