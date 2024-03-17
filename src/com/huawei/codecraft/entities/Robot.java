@@ -6,11 +6,14 @@ import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 public class Robot {
     private static final MyLogger logger = MyLogger.getLogger("Robot");
-    private final int yieldDistance = 5;
+    private static ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private final int yieldDistance = 10;
     private int id;
     private int x, y, carrying;
     private int status;

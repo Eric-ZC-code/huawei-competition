@@ -82,6 +82,7 @@ public class RobotCallable implements Callable {
         }
 //        Berth nearestBerth = mapInfo.berths()[0];
         Berth nearestBerth = mapInfo.findBestBerth(nearestGood.x(), nearestGood.y());
+//        Berth nearestBerth = mapInfo.berths()[robot.id()%mapInfo.berths().length];
         if (nearestGood != null && nearestBerth != null) {
             List<Command> path = mapInfo.getFullPath(robot, nearestGood, nearestBerth);
             robot.fillCommand(path);
