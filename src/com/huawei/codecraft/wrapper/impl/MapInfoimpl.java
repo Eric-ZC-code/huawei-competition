@@ -12,8 +12,6 @@ import java.util.*;
 
 public class MapInfoimpl extends MapInfo {
 
-    private MyLogger logger = MyLogger.getLogger("MapInfoimpl");
-
     @Override
     public Good findBestGood(Robot robot, GoodStrategy goodStrategy) {
         if(availableGoods.size()<20){
@@ -34,16 +32,11 @@ public class MapInfoimpl extends MapInfo {
                     bestGood = findGoodByManhattanDistance(robot);
                     break;
             }
-            logger.info("Robot: " + robot.id() + " BestGood: " + bestGood + " [x: " + robot.x() + ", y: " + robot.y() + "]" + "availableGoods: " + availableGoods.size()+ " acquiredGoods: " + acquiredGoods.size());
         } catch (Exception e) {
-
-            logger.info("availablegoods: " + availableGoods);
             e.printStackTrace();
         } finally {
             rwLock.readLock().unlock();
         }
-        logger.info("BestGood: " + bestGood + " availableGoods: " + availableGoods.size());
-
         return bestGood;
     }
 
@@ -127,7 +120,6 @@ public class MapInfoimpl extends MapInfo {
             int minDistance = Integer.MAX_VALUE;
             for (int i = 0; i < this.berths.length; i++) {
                 Berth berth = this.berths[i];
-                logger.info("Berth: " + berth);
                 int manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
                 if (minDistance > manhattanDistance) {
                     minDistance = manhattanDistance;
@@ -136,7 +128,6 @@ public class MapInfoimpl extends MapInfo {
             }
 
         } catch (Exception e) {
-            logger.info("berths: " + Arrays.toString(berths));
             e.printStackTrace();
         } finally {
             rwLock.readLock().unlock();
@@ -160,7 +151,6 @@ public class MapInfoimpl extends MapInfo {
     public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
         // 寻路逻辑
         if (robot.carrying() == 0) {
-            logger.info("Robot is not carrying good");
             if (good == null) {
                 return new ArrayList<>();
             }
@@ -178,7 +168,6 @@ public class MapInfoimpl extends MapInfo {
 
             List<Command> pathToGood = getRobotToGoodPath(robot, good);
             if(pathToGood.isEmpty()){
-                logger.info("Robot "+ robot.id() + " path to good cannot be found. Goods : ("+ good.x()+" "+ good.y()+")");
 
 //                return new ArrayList<>();
             }
@@ -205,7 +194,6 @@ public class MapInfoimpl extends MapInfo {
             return fullPath;
 
         } else if (robot.carrying() == 1) {
-            logger.info("Robot is carrying good");
             List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
 //
 //            if (robot.x() == berthPoint.x && robot.y() == berthPoint.y) {
@@ -354,7 +342,6 @@ public class MapInfoimpl extends MapInfo {
                 }
             }
         }
-        logger.info("Move Path: " + movePath);
         return movePath;
     }
     private Pair findBerthPoint(Berth berth){

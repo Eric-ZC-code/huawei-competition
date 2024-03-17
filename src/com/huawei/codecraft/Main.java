@@ -32,7 +32,6 @@ import java.util.logging.Logger;
  * @since 2024-02-05
  */
 public class Main {
-    private static final MyLogger logger = MyLogger.getLogger(Main.class.getName());
     private static final int n = 200;
     private static final int robotNum = 10;
     private static final int berthNum = 10;
@@ -50,7 +49,6 @@ public class Main {
     private ExecutorService boatExecutor = Executors.newFixedThreadPool(5);
 
     private void init() {
-        logger.info("init");
 
         Scanner scanf = new Scanner(System.in);
         for (int i = 0; i < n; i++) {
@@ -216,10 +214,10 @@ public class Main {
                         continue;
                     }
                     mainInstance.robotFuture[i].get();
-                    logger.info("[frame:"+ id+" ]Robot "+i+ "completed");
+
                 }
                 if ((frame-1)%1==0){
-                    logger.info("try to ship");
+
                     for (int i = 0; i < mainInstance.boat.length; i++) {
 
                         Future submit = mainInstance.boatExecutor.submit(new BoatCallable(mainInstance.boat[i], mainInstance.mapInfo, frame));
@@ -228,7 +226,7 @@ public class Main {
                 }
                 for (int i = 0; i < mainInstance.boat.length; i++) {
                     mainInstance.boatFuture[i].get();
-                    logger.info("[frame:"+ id+" ]Boat "+i+ "completed");
+
                 }
                 System.out.println("OK");
                 MessageCenter.reset();

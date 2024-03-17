@@ -11,7 +11,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 public class Robot {
-    private static final MyLogger logger = MyLogger.getLogger("Robot");
     private static ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final int yieldDistance = 10;
     private int id;
@@ -125,7 +124,6 @@ public class Robot {
             //普通的基于priority 避让没有 random效果好
             int i = rand.nextInt(10);
             if(i%2==0){
-                logger.info("Robot" + id + " has robot nearby, skip this command by random");
                 return;
             }
         }
@@ -133,7 +131,6 @@ public class Robot {
             Command command = popCommand();
             if (command.cmd().equals("move")) {
                 if (moved) {
-                    logger.info("Robot" + id + " moved, skip this command");
                     this.currentCommand.addFirst(command);
                     break;
 

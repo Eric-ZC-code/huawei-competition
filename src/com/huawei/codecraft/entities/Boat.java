@@ -13,7 +13,6 @@ public class Boat {
     private int capacity;
     private int id;
     private int goodsNum = 0;
-    private static MyLogger logger = MyLogger.getLogger("boat");
     public Boat(int capacity) {
         this.capacity = capacity;
     }
@@ -83,10 +82,8 @@ public class Boat {
     public boolean ship(Integer berthId){
         if(MessageCenter.send(Command.ship(this.id,berthId))){
             this.pos = berthId;
-            logger.info("Boat "+this.id+" ship msg sent");
             return true;
         }
-        logger.info("Boat"+this.id+" ship msg not sent");
         return false;
     }
 
@@ -106,10 +103,10 @@ public class Boat {
             this.pos=-1;
 
             reset();
-            logger.info("Boat "+this.id+" go msg sent");
+
             return true;
         }
-        logger.info("Boat "+this.id+" go msg not sent");
+
         return false;
     }
 }

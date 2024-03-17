@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 public class RobotCallable implements Callable {
-    private static final MyLogger logger= MyLogger.getLogger("RobotCallable");
     private Integer frame;
     private final Robot robot;
     private final MapInfo mapInfo;
@@ -31,7 +30,6 @@ public class RobotCallable implements Callable {
 //            long start = System.currentTimeMillis();
             if(robot.flags().get(frame)){
                 // 该帧已经被处理过了
-                logger.info("Processed, then skip this frame");
                 return null;
             }
             else {
@@ -50,7 +48,6 @@ public class RobotCallable implements Callable {
                     robot.clean();
                     robot.setShouldCarry(false);
                     if(!setCmd(robot)){
-                        logger.info("Not consistent carrying status");
                         return null;
                     }
                 }
@@ -73,7 +70,6 @@ public class RobotCallable implements Callable {
             }
             List<Command> path = mapInfo.getFullPath(robot,null ,nearestBerth);
             robot.fillCommand(path);
-            logger.info("[Frame: " + frame+"]Robot"+robot.id()+"task: "+path);
             return true;
         }
         Good nearestGood = mapInfo.findBestGood(robot, goodStrategy);
@@ -86,7 +82,6 @@ public class RobotCallable implements Callable {
         if (nearestGood != null && nearestBerth != null) {
             List<Command> path = mapInfo.getFullPath(robot, nearestGood, nearestBerth);
             robot.fillCommand(path);
-            logger.info("[Frame: " + frame+"]Robot"+robot.id()+"task: "+path);
             return true;
         }
         return false;
