@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Robot {
     private static ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private final int yieldDistance = 10;
+    private final int yieldDistance = 4;
     private int id;
     private int x, y, carrying;
     private int status;
