@@ -444,6 +444,7 @@ public class MapInfoimpl extends MapInfo {
         }
     }
     public static void main(String[] args) {
+        MapInfoimpl mapInfoimpl = new MapInfoimpl();
         char[][] maze = {
                 {'#', '.', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'},
                 {'#', '.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
@@ -455,10 +456,21 @@ public class MapInfoimpl extends MapInfo {
                 {'#', '.', '.', '.', '.', '.', '#', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
                 {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'},
         };
-
-        List<Pair> path = mazePathAStar(maze, 3, 9, 7, 12);
+        long s1 = System.currentTimeMillis();
+        List<Pair> path =mapInfoimpl.mazePathAStar(maze, 3, 9, 7, 12);
+        long e1 = System.currentTimeMillis();
+        long s2 = System.currentTimeMillis();
+        List<Pair> path2 = mapInfoimpl.mazePathBFS(maze, 3, 9, 7, 12);
+        long e2 = System.currentTimeMillis();
         for (Pair p : path) {
             System.out.println(p.x + ", " + p.y);
+
         }
+        System.out.println("A* time: " + (e1 - s1));
+        System.out.println("\n");
+        for (Pair p : path2) {
+            System.out.println(p.x + ", " + p.y);
+        }
+        System.out.println("BFS time: " + (e2 - s2));
     }
 }
