@@ -6,6 +6,7 @@ import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.util.MyLogger;
+import com.huawei.codecraft.util.Pair;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.*;
@@ -341,7 +342,7 @@ public class MapInfoimpl extends MapInfo {
             while (!queue.isEmpty()) {
                 Pair pos = queue.poll();
                 if (this.availableGoods().get(pos) != null) {
-                    System.err.println("Good: " + this.availableGoods().get(pos));
+                    Good good = this.availableGoods().get(pos);
                     while (parent.get(pos) != null) {
                         path.add(pos);
                         pos = parent.get(pos);
@@ -349,11 +350,10 @@ public class MapInfoimpl extends MapInfo {
                     path.add(start);
                     Collections.reverse(path);
 
-                    System.err.println("Good: " + this.availableGoods().get(pos) + " Path: " + path);
-                    pathMap.put(this.availableGoods().get(pos), path);
+                    pathMap.put(good, path);
                     return pathMap;
                 } else {
-                    List<Pair> nbs = possibleNeighbours(maze, pos.x, pos.y);
+                    List<Pair> nbs = possibleNeighbours(maze, pos.x(), pos.y());
                     for (Pair nb : nbs) {
                         if (!visited.contains(nb)) {
                             visited.add(nb);
@@ -369,7 +369,7 @@ public class MapInfoimpl extends MapInfo {
         } finally {
             rwLock.readLock().unlock();
         }
-        System.err.println("No good found");
+//        System.err.println("No good found");
 
         return new HashMap<>();
     }
@@ -435,8 +435,8 @@ public class MapInfoimpl extends MapInfo {
             }
 
             for (int i = 0; i < 4; i++) {
-                int nextX = current.x + dx[i];
-                int nextY = current.y + dy[i];
+                int nextX = current.x() + dx[i];
+                int nextY = current.y() + dy[i];
                 Pair next = new Pair(nextX, nextY);
                 if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && !isObstacle(nextX, nextY) && (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next))) {
                     costSoFar.put(next, costSoFar.get(current) + 1);
@@ -451,7 +451,7 @@ public class MapInfoimpl extends MapInfo {
 
     // 启发式函数：曼哈顿距离
     private static int heuristic(Pair node, int endX, int endY) {
-        return Math.abs(node.x - endX) + Math.abs(node.y - endY);
+        return Math.abs(node.x() - endX) + Math.abs(node.y() - endY);
     }
 
     // 重建路径
@@ -479,7 +479,7 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getRobotToGoodPath(Robot robot, Good good) {
-        List<Pair> path = mazePathAStar(this.map, robot.x(), robot.y(), good.x(), good.y());
+        List<Pair> path = mazePathBFS(this.map, robot.x(), robot.y(), good.x(), good.y());
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
