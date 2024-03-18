@@ -142,19 +142,35 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
-    public boolean acquirePoint(Pair pos) {
+    public boolean acquirePoint(Pair pos,Robot robot) {
         goingPointLock.writeLock().lock();
 
         try {
-            if(!goingPoint.contains(pos)){
-                this.goingPoint.add(pos);
+            if(!goingPoint.containsKey(pos)){
+                this.goingPoint.put(pos,robot);
                 return true;
             }
             return false;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return false;
         } finally {
             goingPointLock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public Robot getPositionInfo(Pair pos) {
+        goingPointLock.readLock().lock();
+
+        try {
+            return goingPoint.get(pos);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            goingPointLock.readLock().unlock();
+
         }
     }
 
@@ -163,7 +179,7 @@ public class MapInfoimpl extends MapInfo {
         goingPointLock.readLock().lock();
 
         try {
-            return this.goingPoint.contains(pair);
+            return this.goingPoint.containsKey(pair);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -176,13 +192,18 @@ public class MapInfoimpl extends MapInfo {
         goingPointLock.writeLock().lock();
 
         try {
-            this.goingPoint = new HashSet<>(10);
+            this.goingPoint = new HashMap<>(10);
             return true;
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             goingPointLock.writeLock().unlock();
         }
+    }
+
+    @Override
+    public List<Command> circumventionCommand(Pair curPos) {
+        return null;
     }
 
     @Override
@@ -448,7 +469,14 @@ public class MapInfoimpl extends MapInfo {
     }
 
     private boolean isObstacle(int x, int y) {
-        return this.map[x][y] == '#' || this.map[x][y] == '*' || this.map[x][y] == 'A';
+        goingPointLock.readLock().lock();
+        try {
+            return this.map[x][y] == '#' || this.map[x][y] == '*' || this.map[x][y] == 'A';
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            goingPointLock.readLock().unlock();
+        }
     }
 
     // transform path to move commands
