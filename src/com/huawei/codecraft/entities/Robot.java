@@ -129,8 +129,9 @@ public class Robot {
                     // 机器人允许move
                     Pair position = command.targetPosition(Pair.of(x, y));
                     if(!map.acquirePoint(position)){
-                        //没拿到当前点以为着如果继续走就会撞就yield
+                        //没拿到当前点意味着如果继续走就会撞就yield
                         //这种避让方式没法避让双向的撞击
+                        logger.info("Robot "+id+" yield " );
                         this.currentCommand.addFirst(command);
                         break;
                     }

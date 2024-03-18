@@ -156,7 +156,7 @@ public class MapInfoimpl extends MapInfo {
                 this.goingPoint.add(pos);
                 return true;
             }
-            return true;
+            return false;
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
