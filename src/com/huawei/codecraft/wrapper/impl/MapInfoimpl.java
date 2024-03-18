@@ -154,6 +154,7 @@ public class MapInfoimpl extends MapInfo {
         try {
             if(!goingPoint.containsKey(pos)){
                 this.goingPoint.put(pos,robot);
+                this.goingPoint.put(robot.position(),robot);
                 return true;
             }
             return false;
@@ -190,6 +191,20 @@ public class MapInfoimpl extends MapInfo {
             throw new RuntimeException(e);
         } finally {
             goingPointLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public boolean removePoint(Pair pair) {
+        goingPointLock.writeLock().lock();
+
+        try {
+            return goingPoint.remove(pair) != null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            goingPointLock.writeLock().unlock();
         }
     }
 
@@ -478,7 +493,9 @@ public class MapInfoimpl extends MapInfo {
     }
 
     private boolean isObstacle(int x, int y) {
+
         return this.map[x][y] == '#' || this.map[x][y] == '*' || this.map[x][y] == 'A';
+
     }
 
     // transform path to move commands

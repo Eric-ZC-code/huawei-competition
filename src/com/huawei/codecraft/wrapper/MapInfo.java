@@ -18,7 +18,7 @@ public abstract class MapInfo {
     protected char[][] map = new char[200][200];
     protected Berth[] berths = new Berth[5];
     protected Robot[] robots = null;
-    protected HashMap<Pair,Robot> goingPoint = new HashMap<>(10);
+    protected HashMap<Pair,Robot> goingPoint = new HashMap<>(20);
 
     public LinkedHashMap<Pair, Good> availableGoods() {
         return availableGoodsMap;
@@ -107,6 +107,7 @@ public abstract class MapInfo {
     abstract public boolean acquirePoint(Pair pos,Robot robot);
     abstract public Robot getPositionInfo(Pair pos);
     abstract public boolean pointIsAvailable(Pair pair);
+    abstract public boolean removePoint(Pair pair);
     abstract public boolean cleanPoints();
     abstract public List<Command> circumventionCommand(Pair curPos);
 }
