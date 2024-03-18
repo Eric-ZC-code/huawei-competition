@@ -469,14 +469,9 @@ public class MapInfoimpl extends MapInfo {
     }
 
     private boolean isObstacle(int x, int y) {
-        goingPointLock.readLock().lock();
-        try {
-            return this.map[x][y] == '#' || this.map[x][y] == '*' || this.map[x][y] == 'A';
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            goingPointLock.readLock().unlock();
-        }
+
+        return this.map[x][y] == '#' || this.map[x][y] == '*' || this.map[x][y] == 'A';
+
     }
 
     // transform path to move commands
