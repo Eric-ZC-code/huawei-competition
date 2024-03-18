@@ -452,26 +452,33 @@ public class MapInfoimpl extends MapInfo {
                 {'#', '.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
                 {'#', '.', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '#', '#', '#', '#', '#', '.', '#'},
                 {'#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#', '.', '#'},
-                {'#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '.', '.', '.', '.', '#', '#', '#', '#', '.', '#'},
+                {'#', '.', '.', '.', '.', '#', '#', '#', '.', '.', '.', '.', '.', '.', '#', '#', '#', '#', '.', '#'},
                 {'#', '.', '.', '.', '.', '.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
                 {'#', '#', '#', '#', '#', '.', '#', '#', '.', '.', '.', '.', '.', '.', '#', '#', '#', '#', '.', '#'},
                 {'#', '.', '.', '.', '.', '.', '#', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
                 {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'},
         };
         long s1 = System.currentTimeMillis();
-        List<Pair> path =mapInfoimpl.mazePathAStar(maze, 1, 13, 1, 19);
+        List<Pair> path =mapInfoimpl.mazePathAStar(maze, 0, 1, 5, 19);
         long e1 = System.currentTimeMillis();
         long s2 = System.currentTimeMillis();
-        List<Pair> path2 = mapInfoimpl.mazePathBFS(maze, 1, 13, 1, 19);
+        List<Pair> path2 = mapInfoimpl.mazePathBFS(maze, 0, 1, 5, 19);
         long e2 = System.currentTimeMillis();
+
         for (Pair p : path) {
             System.out.println(p.x + ", " + p.y);
 
         }
+//        if (path.isEmpty()) {
+//            System.out.println("A* No path found");
+//        }
         System.out.println("A* time: " + (e1 - s1));
         System.out.println("\n");
-        for (Pair p : path2) {
-            System.out.println(p.x + ", " + p.y);
+//        for (Pair p : path2) {
+//            System.out.println(p.x + ", " + p.y);
+//        }
+        if (path2.isEmpty()){
+            System.out.println("BFS No path found");
         }
         System.out.println("BFS time: " + (e2 - s2));
     }
