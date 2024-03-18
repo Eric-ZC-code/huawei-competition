@@ -457,10 +457,10 @@ public class MapInfoimpl extends MapInfo {
                 {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'},
         };
         long s1 = System.currentTimeMillis();
-        List<Pair> path =mapInfoimpl.mazePathAStar(maze, 3, 9, 7, 12);
+        List<Pair> path =mapInfoimpl.mazePathAStar(maze, 1, 13, 1, 19);
         long e1 = System.currentTimeMillis();
         long s2 = System.currentTimeMillis();
-        List<Pair> path2 = mapInfoimpl.mazePathBFS(maze, 3, 9, 7, 12);
+        List<Pair> path2 = mapInfoimpl.mazePathBFS(maze, 1, 13, 1, 19);
         long e2 = System.currentTimeMillis();
         for (Pair p : path) {
             System.out.println(p.x + ", " + p.y);
