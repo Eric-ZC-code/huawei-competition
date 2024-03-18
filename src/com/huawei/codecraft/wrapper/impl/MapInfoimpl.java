@@ -79,7 +79,7 @@ public class MapInfoimpl extends MapInfo {
                 bestGood = availableGood;
             }
         }
-        if(minDistance>Integer.MAX_VALUE){
+        if(minDistance>100){
             return null;
         }
         return bestGood;
@@ -168,6 +168,9 @@ public class MapInfoimpl extends MapInfo {
         // 如果机器人没有搬运货物
         if (robot.carrying() == 0) {
             logger.info("Robot is not carrying good");
+            if (good == null) {
+                return new ArrayList<>();
+            }
             // 判断货物是否已经被获取，获取了就返回空的命令数组
             rwLock.readLock().lock();
             try {
@@ -255,7 +258,8 @@ public class MapInfoimpl extends MapInfo {
         }
         return path;
     }
-    public static List<Pair> mazePathAStar(char[][] maze, int startX, int startY, int endX, int endY) {
+
+    public List<Pair> mazePathAStar(char[][] maze, int startX, int startY, int endX, int endY) {
         final int[] dx = {0, 1, 0, -1};
         final int[] dy = {1, 0, -1, 0};
         int n = maze.length, m = maze[0].length;
@@ -276,7 +280,7 @@ public class MapInfoimpl extends MapInfo {
 
         while (!frontier.isEmpty()) {
             Pair current = frontier.poll();
-            System.out.println(current.x + " " + current.y + "fs: " + (costSoFar.get(current) + heuristic(current, endX, endY)));
+            // System.err.println(current.x + "," + current.y + " fs: " + (costSoFar.get(current) + heuristic(current, endX, endY)));
             if (current.equals(end)) {
                 return reconstructPath(cameFrom, start, end);
             }
@@ -285,7 +289,7 @@ public class MapInfoimpl extends MapInfo {
                 int nextX = current.x + dx[i];
                 int nextY = current.y + dy[i];
                 Pair next = new Pair(nextX, nextY);
-                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && maze[nextX][nextY] == '.' && (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next))) {
+                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && !isObstacle(nextX, nextY) && (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next))) {
                     costSoFar.put(next, costSoFar.get(current) + 1);
                     frontier.add(next);
                     cameFrom.put(next, current);
@@ -326,7 +330,7 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getRobotToGoodPath(Robot robot, Good good) {
-        List<Pair> path = mazePathBFS(this.map, robot.x(), robot.y(), good.x(), good.y());
+        List<Pair> path = mazePathAStar(this.map, robot.x(), robot.y(), good.x(), good.y());
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
@@ -339,6 +343,7 @@ public class MapInfoimpl extends MapInfo {
         return movePath;
     }
 
+    @Override
     public List<Command> getRobotToBerthPath(Robot robot, Berth berth) {
         Pair berthPoint = findBerthPoint(berth);
         List<Pair> path = mazePathAStar(this.map, robot.x(), robot.y(), berthPoint.x, berthPoint.y);
@@ -448,6 +453,14 @@ public class MapInfoimpl extends MapInfo {
         @Override
         public int hashCode() {
             return Objects.hash(x, y);
+        }
+
+        @Override
+        public String toString() {
+            return "Pair{" +
+                    "x=" + x +
+                    ", y=" + y +
+                    '}';
         }
     }
 }

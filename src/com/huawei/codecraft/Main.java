@@ -177,20 +177,20 @@ public class Main {
 
 
 
-//                if (frame == 1) {
-////                    for (Robot robot : mainInstance.robot) {
-////
-////                        System.err.println(robot);
-////                    }
-////                    mainInstance.mapInfo.availableGoods().forEach(System.err::println);
-//                    for (Berth berth : mainInstance.berth) {
-//                        System.err.println(berth);
+                if (frame == 1) {
+//                    for (Robot robot : mainInstance.robot) {
+//
+//                        System.err.println(robot);
 //                    }
-//                    for (Boat boat : mainInstance.boat) {
-//                        System.err.println(boat);
-//                    }
-//                    System.err.flush();
-//                }
+//                    mainInstance.mapInfo.availableGoods().forEach(System.err::println);
+                    for (Berth berth : mainInstance.berth) {
+                        System.err.println(berth);
+                    }
+                    for (Boat boat : mainInstance.boat) {
+                        System.err.println(boat);
+                    }
+                    System.err.flush();
+                }
 
                 for (int i = 0; i < mainInstance.robot.length; i++) {
                     Robot robot = mainInstance.robot[i];
