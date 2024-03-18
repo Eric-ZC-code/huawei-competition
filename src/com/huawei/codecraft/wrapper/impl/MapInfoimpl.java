@@ -6,7 +6,9 @@ import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.util.MyLogger;
+import com.huawei.codecraft.util.Pair;
 import com.huawei.codecraft.wrapper.MapInfo;
+import com.sun.jndi.ldap.Ber;
 
 import java.util.*;
 
@@ -34,7 +36,7 @@ public class MapInfoimpl extends MapInfo {
                     bestGood = findGoodByManhattanDistance(robot);
                     break;
             }
-            logger.info("Robot: " + robot.id() + " BestGood: " + bestGood + " [x: " + robot.x() + ", y: " + robot.y() + "]" + "availableGoods: " + availableGoods.size()+ " acquiredGoods: " + acquiredGoods.size());
+//            logger.info("Robot: " + robot.id() + " BestGood: " + bestGood + " [x: " + robot.x() + ", y: " + robot.y() + "]" + "availableGoods: " + availableGoods.size()+ " acquiredGoods: " + acquiredGoods.size());
         } catch (Exception e) {
 
             logger.info("availablegoods: " + availableGoods);
@@ -42,7 +44,6 @@ public class MapInfoimpl extends MapInfo {
         } finally {
             rwLock.readLock().unlock();
         }
-        logger.info("BestGood: " + bestGood + " availableGoods: " + availableGoods.size());
 
         return bestGood;
     }
@@ -52,12 +53,11 @@ public class MapInfoimpl extends MapInfo {
         double valueParam = 1.0;
         double distanceParam = 1.0;
         Good bestGood = null;
-        final int size = this.availableGoods.size();
-        for (int i = 0; i < size; i++) {
-            Good availableGood = Optional.of(this.availableGoods.get(i)).get();
+        for (Map.Entry<Pair, Good> entry : this.availableGoods.entrySet()) {
+            Good availableGood = entry.getValue();
             double value = availableGood.value();
             double manhattanDistance = Math.abs(robot.x() - availableGood.x()) + Math.abs(robot.y() - availableGood.y());
-            double ratio = 1.0 * (valueParam * value) / (distanceParam * manhattanDistance);
+            double ratio = (valueParam * value) / (distanceParam * manhattanDistance);
             if (max < ratio) {
                 max = ratio;
                 bestGood = availableGood;
@@ -69,33 +69,28 @@ public class MapInfoimpl extends MapInfo {
     private Good findGoodByManhattanDistance(Robot robot) {
         int minDistance = Integer.MAX_VALUE;
         Good bestGood = null;
-        final int size = this.availableGoods.size();
-        for (int i = 0; i < size; i++) {
-//                System.err.println(i);
-            Good availableGood = Optional.of(this.availableGoods.get(i)).get();
+        for (Map.Entry<Pair, Good> entry : this.availableGoods.entrySet()) {
+            Good availableGood = entry.getValue();
             int manhattanDistance = Math.abs(robot.x() - availableGood.x()) + Math.abs(robot.y() - availableGood.y());
             if (minDistance > manhattanDistance) {
                 minDistance = manhattanDistance;
                 bestGood = availableGood;
             }
         }
-        if(minDistance>100){
+        if (minDistance > 100) {
             return null;
         }
         return bestGood;
-
     }
 
+
     private Good findGoodByValue(Robot robot) {
-        int max = Integer.MIN_VALUE;
+        int maxValue = Integer.MIN_VALUE;
         Good bestGood = null;
-        final int size = this.availableGoods.size();
-        for (int i = 0; i < size; i++) {
-            Good availableGood = Optional.of(this.availableGoods.get(i)).get();
-            int value = availableGood.value();
-            if (max < value) {
-                max = value;
-                bestGood = availableGood;
+        for (Good good : this.availableGoods.values()) {
+            if (good.value() > maxValue) {
+                maxValue = good.value();
+                bestGood= good;
             }
         }
         return bestGood;
@@ -224,7 +219,132 @@ public class MapInfoimpl extends MapInfo {
         return new ArrayList<>();
     }
 
+    // 无目标good bfs搜索
+    @Override
+    public List<Command> getFullPath(Robot robot) {
+        // 获取货物和机器人到货物的路径
+        HashMap<Good, List<Command>> GoodAndPath = getGoodAndPath(robot);
+        if (GoodAndPath.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Good good = GoodAndPath.keySet().iterator().next();
+        List<Command> pathToGood = GoodAndPath.get(good);
+        Berth berth = findBestBerth(good.x(), good.y());
 
+        // 如果机器人不可达泊位，返回空的命令数组
+        List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
+        if (pathToBerth.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 寻路逻辑
+        // 如果机器人没有搬运货物
+        if (robot.carrying() == 0) {
+            logger.info("Robot is not carrying good");
+            if (good == null) {
+                return new ArrayList<>();
+            }
+            // 判断货物是否已经被获取，获取了就返回空的命令数组
+            rwLock.readLock().lock();
+            try {
+                if (good.acquired()) {
+                    return new ArrayList<>();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                rwLock.readLock().unlock();
+            }
+
+            // 获取货物，acquire货物
+            Command getGood = getGood(robot, good);
+            if(getGood == null){
+                return new ArrayList<>();
+            }
+
+            // 获取货物到泊位的路径
+            List<Command> goodToBerth = getGoodToBerthPath(good, berth, robot);
+
+            // 如果机器人到货物的路径或者货物到泊位的路径为空，返回空的命令数组
+            if (goodToBerth.isEmpty() || pathToGood.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            // 合并路径
+            List<Command> fullPath = new ArrayList<>(pathToGood);
+            fullPath.add(getGood);
+            fullPath.addAll(goodToBerth);
+            Command pullGood = pullGood(robot, good, berth);
+            fullPath.add(pullGood);
+
+            return fullPath;
+
+        }
+        // 如果机器人正在搬运货物
+        else if (robot.carrying() == 1) {
+            logger.info("Robot is carrying good");
+
+            // pull good
+            Command pullGood = pullGood(robot, null, berth);
+            pathToBerth.add(pullGood);
+
+            return pathToBerth;
+        }
+
+        return new ArrayList<>();
+    }
+
+    // bfs洪水泛滥法，无目的地四处搜索
+    public HashMap<Good,List<Pair>> mazePathPool(char[][] maze, int startX, int startY) {
+        // availableGoods 需要一个读锁
+        rwLock.readLock().lock();
+        try {
+            HashMap<Good, List<Pair>> pathMap = new HashMap<>(); // 方法返回值: 目标货物和路径
+            Set<Pair> visited = new HashSet<>();
+            List<Pair> path = new ArrayList<>();
+            Map<Pair, Pair> parent = new HashMap<>();
+            Queue<Pair> queue = new LinkedList<>();
+            Pair start = new Pair(startX, startY);
+            queue.offer(start);
+            visited.add(start);
+
+            while (!queue.isEmpty()) {
+                Pair pos = queue.poll();
+                if (this.availableGoods().get(pos) != null) {
+                    System.err.println("Good: " + this.availableGoods().get(pos));
+                    while (parent.get(pos) != null) {
+                        path.add(pos);
+                        pos = parent.get(pos);
+                    }
+                    path.add(start);
+                    Collections.reverse(path);
+
+                    System.err.println("Good: " + this.availableGoods().get(pos) + " Path: " + path);
+                    pathMap.put(this.availableGoods().get(pos), path);
+                    return pathMap;
+                } else {
+                    List<Pair> nbs = possibleNeighbours(maze, pos.x, pos.y);
+                    for (Pair nb : nbs) {
+                        if (!visited.contains(nb)) {
+                            visited.add(nb);
+                            queue.offer(nb);
+                            parent.put(nb, pos);
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            rwLock.readLock().unlock();
+        }
+        System.err.println("No good found");
+
+        return new HashMap<>();
+    }
+
+    // bfs点对点搜索路径
     public List<Pair> mazePathBFS(char[][] maze, int startX, int startY, int endX, int endY) {
         Set<Pair> visited = new HashSet<>();
         Queue<Pair> queue = new LinkedList<>();
@@ -270,7 +390,6 @@ public class MapInfoimpl extends MapInfo {
             int costB = costSoFar.getOrDefault(b, Integer.MAX_VALUE) + heuristic(b, endX, endY);
             return Integer.compare(costA, costB);
         });
-
 
         Pair start = new Pair(startX, startY);
         Pair end = new Pair(endX, endY);
@@ -336,6 +455,19 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
+    public HashMap<Good, List<Command>> getGoodAndPath(Robot robot) {
+        HashMap<Good, List<Pair>> pathMap = mazePathPool(this.map, robot.x(), robot.y());
+        HashMap<Good, List<Command>> result = new HashMap<>();
+        if (pathMap.size() == 1){
+            Good good = pathMap.keySet().iterator().next();
+            List<Pair> path = pathMap.get(good);
+            List<Command> movePath = pathTransform(path, robot.id());
+            result.put(good, movePath);
+        }
+        return result;
+    }
+
+    @Override
     public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot) {
         Pair berthPoint = findBerthPoint(berth);
         List<Pair> path = mazePathAStar(this.map, good.x(), good.y(), berthPoint.x, berthPoint.y);
@@ -358,8 +490,9 @@ public class MapInfoimpl extends MapInfo {
             if(good.acquired()){
                 return null;
             }
-            availableGoods.remove(good);
-            acquiredGoods.add(good);
+            Pair pos = new Pair(good.x(), good.y());
+            availableGoods.remove(pos);
+            acquiredGoods.put(pos, good);
             good.setAcquired(true);
             return Command.get(robot.id());
         } catch (Exception e) {
@@ -374,7 +507,10 @@ public class MapInfoimpl extends MapInfo {
     public Command pullGood(Robot robot, Good good, Berth berth) {
         rwLock.writeLock().lock();
         try {
-            acquiredGoods.remove(good);
+            if (good != null) {
+                Pair pos = new Pair(good.x(), good.y());
+                acquiredGoods.remove(pos);
+            }
             return Command.pull(robot.id());
         } catch (Exception e) {
             e.printStackTrace();
@@ -434,33 +570,5 @@ public class MapInfoimpl extends MapInfo {
         return bestPoint;
     }
 
-    static class Pair {
-        int x, y;
 
-        public Pair(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            Pair pair = (Pair) obj;
-            return x == pair.x && y == pair.y;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y);
-        }
-
-        @Override
-        public String toString() {
-            return "Pair{" +
-                    "x=" + x +
-                    ", y=" + y +
-                    '}';
-        }
-    }
 }

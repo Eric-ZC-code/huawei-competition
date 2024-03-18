@@ -66,19 +66,23 @@ public class RobotCallable implements Callable {
             return true;
         }
         else {
-            Good nearestGood = mapInfo.findBestGood(robot, goodStrategy);
-            if(nearestGood==null){
-                return false;
-            }
-//        Berth nearestBerth = mapInfo.berths()[0];
-            Berth nearestBerth = mapInfo.findBestBerth(nearestGood.x(), nearestGood.y());
-//        Berth nearestBerth = mapInfo.berths()[robot.id()%mapInfo.berths().length];
-            if (nearestGood != null && nearestBerth != null) {
-                List<Command> path = mapInfo.getFullPath(robot, nearestGood, nearestBerth);
-                robot.fillCommand(path);
-                return true;
-            }
-            return false;
+//            Good nearestGood = mapInfo.findBestGood(robot, goodStrategy);
+//            if(nearestGood==null){
+//                return false;
+//            }
+//
+//            Berth nearestBerth = mapInfo.findBestBerth(nearestGood.x(), nearestGood.y());
+////        Berth nearestBerth = mapInfo.berths()[robot.id()%mapInfo.berths().length];
+//            if (nearestGood != null && nearestBerth != null) {
+//                List<Command> path = mapInfo.getFullPath(robot, nearestGood, nearestBerth);
+//                robot.fillCommand(path);
+//                return true;
+//            }
+//            return false;
+
+            List<Command> path = mapInfo.getFullPath(robot);
+            robot.fillCommand(path);
+            return true;
 
         }
 

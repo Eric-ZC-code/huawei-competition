@@ -182,7 +182,6 @@ public class Main {
 //
 //                        System.err.println(robot);
 //                    }
-//                    mainInstance.mapInfo.availableGoods().forEach(System.err::println);
                     for (Berth berth : mainInstance.berth) {
                         System.err.println(berth);
                     }

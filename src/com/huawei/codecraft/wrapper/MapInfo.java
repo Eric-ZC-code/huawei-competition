@@ -5,6 +5,8 @@ import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.GoodStrategy;
+import com.huawei.codecraft.util.Pair;
+import sun.awt.image.ImageWatched;
 
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -12,14 +14,28 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class MapInfo {
     protected final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    protected List<Good> availableGoods = new ArrayList<>();
-    protected List<Good> acquiredGoods = new ArrayList<>();
+    protected HashMap<Pair,Good> availableGoods = new LinkedHashMap<>();
+    protected HashMap<Pair,Good> acquiredGoods = new LinkedHashMap<>();
     protected char[][] map = new char[200][200];
     protected Berth[] berths = new Berth[5];
     protected Robot[] robots = null;
 
-    public List<Good> availableGoods() {
+    public HashMap<Pair, Good> availableGoods() {
         return availableGoods;
+    }
+
+    public MapInfo setAvailableGoods(HashMap<Pair, Good> availableGoods) {
+        this.availableGoods = availableGoods;
+        return this;
+    }
+
+    public HashMap<Pair, Good> acquiredGoods() {
+        return acquiredGoods;
+    }
+
+    public MapInfo setAcquiredGoods(HashMap<Pair, Good> acquiredGoods) {
+        this.acquiredGoods = acquiredGoods;
+        return this;
     }
 
     public Robot[] robots() {
@@ -28,15 +44,6 @@ public abstract class MapInfo {
 
     public MapInfo setRobots(Robot[] robots) {
         this.robots = robots;
-        return this;
-    }
-
-    public List<Good> acquiredGoods() {
-        return acquiredGoods;
-    }
-
-    public MapInfo setAcquiredGoods(List<Good> acquiredGoods) {
-        this.acquiredGoods = acquiredGoods;
         return this;
     }
 
@@ -76,19 +83,20 @@ public abstract class MapInfo {
 
     public void addGood(Good good) {
         rwLock.writeLock().lock();
-
         try {
-            availableGoods.add(good);
+            availableGoods.put(new Pair(good.x(), good.y()), good);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             rwLock.writeLock().unlock();
         }
     }
+
     public void addGood(int x, int y, int value) {
         rwLock.writeLock().lock();
         try {
-            availableGoods.add(new Good(x, y, value));
+            Good newGood = new Good(x, y, value);
+            availableGoods.put(new Pair(x, y), newGood);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -98,7 +106,9 @@ public abstract class MapInfo {
     abstract public Good findBestGood(Robot robot, GoodStrategy strategy);
     abstract public Berth findBestBerth(int x, int y);
     abstract public List<Command> getFullPath(Robot robot, Good good, Berth berth);
+    abstract public List<Command> getFullPath(Robot robot);
     abstract public List<Command> getRobotToGoodPath(Robot robot, Good good);
+    abstract public HashMap<Good, List<Command>> getGoodAndPath(Robot robot);
     abstract public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot);
     abstract public List<Command> getRobotToBerthPath(Robot robot, Berth berth);
     abstract public Command getGood(Robot robot, Good good);
