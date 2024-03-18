@@ -301,8 +301,8 @@ public class MapInfoimpl extends MapInfo {
             }
 
             for (int i = 0; i < 4; i++) {
-                int nextX = current.x + dx[i];
-                int nextY = current.y + dy[i];
+                int nextX = current.x() + dx[i];
+                int nextY = current.y() + dy[i];
                 Pair next = new Pair(nextX, nextY);
                 if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && maze[nextX][nextY] == '.' && (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next))) {
                     frontier.add(next);
@@ -316,7 +316,7 @@ public class MapInfoimpl extends MapInfo {
     }
     // 启发式函数：曼哈顿距离
     private static int heuristic(Pair node, int endX, int endY) {
-        return Math.abs(node.x - endX) + Math.abs(node.y - endY);
+        return Math.abs(node.x() - endX) + Math.abs(node.y() - endY);
     }
 
     // 重建路径
