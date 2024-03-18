@@ -270,6 +270,7 @@ public class MapInfoimpl extends MapInfo {
 
         while (!frontier.isEmpty()) {
             Pair current = frontier.poll();
+            System.out.println(current.x + " " + current.y + "fs: " + (costSoFar.get(current) + heuristic(current, endX, endY)));
             if (current.equals(end)) {
                 return reconstructPath(cameFrom, start, end);
             }
@@ -279,15 +280,16 @@ public class MapInfoimpl extends MapInfo {
                 int nextY = current.y + dy[i];
                 Pair next = new Pair(nextX, nextY);
                 if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && maze[nextX][nextY] == '.' && (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next))) {
+                    costSoFar.put(next, costSoFar.get(current) + 1);
                     frontier.add(next);
                     cameFrom.put(next, current);
-                    costSoFar.put(next, costSoFar.get(current) + 1);
                 }
             }
         }
 
         return Collections.emptyList(); // 未找到路径时返回空列表
     }
+
     // 启发式函数：曼哈顿距离
     private static int heuristic(Pair node, int endX, int endY) {
         return Math.abs(node.x - endX) + Math.abs(node.y - endY);
@@ -326,14 +328,14 @@ public class MapInfoimpl extends MapInfo {
     @Override
     public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot) {
         Pair berthPoint = findBerthPoint(berth);
-        List<Pair> path = mazePathBFS(this.map, good.x(), good.y(), berthPoint.x, berthPoint.y);
+        List<Pair> path = mazePathAStar(this.map, good.x(), good.y(), berthPoint.x, berthPoint.y);
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
 
     public List<Command> getRobotToBerthPath(Robot robot, Berth berth) {
         Pair berthPoint = findBerthPoint(berth);
-        List<Pair> path = mazePathBFS(this.map, robot.x(), robot.y(), berthPoint.x, berthPoint.y);
+        List<Pair> path = mazePathAStar(this.map, robot.x(), robot.y(), berthPoint.x, berthPoint.y);
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
@@ -443,13 +445,18 @@ public class MapInfoimpl extends MapInfo {
     }
     public static void main(String[] args) {
         char[][] maze = {
-                {'.', '.', '.', '#', '.', '.', '.'},
-                {'.', '#', '.', '.', '.', '#', '.'},
-                {'.', '#', '.', '#', '.', '.', '.'},
-                {'.', '.', '#', '.', '#', '.', '#'},
-                {'.', '.', '.', '.', '.', '.', '.'},
+                {'#', '.', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'},
+                {'#', '.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
+                {'#', '.', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '#', '#', '#', '#', '#', '.', '#'},
+                {'#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#', '.', '#'},
+                {'#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '.', '.', '.', '.', '#', '#', '#', '#', '.', '#'},
+                {'#', '.', '.', '.', '.', '.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
+                {'#', '#', '#', '#', '#', '.', '#', '#', '.', '.', '.', '.', '.', '.', '#', '#', '#', '#', '.', '#'},
+                {'#', '.', '.', '.', '.', '.', '#', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#'},
+                {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'},
         };
-        List<Pair> path = mazePathAStar(maze, 0, 0, 4, 6);
+
+        List<Pair> path = mazePathAStar(maze, 3, 9, 7, 12);
         for (Pair p : path) {
             System.out.println(p.x + ", " + p.y);
         }
