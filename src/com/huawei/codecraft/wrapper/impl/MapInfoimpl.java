@@ -228,6 +228,7 @@ public class MapInfoimpl extends MapInfo {
 
         while (!queue.isEmpty()) {
             Pair pos = queue.poll();
+//            System.err.println("pos: " + pos.x + " " + pos.y);
             if (pos.x == endX && pos.y == endY) {
                 while (parent.get(pos) != null) {
                     path.add(pos);
@@ -249,7 +250,7 @@ public class MapInfoimpl extends MapInfo {
         }
         return path;
     }
-    public static List<Pair> mazePathAStar(char[][] maze, int startX, int startY, int endX, int endY) {
+    public List<Pair> mazePathAStar(char[][] maze, int startX, int startY, int endX, int endY) {
         final int[] dx = {0, 1, 0, -1};
         final int[] dy = {1, 0, -1, 0};
         int n = maze.length, m = maze[0].length;
@@ -270,6 +271,7 @@ public class MapInfoimpl extends MapInfo {
 
         while (!frontier.isEmpty()) {
             Pair current = frontier.poll();
+            System.err.println("current: " + current.x + " " + current.y);
             if (current.equals(end)) {
                 return reconstructPath(cameFrom, start, end);
             }
@@ -278,7 +280,7 @@ public class MapInfoimpl extends MapInfo {
                 int nextX = current.x + dx[i];
                 int nextY = current.y + dy[i];
                 Pair next = new Pair(nextX, nextY);
-                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && maze[nextX][nextY] == '.' && (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next))) {
+                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && !isObstacle(nextX, nextY) && (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next))) {
                     costSoFar.put(next, costSoFar.get(current) + 1);
                     frontier.add(next);
                     cameFrom.put(next, current);
