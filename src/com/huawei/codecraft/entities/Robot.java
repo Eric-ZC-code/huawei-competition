@@ -55,6 +55,9 @@ public class Robot {
     public int x() {
         return x;
     }
+    public Pair position(){
+        return Pair.of(x,y);
+    }
 
     public Robot setX(int x) {
         this.x = x;
@@ -131,7 +134,16 @@ public class Robot {
                         //没拿到当前点意味着如果继续走就会撞就yield
                         //这种避让方式没法避让双向的撞击
                         //todo 判断周围信息做出更完善的决策
+
                         Robot conflictRobot = map.getPositionInfo(position);
+                        if(conflictRobot==null){
+                            //todo 为什么会运行这段
+                            //
+                            System.err.println("inconsistent state");
+                            System.err.flush();
+                            this.currentCommand.addFirst(Command.yield());
+                            break;
+                        }
                         clean();
                         if(conflictRobot.x()!=x){
                             // x 轴 冲突
@@ -140,11 +152,13 @@ public class Robot {
                                 //则往左避让
 
                                 command = Command.move(id,1);
+                                this.currentCommand.addFirst(Command.move(id,0));
                             }
                             else{
                                 //冲突机器人在左边或者正上往右避让
                                 //往右避让
                                 command = Command.move(id,0);
+                                this.currentCommand.addFirst(Command.move(id,1));
                             }
                         } else if (conflictRobot.y()!=y) {
                             // y轴冲突
@@ -152,11 +166,13 @@ public class Robot {
                                 //冲突机器人在上方
                                 //往下避让
                                 command = Command.move(id,3);
+                                this.currentCommand.addFirst(Command.move(id,2));
                             }
                             else {
                                 // 冲突机器人在下方
                                 // 往上避让
                                 command = Command.move(id,2);
+                                this.currentCommand.addFirst(Command.move(id,3));
                             }
                         }
 
@@ -188,6 +204,7 @@ public class Robot {
 
                 } else if (command.cmd().equals("move")) {
                     map.map()[x][y] = '.';
+                    map.removePoint(this.position());
                 }
 
             }
