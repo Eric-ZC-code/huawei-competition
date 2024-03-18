@@ -270,7 +270,6 @@ public class MapInfoimpl extends MapInfo {
 
         while (!frontier.isEmpty()) {
             Pair current = frontier.poll();
-            System.out.println(current.x + " " + current.y + "fs: " + (costSoFar.get(current) + heuristic(current, endX, endY)));
             if (current.equals(end)) {
                 return reconstructPath(cameFrom, start, end);
             }
@@ -283,6 +282,7 @@ public class MapInfoimpl extends MapInfo {
                     costSoFar.put(next, costSoFar.get(current) + 1);
                     frontier.add(next);
                     cameFrom.put(next, current);
+
                 }
             }
         }
@@ -320,7 +320,7 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getRobotToGoodPath(Robot robot, Good good) {
-        List<Pair> path = mazePathBFS(this.map, robot.x(), robot.y(), good.x(), good.y());
+        List<Pair> path = mazePathAStar(this.map, robot.x(), robot.y(), good.x(), good.y());
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
