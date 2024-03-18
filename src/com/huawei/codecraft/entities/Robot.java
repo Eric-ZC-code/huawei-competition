@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Robot {
     private static final MyLogger logger = MyLogger.getLogger("Robot");
-    private final int yieldDistance = 5;
+    private final int yieldDistance = 3;
     private int id;
     private int x, y, carrying;
     private int status;
@@ -107,11 +107,13 @@ public class Robot {
         Berth[] berths = map.berths();
         if(nearby!=null){
             //普通的基于priority 避让没有 random效果好
-            int i = rand.nextInt(10);
-            if(i%2==0){
-                logger.info("Robot" + id + " has robot nearby, skip this command by random");
-                return;
-            }
+//            int i = rand.nextInt(10);
+//            if(i%2==0){
+//                logger.info("Robot" + id + " has robot nearby, skip this command by random");
+//                return;
+////            }
+//            clean();
+//            return;
         }
         while (containsCommand()){
             Command command = popCommand();
