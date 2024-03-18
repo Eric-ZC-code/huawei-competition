@@ -148,19 +148,35 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
-    public boolean acquirePoint(Pair pos) {
+    public boolean acquirePoint(Pair pos,Robot robot) {
         goingPointLock.writeLock().lock();
 
         try {
-            if(!goingPoint.contains(pos)){
-                this.goingPoint.add(pos);
+            if(!goingPoint.containsKey(pos)){
+                this.goingPoint.put(pos,robot);
                 return true;
             }
             return false;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return false;
         } finally {
             goingPointLock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public Robot getPositionInfo(Pair pos) {
+        goingPointLock.readLock().lock();
+
+        try {
+            return goingPoint.get(pos);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            goingPointLock.readLock().unlock();
+
         }
     }
 
@@ -169,7 +185,7 @@ public class MapInfoimpl extends MapInfo {
         goingPointLock.readLock().lock();
 
         try {
-            return this.goingPoint.contains(pair);
+            return this.goingPoint.containsKey(pair);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -182,13 +198,18 @@ public class MapInfoimpl extends MapInfo {
         goingPointLock.writeLock().lock();
 
         try {
-            this.goingPoint = new HashSet<>(10);
+            this.goingPoint = new HashMap<>(10);
             return true;
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             goingPointLock.writeLock().unlock();
         }
+    }
+
+    @Override
+    public List<Command> circumventionCommand(Pair curPos) {
+        return null;
     }
 
     @Override
@@ -330,6 +351,61 @@ public class MapInfoimpl extends MapInfo {
                 }
             }
         }
+        return path;
+    }
+    public List<Pair> mazePathAStar(char[][] maze, int startX, int startY, int endX, int endY) {
+        final int[] dx = {0, 1, 0, -1};
+        final int[] dy = {1, 0, -1, 0};
+        int n = maze.length, m = maze[0].length;
+        Map<Pair, Pair> cameFrom = new HashMap<>();
+        Map<Pair, Integer> costSoFar = new HashMap<>();
+        PriorityQueue<Pair> frontier = new PriorityQueue<>((a, b) -> {
+            int costA = costSoFar.getOrDefault(a, Integer.MAX_VALUE) + heuristic(a, endX, endY);
+            int costB = costSoFar.getOrDefault(b, Integer.MAX_VALUE) + heuristic(b, endX, endY);
+            return Integer.compare(costA, costB);
+        });
+
+
+        Pair start = new Pair(startX, startY);
+        Pair end = new Pair(endX, endY);
+        frontier.add(start);
+        cameFrom.put(start, null);
+        costSoFar.put(start, 0);
+
+        while (!frontier.isEmpty()) {
+            Pair current = frontier.poll();
+            if (current.equals(end)) {
+                return reconstructPath(cameFrom, start, end);
+            }
+
+            for (int i = 0; i < 4; i++) {
+                int nextX = current.x() + dx[i];
+                int nextY = current.y() + dy[i];
+                Pair next = new Pair(nextX, nextY);
+                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && !isObstacle(nextX, nextY) && (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next))) {
+                    costSoFar.put(next, costSoFar.get(current) + 1);
+                    frontier.add(next);
+                    cameFrom.put(next, current);
+
+                }
+            }
+        }
+
+        return Collections.emptyList(); // 未找到路径时返回空列表
+    }
+
+    // 启发式函数：曼哈顿距离
+    private static int heuristic(Pair node, int endX, int endY) {
+        return Math.abs(node.x() - endX) + Math.abs(node.y() - endY);
+    }
+
+    // 重建路径
+    private static List<Pair> reconstructPath(Map<Pair, Pair> cameFrom, Pair start, Pair end) {
+        List<Pair> path = new ArrayList<>();
+        for (Pair at = end; at != null; at = cameFrom.get(at)) {
+            path.add(at);
+        }
+        Collections.reverse(path);
         return path;
     }
 

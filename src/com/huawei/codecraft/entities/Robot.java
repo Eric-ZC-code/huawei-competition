@@ -128,12 +128,42 @@ public class Robot {
                 }else {
                     // 机器人允许move
                     Pair position = command.targetPosition(Pair.of(x, y));
-                    if(!map.acquirePoint(position)){
+                    if(!map.acquirePoint(position,this)){
                         //没拿到当前点意味着如果继续走就会撞就yield
                         //这种避让方式没法避让双向的撞击
-                        logger.info("Robot "+id+" yield " );
-                        this.currentCommand.addFirst(command);
-                        break;
+                        //todo 判断周围信息做出更完善的决策
+                        Robot conflictRobot = map.getPositionInfo(position);
+                        clean();
+                        if(conflictRobot.x()!=x){
+                            // x 轴 冲突
+                            if(conflictRobot.y()>y){
+                                //冲突机器人在右边
+                                //则往左避让
+
+                                command = Command.move(id,1);
+                            }
+                            else{
+                                //冲突机器人在左边或者正上往右避让
+                                //往右避让
+                                command = Command.move(id,0);
+                            }
+                        } else if (conflictRobot.y()!=y) {
+                            // y轴冲突
+                            if(conflictRobot.x()>x){
+                                //冲突机器人在上方
+                                //往下避让
+                                command = Command.move(id,3);
+                            }
+                            else {
+                                // 冲突机器人在下方
+                                // 往上避让
+                                command = Command.move(id,2);
+                            }
+                        }
+                        logger.info("Robot" + id + "use command " + command+ " to avoid conflict");
+
+//                        this.currentCommand.addFirst(command);
+//                        break;
                     }
                 }
                 moved = true;
