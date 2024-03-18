@@ -191,6 +191,8 @@ public class Main {
 //                    }
 //                    System.err.flush();
 //                }
+//                    mainInstance.mapInfo.availableGoods().forEach(System.err::println);
+                mainInstance.mapInfo.cleanPoints();
 
                 for (int i = 0; i < mainInstance.robot.length; i++) {
                     Robot robot = mainInstance.robot[i];

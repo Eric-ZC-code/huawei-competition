@@ -9,6 +9,7 @@ import com.huawei.codecraft.wrapper.MapInfo;
 import com.huawei.codecraft.util.MyLogger;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Callable;
 
 public class RobotCallable implements Callable {
@@ -28,15 +29,22 @@ public class RobotCallable implements Callable {
 
         synchronized (robot){
 //            long start = System.currentTimeMillis();
-            if (!robot.containsCommand()||robot.status()==0) {
-                // 目前机器人没有被分配任务或者发生碰撞
+            if (!robot.containsCommand()) {
+                // 目前机器人没有被分配任务
                 // 则去搜索最近的货物，然后规划路径
                 // 只有等待任务分配完成后才能开始执行。
                 robot.clean();
                 if(!setCmd(robot)){
                     return null;
                 }
-            }else {
+            }else if (robot.status()==0){
+                //机器人发生碰撞
+                robot.clean();
+                if(!setCmd(robot)){
+                    return null;
+                }
+
+            } else {
                 if(robot.carrying()==0&&robot.shouldCarry()==true){
                     robot.clean();
                     robot.setShouldCarry(false);

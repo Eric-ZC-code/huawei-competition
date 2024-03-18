@@ -3,6 +3,7 @@ package com.huawei.codecraft.entities;
 
 import com.huawei.codecraft.util.MessageCenter;
 import com.huawei.codecraft.util.MyLogger;
+import com.huawei.codecraft.util.Pair;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.*;
@@ -13,6 +14,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class Robot {
     private static ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final int yieldDistance = 4;
+    public static final Random rand = new Random();
     private int id;
     private int x, y, carrying;
     private int status;
@@ -122,6 +124,16 @@ public class Robot {
                     this.currentCommand.addFirst(command);
                     break;
 
+                }else {
+                    // 机器人允许move
+                    Pair position = command.targetPosition(Pair.of(x, y));
+                    if(!map.acquirePoint(position)){
+                        //没拿到当前点意味着如果继续走就会撞就yield
+                        //这种避让方式没法避让双向的撞击
+                        logger.info("Robot "+id+" yield " );
+                        this.currentCommand.addFirst(command);
+                        break;
+                    }
                 }
                 moved = true;
             }

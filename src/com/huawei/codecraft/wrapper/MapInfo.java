@@ -18,6 +18,7 @@ public abstract class MapInfo {
     protected char[][] map = new char[200][200];
     protected Berth[] berths = new Berth[5];
     protected Robot[] robots = null;
+    protected HashSet<Pair> goingPoint = new HashSet<>(10);
 
     public LinkedHashMap<Pair, Good> availableGoods() {
         return availableGoodsMap;
@@ -103,4 +104,7 @@ public abstract class MapInfo {
     abstract public Integer getAvailableBerth();
     abstract public void addItem(int x, int y, char c);
     abstract public Berth currentBerth(int x, int y);
+    abstract public boolean acquirePoint(Pair pos);
+    abstract public boolean pointIsAvailable(Pair pair);
+    abstract public boolean cleanPoints();
 }
