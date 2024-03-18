@@ -107,10 +107,13 @@ public class Robot {
         Berth[] berths = map.berths();
         if(nearby!=null){
             //普通的基于priority 避让没有 random效果好
-            int i = rand.nextInt(10);
-            if(i%2==0){
-                return;
-            }
+//            int i = rand.nextInt(10);
+//            if(i%2==0){
+//                logger.info("Robot" + id + " has robot nearby, skip this command by random");
+//                return;
+////            }
+//            clean();
+//            return;
         }
         while (containsCommand()){
             Command command = popCommand();
