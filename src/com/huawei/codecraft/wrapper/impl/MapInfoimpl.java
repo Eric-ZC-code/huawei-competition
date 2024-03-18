@@ -10,10 +10,13 @@ import com.huawei.codecraft.util.Pair;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MapInfoimpl extends MapInfo {
 
     private MyLogger logger = MyLogger.getLogger("MapInfoimpl");
+    private ReadWriteLock goingPointLock = new ReentrantReadWriteLock();
 
     @Override
     public Good findBestGood(Robot robot, GoodStrategy goodStrategy) {
@@ -142,6 +145,50 @@ public class MapInfoimpl extends MapInfo {
 
         }
         return null;
+    }
+
+    @Override
+    public boolean acquirePoint(Pair pos) {
+        goingPointLock.writeLock().lock();
+
+        try {
+            if(!goingPoint.contains(pos)){
+                this.goingPoint.add(pos);
+                return true;
+            }
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            goingPointLock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public boolean pointIsAvailable(Pair pair) {
+        goingPointLock.readLock().lock();
+
+        try {
+            return this.goingPoint.contains(pair);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            goingPointLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public boolean cleanPoints() {
+        goingPointLock.writeLock().lock();
+
+        try {
+            this.goingPoint = new HashSet<>(10);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            goingPointLock.writeLock().unlock();
+        }
     }
 
     @Override
