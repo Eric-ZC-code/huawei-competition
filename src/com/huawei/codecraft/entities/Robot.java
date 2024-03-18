@@ -133,7 +133,6 @@ public class Robot {
                         //这种避让方式没法避让双向的撞击
                         //todo 判断周围信息做出更完善的决策
                         Robot conflictRobot = map.getPositionInfo(position);
-                        clean();
                         if(conflictRobot.x()!=x){
                             // x 轴 冲突
                             if(conflictRobot.y()>y){
@@ -141,11 +140,14 @@ public class Robot {
                                 //则往左避让
 
                                 command = Command.move(id,1);
+                                this.currentCommand.addFirst(Command.move(id,0));
+
                             }
                             else{
                                 //冲突机器人在左边或者正上往右避让
                                 //往右避让
                                 command = Command.move(id,0);
+                                this.currentCommand.addFirst(Command.move(id,1));
                             }
                         } else if (conflictRobot.y()!=y) {
                             // y轴冲突
@@ -153,11 +155,13 @@ public class Robot {
                                 //冲突机器人在上方
                                 //往下避让
                                 command = Command.move(id,3);
+                                this.currentCommand.addFirst(Command.move(id,2));
                             }
                             else {
                                 // 冲突机器人在下方
                                 // 往上避让
                                 command = Command.move(id,2);
+                                this.currentCommand.addFirst(Command.move(id,3));
                             }
                         }
                         logger.info("Robot" + id + "use command " + command+ " to avoid conflict");
