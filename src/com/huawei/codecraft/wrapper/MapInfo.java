@@ -5,6 +5,7 @@ import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.GoodStrategy;
+import com.huawei.codecraft.util.Pair;
 
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -12,14 +13,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class MapInfo {
     protected final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    protected List<Good> availableGoods = new ArrayList<>();
-    protected List<Good> acquiredGoods = new ArrayList<>(10);
+    protected LinkedHashMap<Pair,Good> availableGoodsMap = new LinkedHashMap<>(100);
+    protected LinkedList<Good> acquiredGoodsMap = new LinkedList<>();
     protected char[][] map = new char[200][200];
     protected Berth[] berths = new Berth[5];
     protected Robot[] robots = null;
 
-    public List<Good> availableGoods() {
-        return availableGoods;
+    public LinkedHashMap<Pair, Good> availableGoods() {
+        return availableGoodsMap;
     }
 
     public Robot[] robots() {
@@ -31,14 +32,10 @@ public abstract class MapInfo {
         return this;
     }
 
-    public List<Good> acquiredGoods() {
-        return acquiredGoods;
+    public LinkedList<Good> acquiredGoods() {
+        return acquiredGoodsMap;
     }
 
-    public MapInfo setAcquiredGoods(List<Good> acquiredGoods) {
-        this.acquiredGoods = acquiredGoods;
-        return this;
-    }
 
     public char[][] map() {
         return map;
@@ -78,7 +75,7 @@ public abstract class MapInfo {
         rwLock.writeLock().lock();
 
         try {
-            availableGoods.add(good);
+            availableGoodsMap.put(good.pair(),good);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -88,7 +85,7 @@ public abstract class MapInfo {
     public void addGood(int x, int y, int value) {
         rwLock.writeLock().lock();
         try {
-            availableGoods.add(new Good(x, y, value));
+            availableGoodsMap.put(new Pair(x,y),new Good(x, y, value));
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {

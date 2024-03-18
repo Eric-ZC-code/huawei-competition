@@ -12,28 +12,22 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Robot {
     private static final MyLogger logger = MyLogger.getLogger("Robot");
-    private static ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private final int yieldDistance = 10;
+    private final int yieldDistance = 3;
     private int id;
     private int x, y, carrying;
     private int status;
     private boolean shouldCarry = false;
     private Integer priority; // 优先级 0-9 0最高 9最低
-    private final Map<Integer,Boolean> flags = new HashMap<>(); //判断这一帧是否做过事情了，一帧只做一件事
     private ArrayDeque<Command> currentCommand = new ArrayDeque<>();
 
     public Robot() {
-        init();
     }
 
     public Robot(int startX, int startY,Integer priority) {
         this.x = startX;
         this.y = startY;
         this.priority = priority;
-        init();
-        
     }
-
     public Integer priority() {
         return priority;
     }
@@ -41,16 +35,6 @@ public class Robot {
     public Robot setPriority(Integer priority) {
         this.priority = priority;
         return this;
-    }
-
-    public  Map<Integer, Boolean> flags() {
-        return flags;
-    }
-
-    public void init(){
-        for (int i = 1; i <= 15000; i++) {
-            flags.put(i,false);
-        }
     }
     public boolean containsCommand(){
         return !currentCommand.isEmpty();
@@ -123,11 +107,13 @@ public class Robot {
         Berth[] berths = map.berths();
         if(nearby!=null){
             //普通的基于priority 避让没有 random效果好
-            int i = rand.nextInt(10);
-            if(i%2==0){
-                logger.info("Robot" + id + " has robot nearby, skip this command by random");
-                return;
-            }
+//            int i = rand.nextInt(10);
+//            if(i%2==0){
+//                logger.info("Robot" + id + " has robot nearby, skip this command by random");
+//                return;
+////            }
+//            clean();
+//            return;
         }
         while (containsCommand()){
             Command command = popCommand();
