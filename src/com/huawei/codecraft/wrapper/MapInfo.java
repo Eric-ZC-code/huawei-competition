@@ -6,7 +6,6 @@ import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.util.Pair;
-import sun.awt.image.ImageWatched;
 
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -14,28 +13,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class MapInfo {
     protected final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    protected HashMap<Pair,Good> availableGoods = new LinkedHashMap<>();
-    protected HashMap<Pair,Good> acquiredGoods = new LinkedHashMap<>();
+    protected LinkedHashMap<Pair,Good> availableGoodsMap = new LinkedHashMap<>(100);
+    protected LinkedList<Good> acquiredGoodsMap = new LinkedList<>();
     protected char[][] map = new char[200][200];
     protected Berth[] berths = new Berth[5];
     protected Robot[] robots = null;
 
-    public HashMap<Pair, Good> availableGoods() {
-        return availableGoods;
-    }
-
-    public MapInfo setAvailableGoods(HashMap<Pair, Good> availableGoods) {
-        this.availableGoods = availableGoods;
-        return this;
-    }
-
-    public HashMap<Pair, Good> acquiredGoods() {
-        return acquiredGoods;
-    }
-
-    public MapInfo setAcquiredGoods(HashMap<Pair, Good> acquiredGoods) {
-        this.acquiredGoods = acquiredGoods;
-        return this;
+    public LinkedHashMap<Pair, Good> availableGoods() {
+        return availableGoodsMap;
     }
 
     public Robot[] robots() {
@@ -46,6 +31,11 @@ public abstract class MapInfo {
         this.robots = robots;
         return this;
     }
+
+    public LinkedList<Good> acquiredGoods() {
+        return acquiredGoodsMap;
+    }
+
 
     public char[][] map() {
         return map;
@@ -83,8 +73,9 @@ public abstract class MapInfo {
 
     public void addGood(Good good) {
         rwLock.writeLock().lock();
+
         try {
-            availableGoods.put(new Pair(good.x(), good.y()), good);
+            availableGoodsMap.put(good.pair(),good);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -95,8 +86,7 @@ public abstract class MapInfo {
     public void addGood(int x, int y, int value) {
         rwLock.writeLock().lock();
         try {
-            Good newGood = new Good(x, y, value);
-            availableGoods.put(new Pair(x, y), newGood);
+            availableGoodsMap.put(new Pair(x,y),new Good(x, y, value));
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {

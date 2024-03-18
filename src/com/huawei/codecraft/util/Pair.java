@@ -1,14 +1,33 @@
 package com.huawei.codecraft.util;
 
+import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
+
 import java.util.Objects;
 
 public class Pair {
-    public int x;
-    public int y;
+    private int x, y;
 
     public Pair(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public int x() {
+        return x;
+    }
+
+    public Pair setX(int x) {
+        this.x = x;
+        return this;
+    }
+
+    public int y() {
+        return y;
+    }
+
+    public Pair setY(int y) {
+        this.y = y;
+        return this;
     }
 
     @Override
@@ -22,13 +41,5 @@ public class Pair {
     @Override
     public int hashCode() {
         return Objects.hash(x, y);
-    }
-
-    @Override
-    public String toString() {
-        return "Pair{" +
-                "x=" + x +
-                ", y=" + y +
-                '}';
     }
 }
