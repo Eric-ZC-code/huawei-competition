@@ -492,7 +492,7 @@ public class MapInfoimpl extends MapInfo {
         return Command.ignore();
     }
 
-    private boolean isObstacle(int x, int y) {
+    public boolean isObstacle(int x, int y) {
 
         return this.map[x][y] == '#' || this.map[x][y] == '*' || this.map[x][y] == 'A';
 

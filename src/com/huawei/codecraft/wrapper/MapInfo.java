@@ -110,4 +110,5 @@ public abstract class MapInfo {
     abstract public boolean removePoint(Pair pair);
     abstract public boolean cleanPoints();
     abstract public List<Command> circumventionCommand(Pair curPos);
+    abstract public boolean isObstacle(int x, int y);
 }
