@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class BoatCallable implements Callable {
-    private static final MyLogger logger= MyLogger.getLogger("BoatCallable");
     private Integer frame;
     private final Boat boat;
     private final MapInfo mapInfo;
@@ -32,7 +31,6 @@ public class BoatCallable implements Callable {
                     //船在虚拟点
 //                    Integer availableBerth = mapInfo.getAvailableBerth();
                     Integer realBerth = 2* boat.id();
-                    logger.info("Berth:"+realBerth);
                     Optional.ofNullable(realBerth)
                             .ifPresent(boat::ship);
                 }
@@ -48,7 +46,6 @@ public class BoatCallable implements Callable {
 //                        int min = Math.min(berth.loadingSpeed(), berth.amount());
 //                        berth.unload(min);
                         boat.load(berth.loadingSpeed());
-                        logger.info("Boat " +boat.id()+" amount : "+boat.goodsNum());
                         if(boat.isFull()){
                             //船满了 再去虚拟点
                             if(boat.go()){
