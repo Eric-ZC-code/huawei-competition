@@ -16,7 +16,7 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public Good findBestGood(Robot robot, GoodStrategy goodStrategy) {
-        if(availableGoods.size()<20){
+        if(availableGoods.size()<30){
             return null;
         }
 
@@ -158,12 +158,16 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
+        // 如果机器人不可达泊位，返回空的命令数组
+        List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
+        if (pathToBerth.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         // 寻路逻辑
+        // 如果机器人没有搬运货物
         if (robot.carrying() == 0) {
             logger.info("Robot is not carrying good");
-            if (good == null) {
-                return new ArrayList<>();
-            }
             // 判断货物是否已经被获取，获取了就返回空的命令数组
             rwLock.readLock().lock();
             try {
@@ -176,46 +180,37 @@ public class MapInfoimpl extends MapInfo {
                 rwLock.readLock().unlock();
             }
 
+            // 获取机器人到货物的路径
             List<Command> pathToGood = getRobotToGoodPath(robot, good);
-            if(pathToGood.isEmpty()){
-                logger.info("Robot "+ robot.id() + " path to good cannot be found. Goods : ("+ good.x()+" "+ good.y()+")");
 
-//                return new ArrayList<>();
-            }
-
+            // 获取货物，acquire货物
             Command getGood = getGood(robot, good);
             if(getGood == null){
                 return new ArrayList<>();
             }
-            List<Command> pathToBerth = getGoodToBerthPath(good, berth, robot);
 
-            // if pathToGood or pathToBerth is empty, return empty list
-            if (pathToGood.isEmpty() || pathToBerth.isEmpty()) {
+            // 获取货物到泊位的路径
+            List<Command> goodToBerth = getGoodToBerthPath(good, berth, robot);
+
+            // 如果机器人到货物的路径或者货物到泊位的路径为空，返回空的命令数组
+            if (goodToBerth.isEmpty() || pathToGood.isEmpty()) {
                 return new ArrayList<>();
             }
 
+            // 合并路径
             List<Command> fullPath = new ArrayList<>(pathToGood);
             fullPath.add(getGood);
-            fullPath.addAll(pathToBerth);
-
-            // pull good
+            fullPath.addAll(goodToBerth);
             Command pullGood = pullGood(robot, good, berth);
             fullPath.add(pullGood);
 
             return fullPath;
 
-        } else if (robot.carrying() == 1) {
+        }
+        // 如果机器人正在搬运货物
+        else if (robot.carrying() == 1) {
             logger.info("Robot is carrying good");
-            List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
-//
-//            if (robot.x() == berthPoint.x && robot.y() == berthPoint.y) {
-//                Command pullGood = pullGood(robot, good, berth);
-//                pathToBerth.add(pullGood);
-//                return pathToBerth;
-//            }
-            if (pathToBerth.isEmpty()) {
-                return new ArrayList<>();
-            }
+
             // pull good
             Command pullGood = pullGood(robot, good, berth);
             pathToBerth.add(pullGood);

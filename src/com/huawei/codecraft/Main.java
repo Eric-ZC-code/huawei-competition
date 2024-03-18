@@ -241,12 +241,16 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            // Wait for user input to keep the console window open
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Press Enter to exit...");
+            scanner.nextLine();
+
             mainInstance.robotExecutor.shutdown();
             mainInstance.boatExecutor.shutdown();
 
             System.exit(0);
         }
-
 
     }
 
