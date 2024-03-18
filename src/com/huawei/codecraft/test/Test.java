@@ -48,10 +48,10 @@ public class Test {
         int endX = 44, endY = 194;
         Robot robot = new Robot(3, 187,10);
         robot.setStatus(1);
-        robot.setCarrying(1);
+//        robot.setCarrying(1);
         Good good = new Good(endX, endY, 10);
         Berth berth = new Berth(1,2, 187, 1, 1);
-        List<Command> path = MapInfoimpl.getFullPath(robot, null, berth);
+        List<Command> path = MapInfoimpl.getFullPath(robot, good, berth);
         System.out.println("Path: " + path);
     }
 
