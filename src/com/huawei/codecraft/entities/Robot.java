@@ -150,32 +150,45 @@ public class Robot {
                             if(conflictRobot.y()>y){
                                 //冲突机器人在右边
                                 //则往左避让
+                                if(map.isObstacle(x,y-1)){
 
+                                    break;
+                                }
                                 command = Command.move(id,1);
                                 this.currentCommand.addFirst(Command.move(id,0));
+
                             }
                             else{
                                 //冲突机器人在左边或者正上往右避让
                                 //往右避让
+                                if(map.isObstacle(x,y+1)){
+
+                                    break;
+                                }
                                 command = Command.move(id,0);
                                 this.currentCommand.addFirst(Command.move(id,1));
                             }
                         } else if (conflictRobot.y()!=y) {
                             // y轴冲突
-                            if(conflictRobot.x()>x){
+                            if(conflictRobot.x()<x){
                                 //冲突机器人在上方
                                 //往下避让
+                                if(map.isObstacle(x+1,y)){
+                                    break;
+                                }
                                 command = Command.move(id,3);
                                 this.currentCommand.addFirst(Command.move(id,2));
                             }
                             else {
                                 // 冲突机器人在下方
                                 // 往上避让
+                                if (map.isObstacle(x - 1, y)) {
+                                    break;
+                                }
                                 command = Command.move(id,2);
                                 this.currentCommand.addFirst(Command.move(id,3));
                             }
                         }
-
 //                        this.currentCommand.addFirst(command);
 //                        break;
                     }
