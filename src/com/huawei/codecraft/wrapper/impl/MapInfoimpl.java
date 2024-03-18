@@ -318,7 +318,7 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getRobotToGoodPath(Robot robot, Good good) {
-        List<Pair> path = mazePathAStar(this.map, robot.x(), robot.y(), good.x(), good.y());
+        List<Pair> path = mazePathBFS(this.map, robot.x(), robot.y(), good.x(), good.y());
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
