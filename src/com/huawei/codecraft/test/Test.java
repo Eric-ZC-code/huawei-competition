@@ -52,7 +52,7 @@ public class Test {
         Good good = new Good(endX, endY, 10);
         Berth berth = new Berth(1,2, 187, 1, 1);
         List<Command> path = MapInfoimpl.getFullPath(robot, good, berth);
-        System.err.println("Full path: " + path);
+        System.out.println("Full path: " + path);
     }
 
 
