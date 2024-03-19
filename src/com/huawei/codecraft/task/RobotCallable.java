@@ -89,6 +89,9 @@ public class RobotCallable implements Callable {
 //            return false;
 
             List<Command> path = mapInfo.getFullPath(robot);
+            if (path == null || path.size() == 0){
+                return false;
+            }
             robot.fillCommand(path);
             return true;
 
