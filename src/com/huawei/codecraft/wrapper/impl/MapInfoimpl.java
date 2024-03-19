@@ -271,9 +271,9 @@ public class MapInfoimpl extends MapInfo {
                 }
             }
 
-            for (Berth availableBerth : availableBerths) {
-                logger.info("Available Berth: " + availableBerth.id() + " amount: " + availableBerth.amount());
-            }
+//            for (Berth availableBerth : availableBerths) {
+//                logger.info("Available Berth: " + availableBerth.id() + " amount: " + availableBerth.amount());
+//            }
 
             int j = 0, id = 0;
             if (flag) {
