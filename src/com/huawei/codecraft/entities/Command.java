@@ -1,6 +1,6 @@
 package com.huawei.codecraft.entities;
 
-import com.huawei.codecraft.util.Pair;
+import com.huawei.codecraft.util.Position;
 
 public class Command {
     private String cmd;
@@ -41,25 +41,25 @@ public class Command {
     public String cmd() {
         return cmd;
     }
-    public Pair targetPosition(Pair pos){
+    public Position targetPosition(Position pos){
         if (!this.cmd.equals("move")) {
             return null;
         }
         switch (para2()){
             case 0:
                 //right
-                return Pair.of(pos.x(), pos.y()+1);
+                return Position.of(pos.x(), pos.y()+1);
             case 1:
                 //left
-                return Pair.of(pos.x(), pos.y()-1);
+                return Position.of(pos.x(), pos.y()-1);
 
             case 2:
                 // up
-                return Pair.of(pos.x()-1, pos.y());
+                return Position.of(pos.x()-1, pos.y());
 
             case 3:
                 // down
-                return Pair.of(pos.x()+1,pos.y());
+                return Position.of(pos.x()+1,pos.y());
         }
         return null;
 

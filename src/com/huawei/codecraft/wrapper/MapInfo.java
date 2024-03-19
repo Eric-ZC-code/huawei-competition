@@ -6,6 +6,7 @@ import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.util.Pair;
+import com.huawei.codecraft.util.Position;
 
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -13,14 +14,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class MapInfo {
     protected final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    protected LinkedHashMap<Pair,Good> availableGoodsMap = new LinkedHashMap<>(100);
+    protected LinkedHashMap<Position,Good> availableGoodsMap = new LinkedHashMap<>(100);
     protected LinkedList<Good> acquiredGoodsMap = new LinkedList<>();
     protected char[][] map = new char[200][200];
     protected Berth[] berths = new Berth[5];
     protected Robot[] robots = null;
-    protected HashMap<Pair,Robot> goingPoint = new HashMap<>(20);
+    protected HashMap<Position,Robot> goingPoint = new HashMap<>(20);
 
-    public LinkedHashMap<Pair, Good> availableGoods() {
+    public LinkedHashMap<Position, Good> availableGoods() {
         return availableGoodsMap;
     }
 
@@ -83,10 +84,11 @@ public abstract class MapInfo {
             rwLock.writeLock().unlock();
         }
     }
+
     public void addGood(int x, int y, int value) {
         rwLock.writeLock().lock();
         try {
-            availableGoodsMap.put(new Pair(x,y),new Good(x, y, value));
+            availableGoodsMap.put(new Position(x,y),new Good(x, y, value));
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -96,7 +98,9 @@ public abstract class MapInfo {
     abstract public Good findBestGood(Robot robot, GoodStrategy strategy);
     abstract public Berth findBestBerth(int x, int y);
     abstract public List<Command> getFullPath(Robot robot, Good good, Berth berth);
+    abstract public List<Command> getFullPath(Robot robot);
     abstract public List<Command> getRobotToGoodPath(Robot robot, Good good);
+    abstract public Pair<Good, List<Command>> getGoodAndPath(Robot robot);
     abstract public List<Command> getGoodToBerthPath(Good good, Berth berth, Robot robot);
     abstract public List<Command> getRobotToBerthPath(Robot robot, Berth berth);
     abstract public Command getGood(Robot robot, Good good);
@@ -104,11 +108,11 @@ public abstract class MapInfo {
     abstract public Integer getAvailableBerth();
     abstract public void addItem(int x, int y, char c);
     abstract public Berth currentBerth(int x, int y);
-    abstract public boolean acquirePoint(Pair pos,Robot robot);
-    abstract public Robot getPositionInfo(Pair pos);
-    abstract public boolean pointIsAvailable(Pair pair);
-    abstract public boolean removePoint(Pair pair);
+    abstract public boolean acquirePoint(Position pos, Robot robot);
+    abstract public Robot getPositionInfo(Position pos);
+    abstract public boolean pointIsAvailable(Position position);
+    abstract public boolean removePoint(Position position);
     abstract public boolean cleanPoints();
-    abstract public List<Command> circumventionCommand(Pair curPos);
+    abstract public List<Command> circumventionCommand(Position curPos);
     abstract public boolean isObstacle(int x, int y);
 }

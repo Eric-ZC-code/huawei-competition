@@ -1,48 +1,42 @@
 package com.huawei.codecraft.util;
 
-import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
-
 import java.util.Objects;
 
-public class Pair {
-    private int x, y;
+public class Pair<K, V> {
+    private K key;
+    private V value;
 
-    public Pair(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public Pair(K key, V value) {
+        this.key = key;
+        this.value = value;
     }
 
-    public int x() {
-        return x;
-    }
-    public static Pair of(int x, int y){
-        return new Pair(x,y);
+    public K getKey() {
+        return key;
     }
 
-    public Pair setX(int x) {
-        this.x = x;
-        return this;
-    }
-
-    public int y() {
-        return y;
-    }
-
-    public Pair setY(int y) {
-        this.y = y;
-        return this;
+    public V getValue() {
+        return value;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        Pair pair = (Pair) obj;
-        return x == pair.x && y == pair.y;
+        Pair<?, ?> pair = (Pair<?, ?>) obj;
+        return Objects.equals(key, pair.key) && Objects.equals(value, pair.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y);
+        return Objects.hash(key, value);
+    }
+
+    @Override
+    public String toString() {
+        return "Pair{" +
+                "key=" + key +
+                ", value=" + value +
+                '}';
     }
 }
