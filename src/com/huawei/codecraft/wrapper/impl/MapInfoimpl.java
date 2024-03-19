@@ -255,10 +255,69 @@ public class MapInfoimpl extends MapInfo {
         return BestBerth;
     }
 
-
+    // 获取可用泊位
+    @Override
     public Integer getAvailableBerth() {
-        Random rand = new Random();
-        return rand.nextInt(berths.length);
+        rwLock.writeLock().lock();
+        try {
+//            // 选择优先级最高的可用泊位
+//            PriorityQueue<Berth> availableBerths = new PriorityQueue<>(new Comparator<Berth>() {
+//                @Override
+//                public int compare(Berth b1, Berth b2) {
+//                    if (b1.priority() < b2.priority()) {
+//                        return 1;
+//                    } else if (b1.priority() > b2.priority()) {
+//                        return -1;
+//                    } else {
+//                        return 0;
+//                    }
+//                }
+//            });
+//
+//            for (int i = 0; i < this.berths.length; i++) {
+//                if (!this.berths[i].acquired()) {
+//                    availableBerths.offer(this.berths[i]);
+//                }
+//            }
+//            logger.info("Available Berths: " + availableBerths);
+//            int id = availableBerths.poll().id();
+
+            // 随机选择一个可用泊位
+            List<Integer> availableBerths = new ArrayList<>();
+            for (int i = 0; i < this.berths.length; i++) {
+                if (!this.berths[i].acquired()) {
+                    availableBerths.add(i);
+                }
+            }
+            logger.info("Available Berths: " + availableBerths);
+            Random rand = new Random();
+            int j = rand.nextInt(availableBerths.size());
+            int id = availableBerths.get(j);
+
+            logger.info("Get Berth: " + id + ", priority: " + this.berths[id].priority());
+            this.berths[id].setAcquired(true);
+            return id;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+        return null;
+    }
+
+    // 释放泊位
+    @Override
+    public void setBerthFree(int id) {
+        rwLock.writeLock().lock();
+        try {
+            this.berths[id].setAcquired(false);
+            logger.info("Set Berth Free: " + id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            rwLock.writeLock().unlock();
+        }
     }
 
     @Override
