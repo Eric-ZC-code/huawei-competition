@@ -190,6 +190,7 @@ public class Main {
                     }
                     System.err.flush();
                 }
+//                mainInstance.mapInfo.cleanPoints();
 
                 for (int i = 0; i < mainInstance.robot.length; i++) {
                     Robot robot = mainInstance.robot[i];

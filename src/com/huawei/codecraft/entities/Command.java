@@ -1,5 +1,7 @@
 package com.huawei.codecraft.entities;
 
+import com.huawei.codecraft.util.Pair;
+
 public class Command {
     private String cmd;
     private Integer actorId;
@@ -39,29 +41,28 @@ public class Command {
     public String cmd() {
         return cmd;
     }
-    public int[] targetPosition(int x, int y){
+    public Pair targetPosition(Pair pos){
         if (!this.cmd.equals("move")) {
             return null;
         }
         switch (para2()){
             case 0:
                 //right
-                y++;
-                break;
+                return Pair.of(pos.x(), pos.y()+1);
             case 1:
                 //left
-                y--;
-                break;
+                return Pair.of(pos.x(), pos.y()-1);
+
             case 2:
                 // up
-                x++;
-                break;
+                return Pair.of(pos.x()-1, pos.y());
+
             case 3:
                 // down
-                x--;
-                break;
+                return Pair.of(pos.x()+1,pos.y());
         }
-        return new int[]{x,y};
+        return null;
+
 
     }
 
