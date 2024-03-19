@@ -1,1 +1,1 @@
-.\PreliminaryJudge.exe -m maps\map2.txt -l WARN -s 0 "java -jar ..\out\main.jar" 
+.\PreliminaryJudge.exe -m maps\map-3.11.txt -l WARN -s 0 "java -jar ..\out\main.jar" 

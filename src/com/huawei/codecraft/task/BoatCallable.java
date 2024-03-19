@@ -38,18 +38,20 @@ public class BoatCallable implements Callable {
                     //船在泊位
                     try {
                         Berth berth = mapInfo.berths()[boat.pos()];
+                        // 立刻释放泊位，虚拟点的船可以过来占用
+                        mapInfo.setBerthFree(berth.id());
                         if(berth.boat()==null){
                             berth.setBoat(boat);
                         }
-//                        int min = Math.min(berth.loadingSpeed(), berth.amount());
-//                        berth.unload(min);
+                        // 装卸货
+                        int min = Math.min(berth.loadingSpeed(), berth.amount());
+                        berth.unload(min);
                         boat.load(berth.loadingSpeed());
                         if(boat.isFull()){
                             //船满了 再去虚拟点
                             if(boat.go()){
                                 // 船成功出发去虚拟点，需让出berth
                                 berth.setBoat(null);
-                                mapInfo.setBerthFree(berth.id());
                             }
 
                         }else {
@@ -59,7 +61,6 @@ public class BoatCallable implements Callable {
                         System.err.println("Boat error");
                         System.err.flush();
                         e.printStackTrace();
-                    } finally {
                     }
 
                 }

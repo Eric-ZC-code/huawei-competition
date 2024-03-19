@@ -237,7 +237,7 @@ public class MapInfoimpl extends MapInfo {
             int minDistance = Integer.MAX_VALUE;
             for (int i = 0; i < this.berths.length; i++) {
                 Berth berth = this.berths[i];
-                logger.info("Berth: " + berth);
+//                logger.info("Berth: " + berth);
                 int manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
                 if (minDistance > manhattanDistance) {
                     minDistance = manhattanDistance;
@@ -255,46 +255,39 @@ public class MapInfoimpl extends MapInfo {
         return BestBerth;
     }
 
-    // 获取可用泊位
+    // 获取最佳的可用泊位
     @Override
     public Integer getAvailableBerth() {
         rwLock.writeLock().lock();
         try {
-//            // 选择优先级最高的可用泊位
-//            PriorityQueue<Berth> availableBerths = new PriorityQueue<>(new Comparator<Berth>() {
-//                @Override
-//                public int compare(Berth b1, Berth b2) {
-//                    if (b1.priority() < b2.priority()) {
-//                        return 1;
-//                    } else if (b1.priority() > b2.priority()) {
-//                        return -1;
-//                    } else {
-//                        return 0;
-//                    }
-//                }
-//            });
-//
-//            for (int i = 0; i < this.berths.length; i++) {
-//                if (!this.berths[i].acquired()) {
-//                    availableBerths.offer(this.berths[i]);
-//                }
-//            }
-//            logger.info("Available Berths: " + availableBerths);
-//            int id = availableBerths.poll().id();
-
-            // 随机选择一个可用泊位
-            List<Integer> availableBerths = new ArrayList<>();
+            List<Berth> availableBerths = new ArrayList<>();
             for (int i = 0; i < this.berths.length; i++) {
                 if (!this.berths[i].acquired()) {
-                    availableBerths.add(i);
+                    availableBerths.add(this.berths[i]);
                 }
             }
-            logger.info("Available Berths: " + availableBerths);
-            Random rand = new Random();
-            int j = rand.nextInt(availableBerths.size());
-            int id = availableBerths.get(j);
 
-            logger.info("Get Berth: " + id + ", priority: " + this.berths[id].priority());
+            for (Berth availableBerth : availableBerths) {
+                logger.info("Available Berth: " + availableBerth.amount());
+            }
+
+//            // 随机选择一个可用泊位
+//            Random rand = new Random();
+//            int j = rand.nextInt(availableBerths.size());
+//            int id = availableBerths.get(j);
+//            logger.info("Get Berth: " + id);
+
+            // 选择货物最多的泊位
+            int maxGoodsNum = Integer.MIN_VALUE;
+            int id = -1;
+            for (int i = 0; i < availableBerths.size(); i++) {
+                if (availableBerths.get(i).amount() > maxGoodsNum) {
+                    maxGoodsNum = availableBerths.get(i).amount();
+                    id = i;
+                }
+            }
+
+            logger.info("Get Berth: " + id + " amount: " + maxGoodsNum);
             this.berths[id].setAcquired(true);
             return id;
         } catch (Exception e) {
