@@ -10,7 +10,6 @@ import java.util.*;
 
 
 public class Robot {
-    private static final MyLogger logger = MyLogger.getLogger("Robot");
     private final int yieldDistance = 3;
     public static final Random rand = new Random();
     private int id;
@@ -122,7 +121,6 @@ public class Robot {
             Command command = popCommand();
             if (command.cmd().equals("move")) {
                 if (moved) {
-                    logger.info("Robot" + id + " moved, skip this command");
                     this.currentCommand.addFirst(command);
                     break;
 
@@ -188,7 +186,6 @@ public class Robot {
                                 this.currentCommand.addFirst(Command.move(id,3));
                             }
                         }
-                        logger.info("Robot" + id + "use command " + command+ " to avoid conflict");
 
 //                        this.currentCommand.addFirst(command);
 //                        break;

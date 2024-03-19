@@ -16,7 +16,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MapInfoimpl extends MapInfo {
 
-    private MyLogger logger = MyLogger.getLogger("MapInfoimpl");
     private ReadWriteLock goingPointLock = new ReentrantReadWriteLock();
 
     @Override
@@ -39,15 +38,12 @@ public class MapInfoimpl extends MapInfo {
                     bestGood = findGoodByManhattanDistance(robot);
                     break;
             }
-            logger.info("Robot: " + robot.id() + " BestGood: " + bestGood + " [x: " + robot.x() + ", y: " + robot.y() + "]" + "availableGoods: " + availableGoodsMap.size()+ " acquiredGoods: " + acquiredGoodsMap.size());
         } catch (Exception e) {
 
-            logger.info("availablegoods: " + availableGoodsMap);
             e.printStackTrace();
         } finally {
             rwLock.readLock().unlock();
         }
-        logger.info("BestGood: " + bestGood + " availableGoods: " + availableGoodsMap.size());
 
         return bestGood;
     }
@@ -237,7 +233,6 @@ public class MapInfoimpl extends MapInfo {
             int minDistance = Integer.MAX_VALUE;
             for (int i = 0; i < this.berths.length; i++) {
                 Berth berth = this.berths[i];
-//                logger.info("Berth: " + berth);
                 int manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
                 if (minDistance > manhattanDistance) {
                     minDistance = manhattanDistance;
@@ -246,7 +241,6 @@ public class MapInfoimpl extends MapInfo {
             }
 
         } catch (Exception e) {
-            logger.info("berths: " + Arrays.toString(berths));
             e.printStackTrace();
         } finally {
             rwLock.readLock().unlock();
@@ -271,9 +265,6 @@ public class MapInfoimpl extends MapInfo {
                 }
             }
 
-//            for (Berth availableBerth : availableBerths) {
-//                logger.info("Available Berth: " + availableBerth.id() + " amount: " + availableBerth.amount());
-//            }
 
             int j = 0, id = 0;
             if (flag) {
@@ -293,7 +284,6 @@ public class MapInfoimpl extends MapInfo {
             }
 
             id = availableBerths.get(j).id();
-            logger.info("Get Berth: " + id + " amount: " + this.berths[id].amount());
             this.berths[id].setAcquired(true);
             return id;
         } catch (Exception e) {
@@ -310,7 +300,6 @@ public class MapInfoimpl extends MapInfo {
         rwLock.writeLock().lock();
         try {
             this.berths[id].setAcquired(false);
-            logger.info("Set Berth Free: " + id);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -330,7 +319,6 @@ public class MapInfoimpl extends MapInfo {
         // 寻路逻辑
         // 如果机器人没有搬运货物
         if (robot.carrying() == 0) {
-            logger.info("Robot is not carrying good");
             if (good == null) {
                 return new ArrayList<>();
             }
@@ -375,7 +363,6 @@ public class MapInfoimpl extends MapInfo {
         }
         // 如果机器人正在搬运货物
         else if (robot.carrying() == 1) {
-            logger.info("Robot is carrying good");
 
             // 如果机器人不可达泊位，返回空的命令数组
             List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
@@ -419,7 +406,6 @@ public class MapInfoimpl extends MapInfo {
         // 寻路逻辑
         // 如果机器人没有搬运货物
         if (robot.carrying() == 0) {
-            logger.info("Robot is not carrying good");
             // 判断货物是否已经被获取，获取了就返回空的命令数组
             rwLock.readLock().lock();
             try {
@@ -458,7 +444,6 @@ public class MapInfoimpl extends MapInfo {
         }
         // 如果机器人正在搬运货物
         else if (robot.carrying() == 1) {
-            logger.info("Robot is carrying good");
 
             // pull good
             Command pullGood = pullGood(robot, null, berth);
@@ -719,7 +704,6 @@ public class MapInfoimpl extends MapInfo {
                 }
             }
         }
-        logger.info("Move Path: " + movePath);
         return movePath;
     }
     private Position findBerthPoint(Berth berth){

@@ -6,7 +6,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MessageCenter {
-    private static MyLogger logger = MyLogger.getLogger("MessageCenter");
 
     public static ReadWriteLock rwLock = new ReentrantReadWriteLock();
     public static int sentMsg=0;
@@ -36,7 +35,7 @@ public class MessageCenter {
             add();
             System.out.println(cmd);
             System.out.flush();
-            logger.info(cmd.toString());
+//            logger.info(cmd.toString());
 
             return true;
         } catch (Exception e) {
