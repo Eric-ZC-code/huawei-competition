@@ -15,6 +15,9 @@ public class Pair {
     public int x() {
         return x;
     }
+    public static Pair of(int x, int y){
+        return new Pair(x,y);
+    }
 
     public Pair setX(int x) {
         this.x = x;
