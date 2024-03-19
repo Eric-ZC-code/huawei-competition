@@ -260,34 +260,40 @@ public class MapInfoimpl extends MapInfo {
     public Integer getAvailableBerth() {
         rwLock.writeLock().lock();
         try {
+            boolean flag = false;
             List<Berth> availableBerths = new ArrayList<>();
             for (int i = 0; i < this.berths.length; i++) {
                 if (!this.berths[i].acquired()) {
                     availableBerths.add(this.berths[i]);
                 }
-            }
-
-            for (Berth availableBerth : availableBerths) {
-                logger.info("Available Berth: " + availableBerth.amount());
-            }
-
-//            // 随机选择一个可用泊位
-//            Random rand = new Random();
-//            int j = rand.nextInt(availableBerths.size());
-//            int id = availableBerths.get(j);
-//            logger.info("Get Berth: " + id);
-
-            // 选择货物最多的泊位
-            int maxGoodsNum = Integer.MIN_VALUE;
-            int id = -1;
-            for (int i = 0; i < availableBerths.size(); i++) {
-                if (availableBerths.get(i).amount() > maxGoodsNum) {
-                    maxGoodsNum = availableBerths.get(i).amount();
-                    id = i;
+                if (this.berths[0].amount() != this.berths[i].amount()) {
+                    flag = true;
                 }
             }
 
-            logger.info("Get Berth: " + id + " amount: " + maxGoodsNum);
+            for (Berth availableBerth : availableBerths) {
+                logger.info("Available Berth: " + availableBerth.id() + " amount: " + availableBerth.amount());
+            }
+
+            int j = 0, id = 0;
+            if (flag) {
+                // 选择货物最多的泊位
+                int maxGoodsNum = Integer.MIN_VALUE;
+                for (int i = 0; i < availableBerths.size(); i++) {
+                    if (availableBerths.get(i).amount() > maxGoodsNum) {
+                        maxGoodsNum = availableBerths.get(i).amount();
+                        j = i;
+                    }
+                }
+
+            } else {
+                // 随机选择一个可用泊位
+                Random rand = new Random();
+                j = rand.nextInt(availableBerths.size());
+            }
+
+            id = availableBerths.get(j).id();
+            logger.info("Get Berth: " + id + " amount: " + this.berths[id].amount());
             this.berths[id].setAcquired(true);
             return id;
         } catch (Exception e) {

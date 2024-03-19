@@ -56,7 +56,6 @@ public abstract class MapInfo {
 
         for (int i = 0; i < berths.length; i++) {
             this.berths[i] = berths[i];
-//            this.berths[i].initPriority();
         }
         return this;
     }
