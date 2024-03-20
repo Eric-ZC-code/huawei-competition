@@ -283,51 +283,47 @@ public class MapInfoimpl extends MapInfo {
     // 获取最佳的可用泊位
     @Override
     public Integer getAvailableBerth() {
-        berthRWLock.writeLock().lock();
+        berthRWLock.readLock().lock();
         try {
-            boolean flag = false;
-            List<Berth> availableBerths = new ArrayList<>();
+            int maxGoodsNum = Integer.MIN_VALUE;
+            int id = 0;
             for (int i = 0; i < this.berths.length; i++) {
-                if (!this.berths[i].acquired()) {
-                    availableBerths.add(this.berths[i]);
-                }
-                if (this.berths[0].amount() != this.berths[i].amount()) {
-                    flag = true;
-                }
-            }
+                if(this.berths[i].acquired()){
+                    continue;
 
-//            for (Berth availableBerth : availableBerths) {
-//                logger.info("Available Berth: " + availableBerth.id() + " amount: " + availableBerth.amount());
-//            }
-
-            int j = 0, id = 0;
-            if (flag) {
-                // 选择货物最多的泊位
-                int maxGoodsNum = Integer.MIN_VALUE;
-                for (int i = 0; i < availableBerths.size(); i++) {
-                    if (availableBerths.get(i).amount() > maxGoodsNum) {
-                        maxGoodsNum = availableBerths.get(i).amount();
-                        j = i;
+                }else {
+                    if (this.berths[i].amount() > maxGoodsNum) {
+                        maxGoodsNum = this.berths[i].amount();
+                        id = i;
                     }
                 }
 
-            } else {
-                // 随机选择一个可用泊位
-                Random rand = new Random();
-                j = rand.nextInt(availableBerths.size());
             }
 
-            id = availableBerths.get(j).id();
-            this.berths[id].setAcquired(true);
             return id;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            berthRWLock.readLock().unlock();
+        }
+        return null;
+    }
+
+    public boolean acquireBerth(int id) {
+        berthRWLock.writeLock().lock();
+        try {
+            if(this.berths[id].acquired()){
+                return false;
+            }
+            this.berths[id].setAcquired(true);
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             berthRWLock.writeLock().unlock();
         }
-        return null;
+        return false;
     }
-
     // 释放泊位
     @Override
     public void setBerthFree(int id) {
@@ -436,7 +432,7 @@ public class MapInfoimpl extends MapInfo {
         }
         Good good = GoodAndPath.getKey();
         List<Command> pathToGood = GoodAndPath.getValue();
-        Berth berth = findBestBerth(good.x(), good.y(),null,BerthStrategy.LEAST_TIME);
+        Berth berth = findBestBerth(good.x(), good.y(),null,BerthStrategy.MANHANTTAN);
 
         // 如果机器人不可达泊位，返回空的命令数组
         List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
