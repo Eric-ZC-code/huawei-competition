@@ -36,13 +36,13 @@ public class Berth {
         this.id = id;
         return this;
     }
-    public int amount() {
+    public synchronized int amount() {
         return amount;
     }
-    public void load(int amount) {
+    public synchronized void load(int amount) {
         this.amount += amount;
     }
-    public void unload(int amount) {
+    public synchronized void unload(int amount) {
         this.amount -= amount;
     }
 
