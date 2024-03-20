@@ -13,11 +13,12 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class MapInfo {
-    protected final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    protected final ReadWriteLock goodRWLock = new ReentrantReadWriteLock();
+    protected final ReadWriteLock berthRWLock = new ReentrantReadWriteLock();
     protected LinkedHashMap<Position,Good> availableGoodsMap = new LinkedHashMap<>(100);
     protected LinkedList<Good> acquiredGoodsMap = new LinkedList<>();
     protected char[][] map = new char[200][200];
-    protected Berth[] berths = new Berth[5];
+    protected Berth[] berths = new Berth[10];
     protected Robot[] robots = null;
     protected HashMap<Position,Robot> goingPoint = new HashMap<>(20);
 
@@ -53,46 +54,33 @@ public abstract class MapInfo {
     }
 
     public MapInfo setBerths(Berth[] berths) {
-//        PriorityQueue<Berth> queue = new PriorityQueue<>(new Comparator<Berth>() {
-//            @Override
-//            public int compare(Berth b1, Berth b2) {
-//                if (b1.loadingSpeed() < b2.loadingSpeed()) {
-//                    return -1;
-//                } else if (b1.loadingSpeed() > b2.loadingSpeed()) {
-//                    return 1;
-//                } else {
-//                    return 0;
-//                }
-//            }
-//        });
+
         for (int i = 0; i < berths.length; i++) {
-            if (i%2 == 0){
-                this.berths[i/2] = berths[i];
-            }
+            this.berths[i] = berths[i];
         }
         return this;
     }
 
     public void addGood(Good good) {
-        rwLock.writeLock().lock();
+        goodRWLock.writeLock().lock();
 
         try {
             availableGoodsMap.put(good.pair(),good);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            rwLock.writeLock().unlock();
+            goodRWLock.writeLock().unlock();
         }
     }
 
     public void addGood(int x, int y, int value) {
-        rwLock.writeLock().lock();
+        goodRWLock.writeLock().lock();
         try {
             availableGoodsMap.put(new Position(x,y),new Good(x, y, value));
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            rwLock.writeLock().unlock();
+            goodRWLock.writeLock().unlock();
         }
     }
     abstract public Good findBestGood(Robot robot, GoodStrategy strategy);
@@ -106,6 +94,7 @@ public abstract class MapInfo {
     abstract public Command getGood(Robot robot, Good good);
     abstract public Command pullGood(Robot robot, Good good, Berth berth);
     abstract public Integer getAvailableBerth();
+    abstract public void setBerthFree(int id);
     abstract public void addItem(int x, int y, char c);
     abstract public Berth currentBerth(int x, int y);
     abstract public boolean acquirePoint(Position pos, Robot robot);

@@ -210,7 +210,6 @@ public class Robot {
                         if(berth!=null){
                             berth.load(1);
                         }
-
                     } catch (Exception e) {
                         System.err.println("Robot error: "+e);
                         e.printStackTrace();
