@@ -285,7 +285,6 @@ public class MapInfoimpl extends MapInfo {
             }
 
             id = availableBerths.get(j).id();
-            logger.info("Get Berth: " + id + " amount: " + this.berths[id].amount());
             this.berths[id].setAcquired(true);
             return id;
         } catch (Exception e) {
@@ -302,7 +301,7 @@ public class MapInfoimpl extends MapInfo {
         berthRWLock.writeLock().lock();
         try {
             this.berths[id].setAcquired(false);
-            logger.info("Set Berth Free: " + id);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -322,7 +321,7 @@ public class MapInfoimpl extends MapInfo {
         // 寻路逻辑
         // 如果机器人没有搬运货物
         if (robot.carrying() == 0) {
-            logger.info("Robot is not carrying good");
+
             if (good == null) {
                 return new ArrayList<>();
             }
@@ -367,7 +366,7 @@ public class MapInfoimpl extends MapInfo {
         }
         // 如果机器人正在搬运货物
         else if (robot.carrying() == 1) {
-            logger.info("Robot is carrying good");
+
 
             // 如果机器人不可达泊位，返回空的命令数组
             List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
@@ -411,7 +410,6 @@ public class MapInfoimpl extends MapInfo {
         // 寻路逻辑
         // 如果机器人没有搬运货物
         if (robot.carrying() == 0) {
-            logger.info("Robot is not carrying good");
             // 判断货物是否已经被获取，获取了就返回空的命令数组
             goodRWLock.readLock().lock();
             try {
@@ -450,7 +448,7 @@ public class MapInfoimpl extends MapInfo {
         }
         // 如果机器人正在搬运货物
         else if (robot.carrying() == 1) {
-            logger.info("Robot is carrying good");
+
 
             // pull good
             Command pullGood = pullGood(robot, null, berth);
@@ -711,7 +709,7 @@ public class MapInfoimpl extends MapInfo {
                 }
             }
         }
-        logger.info("Move Path: " + movePath);
+
         return movePath;
     }
     private Position findBerthPoint(Berth berth){
