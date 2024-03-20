@@ -150,6 +150,7 @@ public class Main {
                     System.err.println("frame: "+id);
                 }
 
+
                 // 一个简易的计时器保证输出中心在processtime之前关闭输出，保证不丢失输出
     //            if(frame==50){
     //                System.err.println("time: "+(System.currentTimeMillis()-l1));
@@ -240,9 +241,6 @@ public class Main {
             e.printStackTrace();
         } finally {
             // Wait for user input to keep the console window open
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Press Enter to exit...");
-            scanner.nextLine();
 
             mainInstance.robotExecutor.shutdown();
             mainInstance.boatExecutor.shutdown();
