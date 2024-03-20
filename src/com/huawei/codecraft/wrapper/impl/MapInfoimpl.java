@@ -229,14 +229,16 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
-    public Berth findBestBerth(int x, int y) {
-
+    public Berth findBestBerth(int x, int y,Set<Berth> blackList) {
         Berth BestBerth = null;
         goodRWLock.readLock().lock();
         try {
             int minDistance = Integer.MAX_VALUE;
             for (int i = 0; i < this.berths.length; i++) {
                 Berth berth = this.berths[i];
+                if(blackList!=null&&blackList.contains(berth)){
+                    continue;
+                }
 //                logger.info("Berth: " + berth);
                 int manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
                 if (minDistance > manhattanDistance) {
@@ -357,9 +359,13 @@ public class MapInfoimpl extends MapInfo {
 
             // 获取货物到泊位的路径
             List<Command> goodToBerth = getGoodToBerthPath(good, berth, robot);
-
+            //如果泊位不可达则加入黑名单，下次不再搜寻
+            if(goodToBerth.isEmpty()){
+                robot.berthBlackList().add(berth);
+                return new ArrayList<>();
+            }
             // 如果机器人到货物的路径或者货物到泊位的路径为空，返回空的命令数组
-            if (pathToGood.isEmpty() || goodToBerth.isEmpty()) {
+            if (pathToGood.isEmpty()) {
                 return new ArrayList<>();
             }
 
@@ -408,7 +414,7 @@ public class MapInfoimpl extends MapInfo {
         }
         Good good = GoodAndPath.getKey();
         List<Command> pathToGood = GoodAndPath.getValue();
-        Berth berth = findBestBerth(good.x(), good.y());
+        Berth berth = findBestBerth(good.x(), good.y(),null);
 
         // 如果机器人不可达泊位，返回空的命令数组
         List<Command> pathToBerth = getRobotToBerthPath(robot, berth);

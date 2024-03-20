@@ -84,7 +84,7 @@ public abstract class MapInfo {
         }
     }
     abstract public Good findBestGood(Robot robot, GoodStrategy strategy);
-    abstract public Berth findBestBerth(int x, int y);
+    abstract public Berth findBestBerth(int x, int y,Set<Berth> blackList);
     abstract public List<Command> getFullPath(Robot robot, Good good, Berth berth);
     abstract public List<Command> getFullPath(Robot robot);
     abstract public List<Command> getRobotToGoodPath(Robot robot, Good good);

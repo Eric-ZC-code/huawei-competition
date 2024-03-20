@@ -12,6 +12,7 @@ import java.util.*;
 public class Robot {
     private static final MyLogger logger = MyLogger.getLogger("Robot");
     private final int yieldDistance = 3;
+    private final Set<Berth> berthBlackList = new HashSet<>();
     public static final Random rand = new Random();
     private int id;
     private int x, y, carrying;
@@ -100,6 +101,10 @@ public class Robot {
 
     public int status() {
         return status;
+    }
+
+    public Set<Berth> berthBlackList() {
+        return berthBlackList;
     }
 
     public void executeAll(MapInfo map){
@@ -206,7 +211,7 @@ public class Robot {
                 } else if (command.cmd().equals("pull")) {
                     try {
                         shouldCarry = false;
-                        Berth berth = map.findBestBerth(this.x, this.y);
+                        Berth berth = map.findBestBerth(this.x, this.y,berthBlackList);
                         if(berth!=null){
                             berth.load(1);
                         }
