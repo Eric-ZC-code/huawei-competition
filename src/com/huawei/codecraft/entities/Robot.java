@@ -1,7 +1,6 @@
 package com.huawei.codecraft.entities;
 
 
-import com.huawei.codecraft.enums.BerthStrategy;
 import com.huawei.codecraft.util.MessageCenter;
 import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.util.Position;
@@ -9,10 +8,13 @@ import com.huawei.codecraft.wrapper.MapInfo;
 import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
 
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class Robot {
     private static final MyLogger logger = MyLogger.getLogger("Robot");
+    private ReentrantLock robotLock = new ReentrantLock();
+    private boolean searching = false;
     private final int yieldDistance = 3;
     private final Set<Berth> berthBlackList = new HashSet<>();
     public static final Random rand = new Random();
@@ -74,6 +76,15 @@ public class Robot {
         return this;
     }
 
+    public boolean searching() {
+        return searching;
+    }
+
+    public Robot setSearching(boolean searching) {
+        this.searching = searching;
+        return this;
+    }
+
     public int id() {
         return id;
     }
@@ -107,6 +118,10 @@ public class Robot {
 
     public Set<Berth> berthBlackList() {
         return berthBlackList;
+    }
+
+    public ReentrantLock robotLock() {
+        return robotLock;
     }
 
     public void executeAll(MapInfo map){
