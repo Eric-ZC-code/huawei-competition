@@ -10,7 +10,6 @@ import java.util.*;
 
 
 public class Robot {
-    private static ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final int yieldDistance = 4;
     public static final Random rand = new Random();
     private int id;
