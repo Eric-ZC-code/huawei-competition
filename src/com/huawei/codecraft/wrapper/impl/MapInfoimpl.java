@@ -26,7 +26,7 @@ public class MapInfoimpl extends MapInfo {
         }
 
         Good bestGood = null;
-        rwLock.readLock().lock();
+        goodRWLock.readLock().lock();
         try {
             switch (goodStrategy) {
                 case VALUE:
@@ -45,7 +45,7 @@ public class MapInfoimpl extends MapInfo {
             logger.info("availablegoods: " + availableGoodsMap);
             e.printStackTrace();
         } finally {
-            rwLock.readLock().unlock();
+            goodRWLock.readLock().unlock();
         }
         logger.info("BestGood: " + bestGood + " availableGoods: " + availableGoodsMap.size());
 
@@ -58,7 +58,7 @@ public class MapInfoimpl extends MapInfo {
         double distanceParam = 1.0;
         Good bestGood = null;
 //        final int size = this.availableGoodsMap.size();
-        rwLock.readLock().lock();
+        goodRWLock.readLock().lock();
         try {
             for (Map.Entry<Position, Good> pairGoodEntry : availableGoodsMap.entrySet()) {
                 Good availableGood = Optional.of(pairGoodEntry.getValue()).get();
@@ -74,16 +74,16 @@ public class MapInfoimpl extends MapInfo {
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            rwLock.readLock().unlock();
+            goodRWLock.readLock().unlock();
         }
-        rwLock.readLock().unlock();
+        goodRWLock.readLock().unlock();
         return bestGood;
     }
 
     private Good findGoodByManhattanDistance(Robot robot) {
         int minDistance = Integer.MAX_VALUE;
         Good bestGood = null;
-        rwLock.readLock().lock();
+        goodRWLock.readLock().lock();
         try {
             for (Map.Entry<Position, Good> pairGoodEntry : availableGoodsMap.entrySet()) {
                 //                System.err.println(i);
@@ -98,7 +98,7 @@ public class MapInfoimpl extends MapInfo {
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            rwLock.readLock().unlock();
+            goodRWLock.readLock().unlock();
         }
 
         if(minDistance>100){
@@ -111,7 +111,7 @@ public class MapInfoimpl extends MapInfo {
     private Good findGoodByValue(Robot robot) {
         int max = Integer.MIN_VALUE;
         Good bestGood = null;
-        rwLock.readLock().lock();
+        goodRWLock.readLock().lock();
 
         try {
             for (Map.Entry<Position, Good> pairGoodEntry : availableGoodsMap.entrySet()) {
@@ -126,7 +126,7 @@ public class MapInfoimpl extends MapInfo {
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            rwLock.readLock().unlock();
+            goodRWLock.readLock().unlock();
         }
         return bestGood;
 
@@ -232,7 +232,7 @@ public class MapInfoimpl extends MapInfo {
     public Berth findBestBerth(int x, int y) {
 
         Berth BestBerth = null;
-        rwLock.readLock().lock();
+        goodRWLock.readLock().lock();
         try {
             int minDistance = Integer.MAX_VALUE;
             for (int i = 0; i < this.berths.length; i++) {
@@ -249,7 +249,7 @@ public class MapInfoimpl extends MapInfo {
             logger.info("berths: " + Arrays.toString(berths));
             e.printStackTrace();
         } finally {
-            rwLock.readLock().unlock();
+            goodRWLock.readLock().unlock();
         }
 
         return BestBerth;
@@ -258,7 +258,7 @@ public class MapInfoimpl extends MapInfo {
     // 获取最佳的可用泊位
     @Override
     public Integer getAvailableBerth() {
-        rwLock.writeLock().lock();
+        berthRWLock.writeLock().lock();
         try {
             boolean flag = false;
             List<Berth> availableBerths = new ArrayList<>();
@@ -299,7 +299,7 @@ public class MapInfoimpl extends MapInfo {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            rwLock.writeLock().unlock();
+            berthRWLock.writeLock().unlock();
         }
         return null;
     }
@@ -307,7 +307,7 @@ public class MapInfoimpl extends MapInfo {
     // 释放泊位
     @Override
     public void setBerthFree(int id) {
-        rwLock.writeLock().lock();
+        berthRWLock.writeLock().lock();
         try {
             this.berths[id].setAcquired(false);
             logger.info("Set Berth Free: " + id);
@@ -315,7 +315,7 @@ public class MapInfoimpl extends MapInfo {
             e.printStackTrace();
         }
         finally {
-            rwLock.writeLock().unlock();
+            berthRWLock.writeLock().unlock();
         }
     }
 
@@ -335,7 +335,7 @@ public class MapInfoimpl extends MapInfo {
                 return new ArrayList<>();
             }
             // 判断货物是否已经被获取，获取了就返回空的命令数组
-            rwLock.readLock().lock();
+            goodRWLock.readLock().lock();
             try {
                 if (good.acquired()) {
                     return new ArrayList<>();
@@ -343,7 +343,7 @@ public class MapInfoimpl extends MapInfo {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                rwLock.readLock().unlock();
+                goodRWLock.readLock().unlock();
             }
 
             // 获取机器人到货物的路径
@@ -421,7 +421,7 @@ public class MapInfoimpl extends MapInfo {
         if (robot.carrying() == 0) {
             logger.info("Robot is not carrying good");
             // 判断货物是否已经被获取，获取了就返回空的命令数组
-            rwLock.readLock().lock();
+            goodRWLock.readLock().lock();
             try {
                 if (good.acquired()) {
                     return new ArrayList<>();
@@ -429,7 +429,7 @@ public class MapInfoimpl extends MapInfo {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                rwLock.readLock().unlock();
+                goodRWLock.readLock().unlock();
             }
 
             // 获取货物，acquire货物
@@ -473,7 +473,7 @@ public class MapInfoimpl extends MapInfo {
     // bfs洪水泛滥法，无目的地四处搜索
     public Pair<Good,List<Position>> mazePathPool(char[][] maze, int startX, int startY) {
         // availableGoods 需要一个读锁
-        rwLock.readLock().lock();
+        goodRWLock.readLock().lock();
         try {
             Pair<Good, List<Position>> GoodAndPath; // 方法返回值: 目标货物和路径
             Set<Position> visited = new HashSet<>();
@@ -511,7 +511,7 @@ public class MapInfoimpl extends MapInfo {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            rwLock.readLock().unlock();
+            goodRWLock.readLock().unlock();
         }
 //        System.err.println("No good found");
 
@@ -661,7 +661,7 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public Command getGood(Robot robot, Good good) {
-        rwLock.writeLock().lock();
+        goodRWLock.writeLock().lock();
         try {
             if(good.acquired()){
                 return null;
@@ -673,21 +673,21 @@ public class MapInfoimpl extends MapInfo {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            rwLock.writeLock().unlock();
+            goodRWLock.writeLock().unlock();
         }
         return null;
     }
 
     @Override
     public Command pullGood(Robot robot, Good good, Berth berth) {
-        rwLock.writeLock().lock();
+        goodRWLock.writeLock().lock();
         try {
             acquiredGoodsMap.remove(good);
             return Command.pull(robot.id());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            rwLock.writeLock().unlock();
+            goodRWLock.writeLock().unlock();
         }
         return Command.ignore();
     }

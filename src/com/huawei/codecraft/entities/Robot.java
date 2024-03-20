@@ -207,10 +207,8 @@ public class Robot {
                     try {
                         shouldCarry = false;
                         Berth berth = map.findBestBerth(this.x, this.y);
-                        synchronized (berth){
-                            if(berth!=null){
-                                berth.load(1);
-                            }
+                        if(berth!=null){
+                            berth.load(1);
                         }
                     } catch (Exception e) {
                         System.err.println("Robot error: "+e);

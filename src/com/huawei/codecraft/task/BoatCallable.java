@@ -43,12 +43,9 @@ public class BoatCallable implements Callable {
                         if(berth.boat()==null){
                             berth.setBoat(boat);
                         }
-                        synchronized (berth){
-                            int min = Math.min(berth.loadingSpeed(), berth.amount());
-                            berth.unload(min);
-                        }
                         // 装卸货
-
+                        int min = Math.min(berth.loadingSpeed(), berth.amount());
+                        berth.unload(min);
                         boat.load(berth.loadingSpeed());
                         if(boat.isFull()){
                             //船满了 再去虚拟点
