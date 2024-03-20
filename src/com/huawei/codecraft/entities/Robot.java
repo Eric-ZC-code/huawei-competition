@@ -126,20 +126,6 @@ public class Robot {
 
     public void executeAll(MapInfo map){
         boolean moved = false;
-        Robot[] robots = map.robots();
-        Random rand = new Random();
-        Robot nearby = havingRobotNearby(robots);
-        Berth[] berths = map.berths();
-        if(nearby!=null){
-            //普通的基于priority 避让没有 random效果好
-//            int i = rand.nextInt(10);
-//            if(i%2==0){
-//                logger.info("Robot" + id + " has robot nearby, skip this command by random");
-//                return;
-////            }
-//            clean();
-//            return;
-        }
         while (containsCommand()){
             Command command = popCommand();
             if (command.cmd().equals("move")) {
