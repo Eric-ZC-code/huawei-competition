@@ -27,6 +27,9 @@ public class RobotCallable implements Callable {
 
     @Override
     public Object call() throws Exception {
+        if(robot.searching()){
+            return null;
+        }
         boolean b = robot.robotLock().tryLock();
         if(!b){
             return null;
@@ -50,6 +53,7 @@ public class RobotCallable implements Callable {
 
             } else {
                 if(robot.carrying()==0&&robot.shouldCarry()==true){
+                    // 货物消失没有拿到或者其他 inconsistent的状态
                     robot.clean();
                     robot.setShouldCarry(false);
                     if(!setCmd(robot)){
@@ -77,7 +81,7 @@ public class RobotCallable implements Callable {
                 // 机器人已经携带货物
 
                 Berth nearestBerth = mapInfo.findBestBerth(robot.x(), robot.y(),
-                                                           robot.berthBlackList(), BerthStrategy.LEAST_TIME);
+                                                           robot.berthBlackList(), BerthStrategy.MANHANTTAN);
 
                 if(robot.berthBlackList().contains(nearestBerth)||nearestBerth==null){
                     return false;
@@ -87,20 +91,20 @@ public class RobotCallable implements Callable {
                 return true;
             }
             else {
-    //            Good nearestGood = mapInfo.findBestGood(robot, goodStrategy);
-    //            if(nearestGood==null){
-    //                return false;
-    //            }
-    //
-    //            Berth nearestBerth = mapInfo.findBestBerth(nearestGood.x(), nearestGood.y(),
-    //                                                       robot.berthBlackList(), BerthStrategy.LEAST_TIME);
-    ////        Berth nearestBerth = mapInfo.berths()[robot.id()%mapInfo.berths().length];
-    //            if (nearestGood != null && nearestBerth != null) {
-    //                List<Command> path = mapInfo.getFullPath(robot, nearestGood, nearestBerth);
-    //                robot.fillCommand(path);
-    //                return true;
-    //            }
-    //            return false;
+//                Good nearestGood = mapInfo.findBestGood(robot, goodStrategy);
+//                if(nearestGood==null){
+//                    return false;
+//                }
+//
+//                Berth nearestBerth = mapInfo.findBestBerth(nearestGood.x(), nearestGood.y(),
+//                                                           robot.berthBlackList(), BerthStrategy.MANHANTTAN);
+//    //        Berth nearestBerth = mapInfo.berths()[robot.id()%mapInfo.berths().length];
+//                if (nearestGood != null && nearestBerth != null) {
+//                    List<Command> path = mapInfo.getFullPath(robot, nearestGood, nearestBerth);
+//                    robot.fillCommand(path);
+//                    return true;
+//                }
+//                return false;
 
                 List<Command> path = mapInfo.getFullPath(robot);
                 if (path == null || path.size() == 0){
