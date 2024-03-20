@@ -4,6 +4,7 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Boat;
 import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
+import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -39,7 +40,7 @@ public class BoatCallable implements Callable {
                     try {
                         Berth berth = mapInfo.berths()[boat.pos()];
                         // 立刻释放泊位，虚拟点的船可以过来占用
-                        mapInfo.setBerthFree(berth.id());
+
                         if(berth.boat()==null){
                             berth.setBoat(boat);
                         }
@@ -52,6 +53,7 @@ public class BoatCallable implements Callable {
                             if(boat.go()){
                                 // 船成功出发去虚拟点，需让出berth
                                 berth.setBoat(null);
+                                mapInfo.setBerthFree(berth.id());
                             }
 
                         }else {

@@ -4,11 +4,13 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.enums.BerthStrategy;
 import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.util.Pair;
 import com.huawei.codecraft.util.Position;
 import com.huawei.codecraft.wrapper.MapInfo;
+import com.sun.jndi.ldap.Ber;
 
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -229,9 +231,18 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
-    public Berth findBestBerth(int x, int y,Set<Berth> blackList) {
+    public Berth findBestBerth(int x, int y, Set<Berth> blackList, BerthStrategy strategy) {
+        switch (strategy){
+            case LEAST_TIME:
+                return findBestBerthLeastTime(x,y,blackList);
+            default:
+                return findBestBerthManhanttan(x, y, blackList);
+        }
+
+
+    }
+    public Berth findBestBerthManhanttan(int x, int y, Set<Berth> blackList){
         Berth BestBerth = null;
-        goodRWLock.readLock().lock();
         try {
             int minDistance = Integer.MAX_VALUE;
             for (int i = 0; i < this.berths.length; i++) {
@@ -250,11 +261,31 @@ public class MapInfoimpl extends MapInfo {
         } catch (Exception e) {
             logger.info("berths: " + Arrays.toString(berths));
             e.printStackTrace();
-        } finally {
-            goodRWLock.readLock().unlock();
         }
-
         return BestBerth;
+    }
+    public Berth findBestBerthLeastTime(int x, int y,Set<Berth> blackList){
+        Berth bestBerth = null;
+        try {
+            int minTime = Integer.MAX_VALUE;
+            for (int i = 0; i < this.berths.length; i++) {
+                Berth berth = this.berths[i];
+                int manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
+                if(blackList!=null&&blackList.contains(berth)){
+                    continue;
+                }
+                int ratio = manhattanDistance*berth.transportTime();
+                if (minTime > ratio) {
+                    minTime = ratio;
+                    bestBerth = berth;
+                }
+            }
+
+        } catch (Exception e) {
+            logger.info("berths: " + Arrays.toString(berths));
+            e.printStackTrace();
+        }
+        return bestBerth;
     }
 
     // 获取最佳的可用泊位
@@ -414,11 +445,12 @@ public class MapInfoimpl extends MapInfo {
         }
         Good good = GoodAndPath.getKey();
         List<Command> pathToGood = GoodAndPath.getValue();
-        Berth berth = findBestBerth(good.x(), good.y(),null);
+        Berth berth = findBestBerth(good.x(), good.y(),null,BerthStrategy.LEAST_TIME);
 
         // 如果机器人不可达泊位，返回空的命令数组
         List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
         if (pathToBerth.isEmpty()) {
+            robot.berthBlackList().add(berth);
             return new ArrayList<>();
         }
 
@@ -489,8 +521,9 @@ public class MapInfoimpl extends MapInfo {
             Position start = new Position(startX, startY);
             queue.offer(start);
             visited.add(start);
-
-            while (!queue.isEmpty()) {
+            int maxDepth = Integer.MAX_VALUE;
+            while (!queue.isEmpty()&&maxDepth>0) {
+                maxDepth--;
                 Position pos = queue.poll();
                 if (this.availableGoods().get(pos) != null) {
                     Good good = this.availableGoods().get(pos);
@@ -598,6 +631,14 @@ public class MapInfoimpl extends MapInfo {
 
         return Collections.emptyList(); // 未找到路径时返回空列表
     }
+    public Berth whereAmI(Robot r){
+        for (Berth berth : berths) {
+            if(berth.x()<=r.x()&&r.x()<berth.x()+4&&berth.y()<=r.y()&&r.y()<berth.y()+4){
+                return berth;
+            }
+        }
+        return null;
+    }
 
     // 启发式函数：曼哈顿距离
     private static int heuristic(Position node, int endX, int endY) {
@@ -699,7 +740,9 @@ public class MapInfoimpl extends MapInfo {
     }
 
     public boolean isObstacle(int x, int y) {
-
+        if(x<0||x>=this.map.length||y<0||y>=this.map[0].length){
+            return true;
+        }
         return this.map[x][y] == '#' || this.map[x][y] == '*' || this.map[x][y] == 'A';
 
     }

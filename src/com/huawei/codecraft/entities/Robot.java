@@ -1,10 +1,12 @@
 package com.huawei.codecraft.entities;
 
 
+import com.huawei.codecraft.enums.BerthStrategy;
 import com.huawei.codecraft.util.MessageCenter;
 import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.util.Position;
 import com.huawei.codecraft.wrapper.MapInfo;
+import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
 
 import java.util.*;
 
@@ -211,8 +213,9 @@ public class Robot {
                 } else if (command.cmd().equals("pull")) {
                     try {
                         shouldCarry = false;
-                        Berth berth = map.findBestBerth(this.x, this.y,berthBlackList);
+                        Berth berth = ((MapInfoimpl) map).whereAmI(this);
                         if(berth!=null){
+
                             berth.load(1);
                         }
                     } catch (Exception e) {
