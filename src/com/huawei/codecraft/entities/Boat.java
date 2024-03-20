@@ -5,10 +5,12 @@ import com.huawei.codecraft.util.MyLogger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Boat {
     private static final MyLogger logger = MyLogger.getLogger("Boat");
     private int num;
+    private ReentrantLock boatLock = new ReentrantLock();
     private int pos;
     private int status;
     private int capacity;
@@ -20,6 +22,10 @@ public class Boat {
 
     public int id() {
         return id;
+    }
+
+    public ReentrantLock boatLock() {
+        return boatLock;
     }
 
     public Boat setId(int id) {

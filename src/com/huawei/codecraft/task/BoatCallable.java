@@ -8,6 +8,7 @@ import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 public class BoatCallable implements Callable {
     private Integer frame;
@@ -21,8 +22,11 @@ public class BoatCallable implements Callable {
     }
     @Override
     public Object call() throws Exception {
-
-        synchronized (boat){
+        boolean b = boat.boatLock().tryLock(0, TimeUnit.MILLISECONDS);
+        if(!b){
+            return null;
+        }
+        try {
             if(boat.status()==0){
                 //运输中
                 return null;
@@ -30,9 +34,15 @@ public class BoatCallable implements Callable {
 
                 if(boat.pos()==-1){
                     //船在虚拟点
-                    Integer realBerth = mapInfo.getAvailableBerth();
-                    Optional.ofNullable(realBerth)
-                            .ifPresent(boat::ship);
+
+                    Optional.ofNullable(mapInfo.getAvailableBerth())
+                            .ifPresent(bid ->{
+                                boolean b1 = ((MapInfoimpl) mapInfo).acquireBerth(bid);
+                                if(b1){
+                                    boat.ship(bid);
+                                }
+
+                            });
                 }
                 else {
 
@@ -67,6 +77,10 @@ public class BoatCallable implements Callable {
 
                 }
             }
+        }catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            boat.boatLock().unlock();
         }
 
         return null;
