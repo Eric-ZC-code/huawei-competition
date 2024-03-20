@@ -7,11 +7,13 @@ public class Berth {
     private int id;
     private int x;
     private int y;
-    private int transportTime;
-    private int loadingSpeed;
+    private int transportTime; // 运输时间 1-2000
+    private int loadingSpeed; // 装卸货速度 1-5
+    private int amount = 0; // 当前货物数量，根据运输时间和装卸速度初始化
     private boolean acquired = false;
-    private int amount = 0;
     private Boat boat = null;
+    private static final int MAX_TRANSPORT_TIME = 2000;
+    private static final int MAX_LOADING_SPEED = 5;
     public Berth(){}
     public Berth(int id,int x, int y, int transportTime, int loadingSpeed) {
         this.id = id;
@@ -20,25 +22,15 @@ public class Berth {
         this.transportTime = transportTime;
         this.loadingSpeed = loadingSpeed;
     }
-    public synchronized boolean isAcquired() {
+
+    public boolean acquired() {
         return acquired;
     }
-    public synchronized boolean acquired() {
-        if (!acquired) {
-            acquired =true;
-            return true;
-        }
-        return false;
+
+    public Berth setAcquired(boolean acquired) {
+        this.acquired = acquired;
+        return this;
     }
-//    public synchronized boolean release() {
-//        if (acquired) {
-//            acquired =false;
-//            return true;
-//        }
-//        return false;
-//    }
-
-
 
     public Berth setId(int id) {
         this.id = id;
@@ -106,10 +98,14 @@ public class Berth {
     @Override
     public String toString() {
         return "Berth{" +
-                "x=" + x +
+                "id=" + id +
+                ", x=" + x +
                 ", y=" + y +
                 ", transportTime=" + transportTime +
                 ", loadingSpeed=" + loadingSpeed +
+                ", amount=" + amount +
+                ", acquired=" + acquired +
+                ", boat=" + boat +
                 '}';
     }
 

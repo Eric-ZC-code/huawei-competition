@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Boat {
+    private static final MyLogger logger = MyLogger.getLogger("Boat");
     private int num;
     private int pos;
     private int status;
@@ -82,6 +83,7 @@ public class Boat {
     public boolean ship(Integer berthId){
         if(MessageCenter.send(Command.ship(this.id,berthId))){
             this.pos = berthId;
+            logger.info("Boat "+this.id+" ship to "+berthId);
             return true;
         }
         return false;
@@ -101,7 +103,7 @@ public class Boat {
 
         if(MessageCenter.send(Command.go(this.id))){
             this.pos=-1;
-
+            logger.info("Boat "+this.id+" go to virtual point");
             reset();
 
             return true;

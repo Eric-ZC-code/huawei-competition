@@ -3,7 +3,7 @@ package com.huawei.codecraft.enums;
 public enum GoodStrategy {
     MANHATTAN("manhattan"),
     VALUE("value"),
-    RATIO("ratio")
+    RATIO("ratio"),
 
 
     ;

@@ -1,7 +1,7 @@
 package com.huawei.codecraft.entities;
 
 
-import com.huawei.codecraft.util.Pair;
+import com.huawei.codecraft.util.Position;
 
 import java.util.Comparator;
 
@@ -52,8 +52,8 @@ public class Good implements Comparator,Comparable{
         this.y = y;
         this.value = value;
     }
-    public Pair pair(){
-        return new Pair(x,y);
+    public Position pair(){
+        return new Position(x,y);
     }
 
     @Override

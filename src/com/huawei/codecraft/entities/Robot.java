@@ -3,12 +3,10 @@ package com.huawei.codecraft.entities;
 
 import com.huawei.codecraft.util.MessageCenter;
 import com.huawei.codecraft.util.MyLogger;
-import com.huawei.codecraft.util.Pair;
+import com.huawei.codecraft.util.Position;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 public class Robot {
@@ -55,8 +53,8 @@ public class Robot {
     public int x() {
         return x;
     }
-    public Pair position(){
-        return Pair.of(x,y);
+    public Position position(){
+        return Position.of(x,y);
     }
 
     public Robot setX(int x) {
@@ -129,7 +127,7 @@ public class Robot {
 
                 }else {
                     // 机器人允许move
-                    Pair position = command.targetPosition(Pair.of(x, y));
+                    Position position = command.targetPosition(Position.of(x, y));
                     if(!map.acquirePoint(position,this)){
                         //没拿到当前点意味着如果继续走就会撞就yield
                         //这种避让方式没法避让双向的撞击
@@ -209,7 +207,6 @@ public class Robot {
                         if(berth!=null){
                             berth.load(1);
                         }
-
                     } catch (Exception e) {
                         System.err.println("Robot error: "+e);
                         e.printStackTrace();

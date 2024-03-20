@@ -10,3 +10,7 @@ out/**
 **/log_*
 **/*.zip
 MacOSReleasev1-6.1/maps/**
+**/run_simple_demo.bat
+/WindowsRelease/maps/**
+/WindowsRelease/sdk/**
+
