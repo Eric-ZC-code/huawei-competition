@@ -5,12 +5,18 @@ import com.huawei.codecraft.util.MessageCenter;
 import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.util.Position;
 import com.huawei.codecraft.wrapper.MapInfo;
+import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
 
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class Robot {
-    private final int yieldDistance = 4;
+    private static final MyLogger logger = MyLogger.getLogger("Robot");
+    private ReentrantLock robotLock = new ReentrantLock();
+    private boolean searching = false;
+    private final int yieldDistance = 3;
+    private final Set<Berth> berthBlackList = new HashSet<>();
     public static final Random rand = new Random();
     private int id;
     private int x, y, carrying;
@@ -70,6 +76,15 @@ public class Robot {
         return this;
     }
 
+    public boolean searching() {
+        return searching;
+    }
+
+    public Robot setSearching(boolean searching) {
+        this.searching = searching;
+        return this;
+    }
+
     public int id() {
         return id;
     }
@@ -99,6 +114,14 @@ public class Robot {
 
     public int status() {
         return status;
+    }
+
+    public Set<Berth> berthBlackList() {
+        return berthBlackList;
+    }
+
+    public ReentrantLock robotLock() {
+        return robotLock;
     }
 
     public void executeAll(MapInfo map){
@@ -202,8 +225,9 @@ public class Robot {
                 } else if (command.cmd().equals("pull")) {
                     try {
                         shouldCarry = false;
-                        Berth berth = map.findBestBerth(this.x, this.y);
+                        Berth berth = ((MapInfoimpl) map).whereAmI(this);
                         if(berth!=null){
+
                             berth.load(1);
                         }
                     } catch (Exception e) {

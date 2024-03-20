@@ -45,7 +45,10 @@ public class Main {
     private Boat[] boat = new Boat[5];
     private Future<Robot>[] robotFuture = new Future[robotNum];
     private Future<Boat>[] boatFuture = new Future[5];
-    private ExecutorService robotExecutor = Executors.newFixedThreadPool(10);
+    private ThreadPoolExecutor robotExecutor = new ThreadPoolExecutor(10,10,
+                                                                      0,TimeUnit.MILLISECONDS,
+                                                                      new SynchronousQueue<>(),
+                                                                      new ThreadPoolExecutor.AbortPolicy());
     private ExecutorService boatExecutor = Executors.newFixedThreadPool(5);
 
     private void init() {
@@ -147,8 +150,9 @@ public class Main {
 
                 int id = mainInstance.input();
                 if(true){
-                    System.err.println("frame: "+id);
+                    System.err.println("frame:"+id);
                 }
+
 
                 // 一个简易的计时器保证输出中心在processtime之前关闭输出，保证不丢失输出
     //            if(frame==50){
@@ -182,7 +186,6 @@ public class Main {
 ////
 ////                        System.err.println(robot);
 ////                    }
-////                    mainInstance.mapInfo.availableGoods().forEach(System.err::println);
 //                    for (Berth berth : mainInstance.berth) {
 //                        System.err.println(berth);
 //                    }
@@ -191,33 +194,46 @@ public class Main {
 //                    }
 //                    System.err.flush();
 //                }
-//                    mainInstance.mapInfo.availableGoods().forEach(System.err::println);
 //                mainInstance.mapInfo.cleanPoints();
-
+                long start = System.currentTimeMillis();
                 for (int i = 0; i < mainInstance.robot.length; i++) {
                     Robot robot = mainInstance.robot[i];
-                    if(i!=0){
-                        Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
-                                                                                                   mainInstance.mapInfo,
-                                                                                                   frame,
-                                                                                                   GoodStrategy.MANHATTAN));
-                        mainInstance.robotFuture[i]=submit;
-                    }
-                    else {
-                        Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
-                                                                                                   mainInstance.mapInfo,
-                                                                                                   frame,
-                                                                                                   GoodStrategy.MANHATTAN));
-                        mainInstance.robotFuture[i]=submit;
+                    try {
+                        if(i!=0){
+                            Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
+                                                                                                       mainInstance.mapInfo,
+                                                                                                       frame,
+                                                                                                       GoodStrategy.MANHATTAN));
+                            mainInstance.robotFuture[i]=submit;
+                        }
+                        else {
+                            Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
+                                                                                                       mainInstance.mapInfo,
+                                                                                                       frame,
+                                                                                                       GoodStrategy.MANHATTAN));
+                            mainInstance.robotFuture[i]=submit;
+                        }
+                    } catch (RejectedExecutionException e) {
+                        // reject the task, so no future
+                        mainInstance.robotFuture[i]=null;
                     }
                 }
+
                 for (int i = 0; i < mainInstance.robot.length; i++) {
                     if (mainInstance.robotFuture[i]==null) {
+                        continue;
+                    }
+                    if(mainInstance.robot[i].searching()){
+                        System.err.println("[FRAME]:"+id+" robot"+i+" is searching");
                         continue;
                     }
                     mainInstance.robotFuture[i].get();
 
                 }
+                long end = System.currentTimeMillis();
+                System.err.println("[FRAME]: "+id+" Robot execution time: "+(end-start));
+
+                start = System.currentTimeMillis();
                 if ((frame-1)%1==0){
 
                     for (int i = 0; i < mainInstance.boat.length; i++) {
@@ -230,6 +246,9 @@ public class Main {
                     mainInstance.boatFuture[i].get();
 
                 }
+                end = System.currentTimeMillis();
+                System.err.println("[FRAME]: "+id+" Ship execution time: "+(end-start));
+
                 System.out.println("OK");
                 MessageCenter.reset();
                 System.out.flush();
@@ -241,6 +260,8 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            // Wait for user input to keep the console window open
+
             mainInstance.robotExecutor.shutdown();
             mainInstance.boatExecutor.shutdown();
 

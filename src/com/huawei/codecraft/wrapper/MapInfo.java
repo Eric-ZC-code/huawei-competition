@@ -4,6 +4,7 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.enums.BerthStrategy;
 import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.util.Pair;
 import com.huawei.codecraft.util.Position;
@@ -84,7 +85,7 @@ public abstract class MapInfo {
         }
     }
     abstract public Good findBestGood(Robot robot, GoodStrategy strategy);
-    abstract public Berth findBestBerth(int x, int y);
+    abstract public Berth findBestBerth(int x, int y, Set<Berth> blackList, BerthStrategy strategy);
     abstract public List<Command> getFullPath(Robot robot, Good good, Berth berth);
     abstract public List<Command> getFullPath(Robot robot);
     abstract public List<Command> getRobotToGoodPath(Robot robot, Good good);
