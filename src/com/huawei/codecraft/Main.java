@@ -147,7 +147,7 @@ public class Main {
 
                 int id = mainInstance.input();
                 if(true){
-                    System.err.println("frame: "+id);
+                    System.err.println("frame:"+id);
                 }
 
 
@@ -178,19 +178,19 @@ public class Main {
 
 
 
-                if (frame == 1) {
-//                    for (Robot robot : mainInstance.robot) {
-//
-//                        System.err.println(robot);
+//                if (frame == 1) {
+////                    for (Robot robot : mainInstance.robot) {
+////
+////                        System.err.println(robot);
+////                    }
+//                    for (Berth berth : mainInstance.berth) {
+//                        System.err.println(berth);
 //                    }
-                    for (Berth berth : mainInstance.berth) {
-                        System.err.println(berth);
-                    }
-                    for (Boat boat : mainInstance.boat) {
-                        System.err.println(boat);
-                    }
-                    System.err.flush();
-                }
+//                    for (Boat boat : mainInstance.boat) {
+//                        System.err.println(boat);
+//                    }
+//                    System.err.flush();
+//                }
 //                mainInstance.mapInfo.cleanPoints();
 
                 for (int i = 0; i < mainInstance.robot.length; i++) {
