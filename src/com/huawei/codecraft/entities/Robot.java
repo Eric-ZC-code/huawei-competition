@@ -20,6 +20,7 @@ public class Robot {
     public static final Random rand = new Random();
     private int id;
     private int x, y, carrying;
+    private int expectedX, expectedY;
     private int status;
     private boolean shouldCarry = false;
     private Integer priority; // 优先级 0-9 0最高 9最低
@@ -73,6 +74,24 @@ public class Robot {
 
     public Robot setY(int y) {
         this.y = y;
+        return this;
+    }
+
+    public int expectedX() {
+        return expectedX;
+    }
+
+    public Robot setExpectedX(int expectedX) {
+        this.expectedX = expectedX;
+        return this;
+    }
+
+    public int expectedY() {
+        return expectedY;
+    }
+
+    public Robot setExpectedY(int expectedY) {
+        this.expectedY = expectedY;
         return this;
     }
 
@@ -134,6 +153,13 @@ public class Robot {
                     break;
 
                 }else {
+                    if(x!=expectedX||y!=expectedY){
+                        // 机器人位置不对 可以能因为丢帧
+                        expectedX = x;
+                        expectedY = y;
+                        clean();
+                        break;
+                    }
                     // 机器人允许move
                     Position position = command.targetPosition(Position.of(x, y));
                     if(!map.acquirePoint(position,this)){
@@ -223,6 +249,8 @@ public class Robot {
 
                 } else if (command.cmd().equals("move")) {
                     map.map()[x][y] = '.';
+                    expectedX = command.targetPosition(Position.of(x, y)).x();
+                    expectedY = command.targetPosition(Position.of(x, y)).y();
                     map.removePoint(this.position());
                 }
 

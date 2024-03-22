@@ -147,7 +147,7 @@ public class Main {
 
                 int id = mainInstance.input();
                 if (true) {
-                    System.err.println("frame:" + id);
+//                    System.err.println("frame:" + id);
                 }
 
 
@@ -222,7 +222,7 @@ public class Main {
 
                 }
                 start = System.currentTimeMillis();
-                if ((frame - 1) % 1 == 0) {
+                if (frame>500) {
 
                     for (int i = 0; i < mainInstance.boat.length; i++) {
 
@@ -231,6 +231,9 @@ public class Main {
                     }
                 }
                 for (int i = 0; i < mainInstance.boat.length; i++) {
+                    if (mainInstance.boatFuture[i] == null) {
+                        continue;
+                    }
                     mainInstance.boatFuture[i].get();
 
                 }

@@ -267,7 +267,7 @@ public class MapInfoimpl extends MapInfo {
                 if(blackList!=null&&blackList.contains(berth)){
                     continue;
                 }
-                int ratio = manhattanDistance*berth.transportTime();
+                int ratio = (manhattanDistance/10)*berth.transportTime();
                 if (minTime > ratio) {
                     minTime = ratio;
                     bestBerth = berth;
@@ -421,9 +421,9 @@ public class MapInfoimpl extends MapInfo {
     @Override
     public List<Command> getFullPath(Robot robot) {
 //        // 如果货物数量小于20，返回空的命令数组
-//        if(availableGoodsMap.size()<20){
-//            return null;
-//        }
+        if(availableGoodsMap.size()<20){
+            return null;
+        }
 
         // 获取货物和机器人到货物的路径
         Pair<Good, List<Command>> GoodAndPath = getGoodAndPath(robot);
