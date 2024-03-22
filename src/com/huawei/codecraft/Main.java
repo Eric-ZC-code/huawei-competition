@@ -32,6 +32,7 @@ import java.util.logging.Logger;
  * @since 2024-02-05
  */
 public class Main {
+    private static final MyLogger logger = MyLogger.getLogger("Main");
     private static final int n = 200;
     private static final int robotNum = 10;
     private static final int berthNum = 10;
@@ -45,7 +46,9 @@ public class Main {
     private Boat[] boat = new Boat[5];
     private Future<Robot>[] robotFuture = new Future[robotNum];
     private Future<Boat>[] boatFuture = new Future[5];
-    private ExecutorService robotExecutor = Executors.newFixedThreadPool(10);
+    private ThreadPoolExecutor robotExecutor = new ThreadPoolExecutor(10, 10,
+                                                                      0, TimeUnit.MILLISECONDS,
+                                                                      new SynchronousQueue<>());
     private ExecutorService boatExecutor = Executors.newFixedThreadPool(5);
 
     private void init() {
@@ -124,6 +127,12 @@ public class Main {
                     .setId(i)
                     .setPriority(i);
             mapInfo.addItem(robot[i].x(), robot[i].y(), 'A');
+        }
+        if(id==500){
+            for (char[] chars : mapInfo.map()) {
+                System.err.println(chars);
+
+            }
         }
         for (int i = 0; i < 5; i++) {
             Boat boat = this.boat[i].setStatus(scanf.nextInt())
@@ -213,11 +222,11 @@ public class Main {
                     if (mainInstance.robotFuture[i] == null) {
                         continue;
                     }
-                    if (mainInstance.robot[i].searching()) {
-//                        System.err.println("[FRAME]:" + id + " robot" + i + " is searching");
-                        // todo 虽然不阻塞这帧的流程，但实际是一样的，无非下一帧的命令在任务队列里候着
+//                    if (mainInstance.robot[i].searching()) {
+////                        System.err.println("[FRAME]:" + id + " robot" + i + " is searching");
+//                        // todo 虽然不阻塞这帧的流程，但实际是一样的，无非下一帧的命令在任务队列里候着
 //                        continue;
-                    }
+//                    }
                     mainInstance.robotFuture[i].get();
 
                 }
@@ -250,6 +259,10 @@ public class Main {
             e.printStackTrace();
         } finally {
             // Wait for user input to keep the console window open
+            for (char[] line : mainInstance.ch) {
+                logger.info(new String(line));
+
+            }
 
             mainInstance.robotExecutor.shutdown();
             mainInstance.boatExecutor.shutdown();

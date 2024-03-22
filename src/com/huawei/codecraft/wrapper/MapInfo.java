@@ -17,7 +17,6 @@ public abstract class MapInfo {
     protected final ReadWriteLock goodRWLock = new ReentrantReadWriteLock();
     protected final ReadWriteLock berthRWLock = new ReentrantReadWriteLock();
     protected LinkedHashMap<Position,Good> availableGoodsMap = new LinkedHashMap<>(100);
-    protected LinkedList<Good> acquiredGoodsMap = new LinkedList<>();
     protected char[][] map = new char[200][200];
     protected Berth[] berths = new Berth[10];
     protected Robot[] robots = null;
@@ -35,11 +34,6 @@ public abstract class MapInfo {
         this.robots = robots;
         return this;
     }
-
-    public LinkedList<Good> acquiredGoods() {
-        return acquiredGoodsMap;
-    }
-
 
     public char[][] map() {
         return map;

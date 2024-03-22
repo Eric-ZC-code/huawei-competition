@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 
 public class RobotCallable implements Callable {
+    private static final MyLogger logger = MyLogger.getLogger("RobotCallable");
     private Integer frame;
     private final Robot robot;
     private final MapInfo mapInfo;
@@ -27,6 +28,10 @@ public class RobotCallable implements Callable {
 
     @Override
     public Object call() throws Exception {
+
+        if(robot.id()==5 || robot.id()==0){
+            logger.info("robot "+robot.id()+" : "+ robot.currentCommand()+ " it is fucking searching ? " +robot.searching());
+        }
         if(robot.searching()){
             return null;
         }
@@ -35,6 +40,14 @@ public class RobotCallable implements Callable {
             return null;
         }
         try {
+            if(robot.id()==0&&frame==500){
+                for (char[] chars : mapInfo.map()) {
+                    System.err.println(chars);
+                }
+            }
+            if(robot.berthBlackList().size()==mapInfo.berths().length){
+                return null;
+            }
 //            long start = System.currentTimeMillis();
             if (!robot.containsCommand()) {
                 // 目前机器人没有被分配任务
@@ -82,7 +95,9 @@ public class RobotCallable implements Callable {
 
                 Berth nearestBerth = mapInfo.findBestBerth(robot.x(), robot.y(),
                                                            robot.berthBlackList(), BerthStrategy.MANHANTTAN);
-
+                if(nearestBerth==null){
+                    return false;
+                }
                 if(robot.berthBlackList().contains(nearestBerth)||nearestBerth==null){
                     return false;
                 }
@@ -107,6 +122,9 @@ public class RobotCallable implements Callable {
 //                return false;
 
                 List<Command> path = mapInfo.getFullPath(robot);
+                if(robot.id()==5 || robot.id()==0){
+                    logger.info("robot "+robot.id()+" : "+ path);
+                }
                 if (path == null || path.size() == 0){
                     return false;
                 }
