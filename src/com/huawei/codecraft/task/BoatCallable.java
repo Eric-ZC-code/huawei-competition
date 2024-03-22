@@ -38,8 +38,6 @@ public class BoatCallable implements Callable {
                     //船在泊位
                     try {
                         Berth berth = mapInfo.berths()[boat.pos()];
-                        // 立刻释放泊位，虚拟点的船可以过来占用
-                        mapInfo.setBerthFree(berth.id());
                         if(berth.boat()==null){
                             berth.setBoat(boat);
                         }
@@ -52,6 +50,8 @@ public class BoatCallable implements Callable {
                             if(boat.go()){
                                 // 船成功出发去虚拟点，需让出berth
                                 berth.setBoat(null);
+                                // 立刻释放泊位，虚拟点的船可以过来占用
+                                mapInfo.setBerthFree(berth.id());
                             }
 
                         }else {
