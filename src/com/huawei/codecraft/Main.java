@@ -128,12 +128,7 @@ public class Main {
                     .setPriority(i);
             mapInfo.addItem(robot[i].x(), robot[i].y(), 'A');
         }
-        if(id==500){
-            for (char[] chars : mapInfo.map()) {
-                System.err.println(chars);
 
-            }
-        }
         for (int i = 0; i < 5; i++) {
             Boat boat = this.boat[i].setStatus(scanf.nextInt())
                                     .setPos(scanf.nextInt())
@@ -155,9 +150,9 @@ public class Main {
             for (int frame = 1; frame <= 15000; frame++) {
 
                 int id = mainInstance.input();
-                if (true) {
+//                if (true) {
 //                    System.err.println("frame:" + id);
-                }
+//                }
 
 
                 // 一个简易的计时器保证输出中心在processtime之前关闭输出，保证不丢失输出
@@ -259,10 +254,8 @@ public class Main {
             e.printStackTrace();
         } finally {
             // Wait for user input to keep the console window open
-            for (char[] line : mainInstance.ch) {
-                logger.info(new String(line));
-
-            }
+            Scanner scanner = new Scanner(System.in);
+            scanner.nextLine();
 
             mainInstance.robotExecutor.shutdown();
             mainInstance.boatExecutor.shutdown();
