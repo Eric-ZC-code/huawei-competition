@@ -4,6 +4,7 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.enums.BerthStrategy;
 import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.util.Pair;
 import com.huawei.codecraft.util.Position;
@@ -16,7 +17,6 @@ public abstract class MapInfo {
     protected final ReadWriteLock goodRWLock = new ReentrantReadWriteLock();
     protected final ReadWriteLock berthRWLock = new ReentrantReadWriteLock();
     protected LinkedHashMap<Position,Good> availableGoodsMap = new LinkedHashMap<>(100);
-    protected LinkedList<Good> acquiredGoodsMap = new LinkedList<>();
     protected char[][] map = new char[200][200];
     protected Berth[] berths = new Berth[10];
     protected Robot[] robots = null;
@@ -34,11 +34,6 @@ public abstract class MapInfo {
         this.robots = robots;
         return this;
     }
-
-    public LinkedList<Good> acquiredGoods() {
-        return acquiredGoodsMap;
-    }
-
 
     public char[][] map() {
         return map;
@@ -84,7 +79,7 @@ public abstract class MapInfo {
         }
     }
     abstract public Good findBestGood(Robot robot, GoodStrategy strategy);
-    abstract public Berth findBestBerth(int x, int y);
+    abstract public Berth findBestBerth(int x, int y, Set<Berth> blackList, BerthStrategy strategy);
     abstract public List<Command> getFullPath(Robot robot, Good good, Berth berth);
     abstract public List<Command> getFullPath(Robot robot);
     abstract public List<Command> getRobotToGoodPath(Robot robot, Good good);

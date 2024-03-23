@@ -32,6 +32,7 @@ import java.util.logging.Logger;
  * @since 2024-02-05
  */
 public class Main {
+    private static final MyLogger logger = MyLogger.getLogger("Main");
     private static final int n = 200;
     private static final int robotNum = 10;
     private static final int berthNum = 10;
@@ -45,7 +46,9 @@ public class Main {
     private Boat[] boat = new Boat[5];
     private Future<Robot>[] robotFuture = new Future[robotNum];
     private Future<Boat>[] boatFuture = new Future[5];
-    private ExecutorService robotExecutor = Executors.newFixedThreadPool(10);
+    private ThreadPoolExecutor robotExecutor = new ThreadPoolExecutor(10, 10,
+                                                                      0, TimeUnit.MILLISECONDS,
+                                                                      new SynchronousQueue<>());
     private ExecutorService boatExecutor = Executors.newFixedThreadPool(5);
 
     private void init() {
@@ -125,6 +128,7 @@ public class Main {
                     .setPriority(i);
             mapInfo.addItem(robot[i].x(), robot[i].y(), 'A');
         }
+
         for (int i = 0; i < 5; i++) {
             Boat boat = this.boat[i].setStatus(scanf.nextInt())
                                     .setPos(scanf.nextInt())
@@ -146,14 +150,15 @@ public class Main {
             for (int frame = 1; frame <= 15000; frame++) {
 
                 int id = mainInstance.input();
-                if(true){
-                    System.err.println("frame: "+id);
-                }
+//                if (true) {
+//                    System.err.println("frame:" + id);
+//                }
+
 
                 // 一个简易的计时器保证输出中心在processtime之前关闭输出，保证不丢失输出
-    //            if(frame==50){
-    //                System.err.println("time: "+(System.currentTimeMillis()-l1));
-    //            }
+                //            if(frame==50){
+                //                System.err.println("time: "+(System.currentTimeMillis()-l1));
+                //            }
 //                CompletableFuture.supplyAsync(()->{
 //                    long l= System.currentTimeMillis() ;
 //                    try {
@@ -175,59 +180,68 @@ public class Main {
 //                });
 
 
-
-
-                if (frame == 1) {
-//                    for (Robot robot : mainInstance.robot) {
-//
-//                        System.err.println(robot);
+//                if (frame == 1) {
+////                    for (Robot robot : mainInstance.robot) {
+////
+////                        System.err.println(robot);
+////                    }
+//                    for (Berth berth : mainInstance.berth) {
+//                        System.err.println(berth);
 //                    }
-                    for (Berth berth : mainInstance.berth) {
-                        System.err.println(berth);
-                    }
-                    for (Boat boat : mainInstance.boat) {
-                        System.err.println(boat);
-                    }
-                    System.err.flush();
-                }
+//                    for (Boat boat : mainInstance.boat) {
+//                        System.err.println(boat);
+//                    }
+//                    System.err.flush();
+//                }
 //                mainInstance.mapInfo.cleanPoints();
-
+                long start = System.currentTimeMillis();
                 for (int i = 0; i < mainInstance.robot.length; i++) {
                     Robot robot = mainInstance.robot[i];
-                    if(i!=0){
-                        Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
-                                                                                                   mainInstance.mapInfo,
-                                                                                                   frame,
-                                                                                                   GoodStrategy.MANHATTAN));
-                        mainInstance.robotFuture[i]=submit;
-                    }
-                    else {
-                        Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
-                                                                                                   mainInstance.mapInfo,
-                                                                                                   frame,
-                                                                                                   GoodStrategy.MANHATTAN));
-                        mainInstance.robotFuture[i]=submit;
+                    try {
+                        if (!robot.searching()) {
+                            Future<Robot> submit = mainInstance.robotExecutor.submit(new RobotCallable(robot,
+                                                                                                       mainInstance.mapInfo,
+                                                                                                       frame,
+                                                                                                       GoodStrategy.MANHATTAN));
+                            mainInstance.robotFuture[i] = submit;
+                        }
+
+
+                    } catch (RejectedExecutionException e) {
+                        // reject the task, so no future
+                        mainInstance.robotFuture[i] = null;
                     }
                 }
+
                 for (int i = 0; i < mainInstance.robot.length; i++) {
-                    if (mainInstance.robotFuture[i]==null) {
+                    if (mainInstance.robotFuture[i] == null) {
                         continue;
                     }
+//                    if (mainInstance.robot[i].searching()) {
+////                        System.err.println("[FRAME]:" + id + " robot" + i + " is searching");
+//                        // todo 虽然不阻塞这帧的流程，但实际是一样的，无非下一帧的命令在任务队列里候着
+//                        continue;
+//                    }
                     mainInstance.robotFuture[i].get();
 
                 }
-                if ((frame-1)%1==0){
+                start = System.currentTimeMillis();
+                if (frame>500) {
 
                     for (int i = 0; i < mainInstance.boat.length; i++) {
 
                         Future submit = mainInstance.boatExecutor.submit(new BoatCallable(mainInstance.boat[i], mainInstance.mapInfo, frame));
-                        mainInstance.boatFuture[i]=submit;
+                        mainInstance.boatFuture[i] = submit;
                     }
                 }
                 for (int i = 0; i < mainInstance.boat.length; i++) {
+                    if (mainInstance.boatFuture[i] == null) {
+                        continue;
+                    }
                     mainInstance.boatFuture[i].get();
 
                 }
+
                 System.out.println("OK");
                 MessageCenter.reset();
                 System.out.flush();
@@ -241,7 +255,6 @@ public class Main {
         } finally {
             // Wait for user input to keep the console window open
             Scanner scanner = new Scanner(System.in);
-            System.out.println("Press Enter to exit...");
             scanner.nextLine();
 
             mainInstance.robotExecutor.shutdown();
