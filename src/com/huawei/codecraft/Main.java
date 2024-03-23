@@ -142,9 +142,9 @@ public class Main {
             for (int frame = 1; frame <= 15000; frame++) {
 
                 int id = mainInstance.input();
-//                if (true) {
-//                    System.err.println("frame:" + id);
-//                }
+                if (true) {
+                    System.err.println("frame:" + id);
+                }
 
 
                 // 一个简易的计时器保证输出中心在processtime之前关闭输出，保证不丢失输出

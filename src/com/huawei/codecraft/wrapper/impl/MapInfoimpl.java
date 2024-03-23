@@ -6,6 +6,7 @@ import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.BerthStrategy;
 import com.huawei.codecraft.enums.GoodStrategy;
+import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.util.Pair;
 import com.huawei.codecraft.util.Position;
 import com.huawei.codecraft.wrapper.MapInfo;
@@ -15,6 +16,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MapInfoimpl extends MapInfo {
+    private final MyLogger logger = MyLogger.getLogger("MapInfoImpl");
 
     private ReadWriteLock goingPointLock = new ReentrantReadWriteLock();
 
@@ -225,23 +227,22 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
-    public Berth findBestBerth(int x, int y, Set<Berth> blackList, BerthStrategy strategy) {
+    public Berth findBestBerth(int x, int y, Set<Berth> whiteList, BerthStrategy strategy) {
         switch (strategy){
             case LEAST_TIME:
-                return findBestBerthLeastTime(x,y,blackList);
+                return findBestBerthLeastTime(x,y,whiteList);
             default:
-                return findBestBerthManhanttan(x, y, blackList);
+                return findBestBerthManhanttan(x, y, whiteList);
         }
 
-
     }
-    public Berth findBestBerthManhanttan(int x, int y, Set<Berth> blackList){
+    public Berth findBestBerthManhanttan(int x, int y, Set<Berth> whiteList){
         Berth BestBerth = null;
         try {
             int minDistance = Integer.MAX_VALUE;
             for (int i = 0; i < this.berths.length; i++) {
                 Berth berth = this.berths[i];
-                if(blackList!=null&&blackList.contains(berth)){
+                if(whiteList==null && !whiteList.contains(berth)){
                     continue;
                 }
 //                logger.info("Berth: " + berth);
@@ -257,14 +258,14 @@ public class MapInfoimpl extends MapInfo {
         }
         return BestBerth;
     }
-    public Berth findBestBerthLeastTime(int x, int y,Set<Berth> blackList){
+    public Berth findBestBerthLeastTime(int x, int y,Set<Berth> whiteList){
         Berth bestBerth = null;
         try {
             double minTime = Integer.MAX_VALUE;
             for (int i = 0; i < this.berths.length; i++) {
                 Berth berth = this.berths[i];
                 double manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
-                if(blackList!=null&&blackList.contains(berth)){
+                if(whiteList==null && !whiteList.contains(berth)){
                     continue;
                 }
                 double ratio = (manhattanDistance/400)*0.8+berth.transportTime()/2000;
@@ -351,7 +352,6 @@ public class MapInfoimpl extends MapInfo {
         // 如果机器人不可达泊位，返回空的命令数组
         List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
         if (pathToBerth.isEmpty()) {
-            robot.berthBlackList().add(berth);
             return new ArrayList<>();
         }
 
@@ -375,9 +375,11 @@ public class MapInfoimpl extends MapInfo {
         if (GoodAndPath == null || GoodAndPath.getKey() == null || GoodAndPath.getValue().isEmpty()) {
             return new ArrayList<>();
         }
+        logger.info("Good: "+GoodAndPath.getKey());
         Good good = GoodAndPath.getKey();
         List<Command> pathToGood = GoodAndPath.getValue();
-        Berth berth = findBestBerth(good.x(), good.y(),robot.berthBlackList(),BerthStrategy.MANHANTTAN);
+        Berth berth = findBestBerth(good.x(), good.y(),robot.berthWhiteList(),BerthStrategy.LEAST_TIME);
+        logger.info("Berth: "+berth);
         if (berth == null) {
             return new ArrayList<>();
         }
@@ -385,7 +387,6 @@ public class MapInfoimpl extends MapInfo {
         // 如果机器人不可达泊位，返回空的命令数组
         List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
         if (pathToBerth.isEmpty()) {
-            robot.berthBlackList().add(berth);
             return new ArrayList<>();
         }
 
@@ -411,7 +412,6 @@ public class MapInfoimpl extends MapInfo {
         // 获取货物到泊位的路径
         List<Command> goodToBerth = getGoodToBerthPath(good, berth, robot);
         if(goodToBerth.isEmpty()){
-            robot.berthBlackList().add(berth);
             return new ArrayList<>();
         }
 

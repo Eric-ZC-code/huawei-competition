@@ -5,12 +5,14 @@ import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.BerthStrategy;
 import com.huawei.codecraft.enums.GoodStrategy;
+import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.List;
 import java.util.concurrent.Callable;
 
 public class RobotCallable implements Callable {
+    private final MyLogger logger = MyLogger.getLogger("RobotCallable");
     private Integer frame;
     private final Robot robot;
     private final MapInfo mapInfo;
@@ -24,6 +26,13 @@ public class RobotCallable implements Callable {
 
     @Override
     public Object call() throws Exception {
+        if (robot.whiteListedSetUp() == false){
+            // TODO(init whiteList)
+            robot.initWhiteList(mapInfo, 3);
+            robot.setWhiteListedSetUp(true);
+        } else {
+            return null;
+        }
 
         if(robot.searching()){
             return null;
@@ -33,12 +42,9 @@ public class RobotCallable implements Callable {
             return null;
         }
         try {
-//            if(robot.id()==0&&frame==500){
-//                for (char[] chars : mapInfo.map()) {
-//                    System.err.println(chars);
-//                }
-//            }
-            if(robot.berthBlackList().size()==mapInfo.berths().length){
+
+            // 白名单为空，说明没有货物了
+            if(robot.berthWhiteList().isEmpty()){
                 return null;
             }
 //            long start = System.currentTimeMillis();
@@ -46,6 +52,7 @@ public class RobotCallable implements Callable {
                 // 目前机器人没有被分配任务
                 // 则去搜索最近的货物，然后规划路径
                 // 只有等待任务分配完成后才能开始执行。
+                logger.info("robot id: "+robot.id()+" searching");
                 robot.clean();
                 if(!setCmd(robot)){
                     return null;
@@ -87,11 +94,12 @@ public class RobotCallable implements Callable {
                 // 机器人已经携带货物
 
                 Berth nearestBerth = mapInfo.findBestBerth(robot.x(), robot.y(),
-                                                           robot.berthBlackList(), BerthStrategy.MANHANTTAN);
+                                                           robot.berthWhiteList(), BerthStrategy.MANHANTTAN);
                 if(nearestBerth==null){
                     return false;
                 }
-                if(robot.berthBlackList().contains(nearestBerth)||nearestBerth==null){
+                // 如果目的地是白名单中的泊位，则规划路径
+                if(!robot.berthWhiteList().contains(nearestBerth)||nearestBerth==null){
                     return false;
                 }
                 List<Command> path = mapInfo.getFullPath(robot,null ,nearestBerth);

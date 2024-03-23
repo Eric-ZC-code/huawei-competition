@@ -2,6 +2,7 @@ package com.huawei.codecraft.entities;
 
 
 import com.huawei.codecraft.util.MessageCenter;
+import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.util.Position;
 import com.huawei.codecraft.wrapper.MapInfo;
 import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
@@ -11,11 +12,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public class Robot {
+//    private final MyLogger logger = MyLogger.getLogger("Robot");
 
     private ReentrantLock robotLock = new ReentrantLock();
     private boolean searching = false;
     private final int yieldDistance = 3;
-    private final Set<Berth> berthBlackList = new HashSet<>();
+    private final Set<Berth> berthWhiteList = new HashSet<>();
+    private boolean whiteListedSetUp = false;
     public static final Random rand = new Random();
     private int id;
     private int x, y, carrying;
@@ -33,6 +36,33 @@ public class Robot {
         this.y = startY;
         this.priority = priority;
     }
+    public boolean whiteListedSetUp() {
+        return whiteListedSetUp;
+    }
+
+    public Robot setWhiteListedSetUp(boolean whiteListedSetUp) {
+        this.whiteListedSetUp = whiteListedSetUp;
+        return this;
+    }
+
+    public void initWhiteList(MapInfo map, int listSize){
+        if(whiteListedSetUp){
+            return;
+        }
+//        logger.info("initWhiteList begin");
+        while (berthWhiteList.size()<listSize){
+            for (int i=0; i<map.berths().length; i++){
+                List<Command> path = map.getRobotToBerthPath(this, map.berths()[i]);
+                if (!path.isEmpty()){
+                    berthWhiteList.add(map.berths()[i]);
+                }
+            }
+            break;
+        }
+//        logger.info("Robot: " + this.id() + ", whiteList: " + berthWhiteList.toString());
+//        logger.info("initWhiteList end");
+    }
+
     public Integer priority() {
         return priority;
     }
@@ -134,8 +164,8 @@ public class Robot {
         return status;
     }
 
-    public Set<Berth> berthBlackList() {
-        return berthBlackList;
+    public Set<Berth> berthWhiteList() {
+        return berthWhiteList;
     }
 
     public ReentrantLock robotLock() {
