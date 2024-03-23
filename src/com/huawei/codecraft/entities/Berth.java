@@ -1,7 +1,5 @@
 package com.huawei.codecraft.entities;
 
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Berth {
     private int id;

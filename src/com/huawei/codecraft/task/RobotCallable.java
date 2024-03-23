@@ -2,19 +2,15 @@ package com.huawei.codecraft.task;
 
 import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
-import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.BerthStrategy;
 import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.wrapper.MapInfo;
-import com.huawei.codecraft.util.MyLogger;
 
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Callable;
 
 public class RobotCallable implements Callable {
-    private static final MyLogger logger = MyLogger.getLogger("RobotCallable");
     private Integer frame;
     private final Robot robot;
     private final MapInfo mapInfo;

@@ -12,19 +12,12 @@ import com.huawei.codecraft.enums.GoodStrategy;
 import com.huawei.codecraft.task.BoatCallable;
 import com.huawei.codecraft.task.RobotCallable;
 import com.huawei.codecraft.util.MessageCenter;
-import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.*;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 /**
  * Main
@@ -32,7 +25,6 @@ import java.util.logging.Logger;
  * @since 2024-02-05
  */
 public class Main {
-    private static final MyLogger logger = MyLogger.getLogger("Main");
     private static final int n = 200;
     private static final int robotNum = 10;
     private static final int berthNum = 10;

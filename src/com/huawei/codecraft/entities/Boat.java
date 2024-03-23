@@ -1,10 +1,7 @@
 package com.huawei.codecraft.entities;
 
 import com.huawei.codecraft.util.MessageCenter;
-import com.huawei.codecraft.util.MyLogger;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Boat {

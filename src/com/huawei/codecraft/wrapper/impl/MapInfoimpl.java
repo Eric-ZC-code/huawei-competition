@@ -6,11 +6,9 @@ import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.BerthStrategy;
 import com.huawei.codecraft.enums.GoodStrategy;
-import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.util.Pair;
 import com.huawei.codecraft.util.Position;
 import com.huawei.codecraft.wrapper.MapInfo;
-import com.sun.jndi.ldap.Ber;
 
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;

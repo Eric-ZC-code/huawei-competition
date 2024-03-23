@@ -2,7 +2,6 @@ package com.huawei.codecraft.entities;
 
 
 import com.huawei.codecraft.util.MessageCenter;
-import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.util.Position;
 import com.huawei.codecraft.wrapper.MapInfo;
 import com.huawei.codecraft.wrapper.impl.MapInfoimpl;

@@ -2,7 +2,6 @@ package com.huawei.codecraft.task;
 
 import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Boat;
-import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
 
