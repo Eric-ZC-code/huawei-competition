@@ -16,8 +16,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MapInfoimpl extends MapInfo {
-    private final MyLogger logger = MyLogger.getLogger("MapInfoImpl");
-
+//    private MyLogger logger = MyLogger.getLogger("MapInfoimpl");
     private ReadWriteLock goingPointLock = new ReentrantReadWriteLock();
 
     @Override
@@ -232,54 +231,49 @@ public class MapInfoimpl extends MapInfo {
             case LEAST_TIME:
                 return findBestBerthLeastTime(x,y,whiteList);
             default:
-                return findBestBerthManhanttan(x, y, whiteList);
+                return findBestBerthManhattan(x, y, whiteList);
         }
 
     }
-    public Berth findBestBerthManhanttan(int x, int y, Set<Berth> whiteList){
-        Berth BestBerth = null;
-        try {
-            int minDistance = Integer.MAX_VALUE;
-            for (int i = 0; i < this.berths.length; i++) {
-                Berth berth = this.berths[i];
-                if(whiteList==null && !whiteList.contains(berth)){
-                    continue;
-                }
-//                logger.info("Berth: " + berth);
-                int manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
-                if (minDistance > manhattanDistance) {
-                    minDistance = manhattanDistance;
-                    BestBerth = berth;
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return BestBerth;
-    }
-    public Berth findBestBerthLeastTime(int x, int y,Set<Berth> whiteList){
+    public Berth findBestBerthManhattan(int x, int y, Set<Berth> whiteList) {
         Berth bestBerth = null;
         try {
-            double minTime = Integer.MAX_VALUE;
-            for (int i = 0; i < this.berths.length; i++) {
-                Berth berth = this.berths[i];
-                double manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
-                if(whiteList==null && !whiteList.contains(berth)){
-                    continue;
-                }
-                double ratio = (manhattanDistance/400)*0.8+berth.transportTime()/2000;
-                if (minTime > ratio) {
-                    minTime = ratio;
-                    bestBerth = berth;
+            int minDistance = Integer.MAX_VALUE;
+            if (whiteList != null && !whiteList.isEmpty()) {
+                for (Berth berth : whiteList) {
+                    int manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
+                    if (minDistance > manhattanDistance) {
+                        minDistance = manhattanDistance;
+                        bestBerth = berth;
+                    }
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
         return bestBerth;
     }
+
+    public Berth findBestBerthLeastTime(int x, int y, Set<Berth> whiteList) {
+        Berth bestBerth = null;
+        try {
+            double minTime = Double.MAX_VALUE;
+            if (whiteList != null && !whiteList.isEmpty()) {
+                for (Berth berth : whiteList) {
+                    double manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
+                    double ratio = (manhattanDistance / 400) * 8 + berth.transportTime() / 2000.0;
+                    if (minTime > ratio) {
+                        minTime = ratio;
+                        bestBerth = berth;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bestBerth;
+    }
+
 
     // 获取最佳的可用泊位
     @Override
@@ -375,11 +369,9 @@ public class MapInfoimpl extends MapInfo {
         if (GoodAndPath == null || GoodAndPath.getKey() == null || GoodAndPath.getValue().isEmpty()) {
             return new ArrayList<>();
         }
-        logger.info("Good: "+GoodAndPath.getKey());
         Good good = GoodAndPath.getKey();
         List<Command> pathToGood = GoodAndPath.getValue();
         Berth berth = findBestBerth(good.x(), good.y(),robot.berthWhiteList(),BerthStrategy.LEAST_TIME);
-        logger.info("Berth: "+berth);
         if (berth == null) {
             return new ArrayList<>();
         }
@@ -387,6 +379,7 @@ public class MapInfoimpl extends MapInfo {
         // 如果机器人不可达泊位，返回空的命令数组
         List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
         if (pathToBerth.isEmpty()) {
+//            logger.info("No path to berth" + robot.berthWhiteList().contains(berth));
             return new ArrayList<>();
         }
 
@@ -415,7 +408,7 @@ public class MapInfoimpl extends MapInfo {
             return new ArrayList<>();
         }
 
-        // 如果机器人到货物的路径或者货物到泊位的路径为空，返回空的命令数组
+        // 如果机器人到货物的路径为空，返回空的命令数组
         if (pathToGood.isEmpty()) {
             return new ArrayList<>();
         }

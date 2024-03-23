@@ -50,18 +50,17 @@ public class Robot {
             return;
         }
 //        logger.info("initWhiteList begin");
-        while (berthWhiteList.size()<listSize){
-            for (int i=0; i<map.berths().length; i++){
-                List<Command> path = map.getRobotToBerthPath(this, map.berths()[i]);
-                if (!path.isEmpty()){
-                    berthWhiteList.add(map.berths()[i]);
-                }
+        for (int i=0; i<map.berths().length; i++){
+            List<Command> path = map.getRobotToBerthPath(this, map.berths()[i]);
+            if (!path.isEmpty()){
+                berthWhiteList.add(map.berths()[i]);
             }
-            break;
+            if (berthWhiteList.size() > listSize){
+                break;
+            }
         }
-//        logger.info("Robot: " + this.id() + ", whiteList: " + berthWhiteList.toString());
-//        logger.info("initWhiteList end");
     }
+
 
     public Integer priority() {
         return priority;

@@ -5,14 +5,12 @@ import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Robot;
 import com.huawei.codecraft.enums.BerthStrategy;
 import com.huawei.codecraft.enums.GoodStrategy;
-import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.wrapper.MapInfo;
 
 import java.util.List;
 import java.util.concurrent.Callable;
 
 public class RobotCallable implements Callable {
-    private final MyLogger logger = MyLogger.getLogger("RobotCallable");
     private Integer frame;
     private final Robot robot;
     private final MapInfo mapInfo;
@@ -27,12 +25,15 @@ public class RobotCallable implements Callable {
     @Override
     public Object call() throws Exception {
         if (robot.whiteListedSetUp() == false){
-            // TODO(init whiteList)
-            robot.initWhiteList(mapInfo, 3);
+            // 初始化白名单
+            robot.initWhiteList(mapInfo, 8);
             robot.setWhiteListedSetUp(true);
-        } else {
             return null;
         }
+
+//        if (robot.id() == 5 || robot.id() == 0) {
+//            System.err.println("Robot id：" + robot.id() + ": " + robot.berthWhiteList());
+//        }
 
         if(robot.searching()){
             return null;
@@ -52,7 +53,6 @@ public class RobotCallable implements Callable {
                 // 目前机器人没有被分配任务
                 // 则去搜索最近的货物，然后规划路径
                 // 只有等待任务分配完成后才能开始执行。
-                logger.info("robot id: "+robot.id()+" searching");
                 robot.clean();
                 if(!setCmd(robot)){
                     return null;
