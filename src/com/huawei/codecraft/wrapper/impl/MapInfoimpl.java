@@ -347,80 +347,25 @@ public class MapInfoimpl extends MapInfo {
     @Override
     public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
 
-        // 寻路逻辑
-        // 如果机器人没有搬运货物
-        if (robot.carrying() == 0) {
-            if (good == null) {
-                return new ArrayList<>();
-            }
-            // 判断货物是否已经被获取，获取了就返回空的命令数组
-            goodRWLock.readLock().lock();
-            try {
-                if (good.acquired()) {
-                    return new ArrayList<>();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                goodRWLock.readLock().unlock();
-            }
-
-            // 获取机器人到货物的路径
-            List<Command> pathToGood = getRobotToGoodPath(robot, good);
-
-            // 获取货物，acquire货物
-            Command getGood = getGood(robot, good);
-            if(getGood == null){
-                return new ArrayList<>();
-            }
-
-            // 获取货物到泊位的路径
-            List<Command> goodToBerth = getGoodToBerthPath(good, berth, robot);
-            //如果泊位不可达则加入黑名单，下次不再搜寻
-            if(goodToBerth.isEmpty()){
-                robot.berthBlackList().add(berth);
-                return new ArrayList<>();
-            }
-            // 如果机器人到货物的路径或者货物到泊位的路径为空，返回空的命令数组
-            if (pathToGood.isEmpty()) {
-                return new ArrayList<>();
-            }
-
-            // 合并路径
-            List<Command> fullPath = new ArrayList<>(pathToGood);
-            fullPath.add(getGood);
-            fullPath.addAll(goodToBerth);
-//            Command pullGood = pullGood(robot, good, berth);
-            fullPath.add(Command.pull(robot.id()));
-
-            return fullPath;
-
-        }
-        // 如果机器人正在搬运货物
-        else if (robot.carrying() == 1) {
-
-
-            // 如果机器人不可达泊位，返回空的命令数组
-            List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
-            if (pathToBerth.isEmpty()) {
-                robot.berthBlackList().add(berth);
-                return new ArrayList<>();
-            }
-
-            // pull good
-//            Command pullGood = pullGood(robot, good, berth);
-            pathToBerth.add(Command.pull(robot.id()));
-
-            return pathToBerth;
+        // 寻路逻辑, 机器人携带货物
+        // 如果机器人不可达泊位，返回空的命令数组
+        List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
+        if (pathToBerth.isEmpty()) {
+            robot.berthBlackList().add(berth);
+            return new ArrayList<>();
         }
 
-        return new ArrayList<>();
+        // pull good
+        pathToBerth.add(Command.pull(robot.id()));
+
+        return pathToBerth;
     }
+
 
     // 无目标good bfs搜索
     @Override
     public List<Command> getFullPath(Robot robot) {
-//        // 如果货物数量小于20，返回空的命令数组
+        // 如果货物数量小于20，返回空的命令数组
         if(availableGoodsMap.size()<20){
             return null;
         }
@@ -436,6 +381,7 @@ public class MapInfoimpl extends MapInfo {
         if (berth == null) {
             return new ArrayList<>();
         }
+
         // 如果机器人不可达泊位，返回空的命令数组
         List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
         if (pathToBerth.isEmpty()) {
@@ -443,51 +389,46 @@ public class MapInfoimpl extends MapInfo {
             return new ArrayList<>();
         }
 
-        // 寻路逻辑
-        // 如果机器人没有搬运货物
-        if (robot.carrying() == 0) {
-            // 判断货物是否已经被获取，获取了就返回空的命令数组
-            goodRWLock.readLock().lock();
-            try {
-                if (good.acquired()) {
-                    return new ArrayList<>();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                goodRWLock.readLock().unlock();
-            }
-
-            // 获取货物，acquire货物
-            Command getGood = getGood(robot, good);
-            if(getGood == null){
+        // 寻路逻辑，机器人没有搬运货物
+        // 判断货物是否已经被获取，获取了就返回空的命令数组
+        goodRWLock.readLock().lock();
+        try {
+            if (good.acquired()) {
                 return new ArrayList<>();
             }
-
-            // 获取货物到泊位的路径
-            List<Command> goodToBerth = getGoodToBerthPath(good, berth, robot);
-            if(goodToBerth.isEmpty()){
-                robot.berthBlackList().add(berth);
-                return new ArrayList<>();
-            }
-
-            // 如果机器人到货物的路径或者货物到泊位的路径为空，返回空的命令数组
-            if (pathToGood.isEmpty()) {
-                return new ArrayList<>();
-            }
-
-            // 合并路径
-            List<Command> fullPath = new ArrayList<>(pathToGood);
-            fullPath.add(getGood);
-            fullPath.addAll(goodToBerth);
-//            Command pullGood = pullGood(robot, good, berth);
-            fullPath.add(Command.pull(robot.id()));
-
-            return fullPath;
-
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            goodRWLock.readLock().unlock();
         }
 
-        return new ArrayList<>();
+        // 获取货物，acquire货物
+        Command getGood = getGood(robot, good);
+        if(getGood == null){
+            return new ArrayList<>();
+        }
+
+        // 获取货物到泊位的路径
+        List<Command> goodToBerth = getGoodToBerthPath(good, berth, robot);
+        if(goodToBerth.isEmpty()){
+            robot.berthBlackList().add(berth);
+            return new ArrayList<>();
+        }
+
+        // 如果机器人到货物的路径或者货物到泊位的路径为空，返回空的命令数组
+        if (pathToGood.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 合并路径
+        List<Command> fullPath = new ArrayList<>(pathToGood);
+        fullPath.add(getGood);
+        fullPath.addAll(goodToBerth);
+//            Command pullGood = pullGood(robot, good, berth);
+        fullPath.add(Command.pull(robot.id()));
+
+        return fullPath;
+
     }
 
     // bfs洪水泛滥法，无目的地四处搜索
@@ -598,11 +539,8 @@ public class MapInfoimpl extends MapInfo {
                 return reconstructPath(cameFrom, start, end);
             }
 
-            for (int i = 0; i < 4; i++) {
-                int nextX = current.x() + dx[i];
-                int nextY = current.y() + dy[i];
-                Position next = new Position(nextX, nextY);
-                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && !isObstacle(nextX, nextY) && (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next))) {
+            for (Position next : possibleNeighbours(maze, current.x(), current.y())){
+                if (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next)) {
                     costSoFar.put(next, costSoFar.get(current) + 1);
                     frontier.add(next);
                     cameFrom.put(next, current);
