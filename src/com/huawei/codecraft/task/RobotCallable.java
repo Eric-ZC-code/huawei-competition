@@ -87,7 +87,7 @@ public class RobotCallable implements Callable {
                 // 机器人已经携带货物
 
                 Berth nearestBerth = mapInfo.findBestBerth(robot.x(), robot.y(),
-                                                           robot.berthBlackList(), BerthStrategy.MANHANTTAN);
+                                                           robot.berthBlackList(), BerthStrategy.LEAST_TIME);
                 if(nearestBerth==null){
                     return false;
                 }

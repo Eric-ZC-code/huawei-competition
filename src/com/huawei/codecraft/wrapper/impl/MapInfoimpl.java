@@ -377,7 +377,7 @@ public class MapInfoimpl extends MapInfo {
         }
         Good good = GoodAndPath.getKey();
         List<Command> pathToGood = GoodAndPath.getValue();
-        Berth berth = findBestBerth(good.x(), good.y(),robot.berthBlackList(),BerthStrategy.MANHANTTAN);
+        Berth berth = findBestBerth(good.x(), good.y(),robot.berthBlackList(),BerthStrategy.LEAST_TIME);
         if (berth == null) {
             return new ArrayList<>();
         }
