@@ -438,7 +438,6 @@ public class MapInfoimpl extends MapInfo {
         if (berth == null) {
             return new ArrayList<>();
         }
-        logger.info("Robot id: "+robot.id()+" bl: "+robot.berthBlackList().size()+" this Berth: "+berth);
         // 如果机器人不可达泊位，返回空的命令数组
         List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
         if (pathToBerth.isEmpty()) {
