@@ -267,7 +267,7 @@ public class MapInfoimpl extends MapInfo {
                 if(blackList!=null&&blackList.contains(berth)){
                     continue;
                 }
-                double ratio = (manhattanDistance/400)*0.8+berth.transportTime()/2000;
+                double ratio = (manhattanDistance/400)*2+berth.transportTime()/2000;
                 if (minTime > ratio) {
                     minTime = ratio;
                     bestBerth = berth;
