@@ -2,19 +2,24 @@ package com.huawei.codecraft.entities;
 
 
 import com.huawei.codecraft.util.MessageCenter;
-import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.util.Position;
 import com.huawei.codecraft.wrapper.MapInfo;
+import com.huawei.codecraft.wrapper.impl.MapInfoimpl;
 
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class Robot {
-    private static final MyLogger logger = MyLogger.getLogger("Robot");
+
+    private ReentrantLock robotLock = new ReentrantLock();
+    private boolean searching = false;
     private final int yieldDistance = 3;
+    private final Set<Berth> berthBlackList = new HashSet<>();
     public static final Random rand = new Random();
     private int id;
     private int x, y, carrying;
+    private int expectedX, expectedY;
     private int status;
     private boolean shouldCarry = false;
     private Integer priority; // 优先级 0-9 0最高 9最低
@@ -71,6 +76,33 @@ public class Robot {
         return this;
     }
 
+    public int expectedX() {
+        return expectedX;
+    }
+
+    public Robot setExpectedX(int expectedX) {
+        this.expectedX = expectedX;
+        return this;
+    }
+
+    public int expectedY() {
+        return expectedY;
+    }
+
+    public Robot setExpectedY(int expectedY) {
+        this.expectedY = expectedY;
+        return this;
+    }
+
+    public boolean searching() {
+        return searching;
+    }
+
+    public Robot setSearching(boolean searching) {
+        this.searching = searching;
+        return this;
+    }
+
     public int id() {
         return id;
     }
@@ -102,31 +134,31 @@ public class Robot {
         return status;
     }
 
+    public Set<Berth> berthBlackList() {
+        return berthBlackList;
+    }
+
+    public ReentrantLock robotLock() {
+        return robotLock;
+    }
+
     public void executeAll(MapInfo map){
         boolean moved = false;
-        Robot[] robots = map.robots();
-        Random rand = new Random();
-        Robot nearby = havingRobotNearby(robots);
-        Berth[] berths = map.berths();
-        if(nearby!=null){
-            //普通的基于priority 避让没有 random效果好
-//            int i = rand.nextInt(10);
-//            if(i%2==0){
-//                logger.info("Robot" + id + " has robot nearby, skip this command by random");
-//                return;
-////            }
-//            clean();
-//            return;
-        }
         while (containsCommand()){
             Command command = popCommand();
             if (command.cmd().equals("move")) {
                 if (moved) {
-                    logger.info("Robot" + id + " moved, skip this command");
                     this.currentCommand.addFirst(command);
                     break;
 
                 }else {
+                    if(x!=expectedX||y!=expectedY){
+                        // 机器人位置不对 可以能因为丢帧
+                        expectedX = x;
+                        expectedY = y;
+                        clean();
+                        break;
+                    }
                     // 机器人允许move
                     Position position = command.targetPosition(Position.of(x, y));
                     if(!map.acquirePoint(position,this)){
@@ -188,8 +220,6 @@ public class Robot {
                                 this.currentCommand.addFirst(Command.move(id,3));
                             }
                         }
-                        logger.info("Robot" + id + "use command " + command+ " to avoid conflict");
-
 //                        this.currentCommand.addFirst(command);
 //                        break;
                     }
@@ -206,8 +236,9 @@ public class Robot {
                 } else if (command.cmd().equals("pull")) {
                     try {
                         shouldCarry = false;
-                        Berth berth = map.findBestBerth(this.x, this.y);
+                        Berth berth = ((MapInfoimpl) map).whereAmI(this);
                         if(berth!=null){
+
                             berth.load(1);
                         }
                     } catch (Exception e) {
@@ -217,6 +248,8 @@ public class Robot {
 
                 } else if (command.cmd().equals("move")) {
                     map.map()[x][y] = '.';
+                    expectedX = command.targetPosition(Position.of(x, y)).x();
+                    expectedY = command.targetPosition(Position.of(x, y)).y();
                     map.removePoint(this.position());
                 }
 

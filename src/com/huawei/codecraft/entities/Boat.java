@@ -1,14 +1,12 @@
 package com.huawei.codecraft.entities;
 
 import com.huawei.codecraft.util.MessageCenter;
-import com.huawei.codecraft.util.MyLogger;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Boat {
-    private static final MyLogger logger = MyLogger.getLogger("Boat");
     private int num;
+    private ReentrantLock boatLock = new ReentrantLock();
     private int pos;
     private int status;
     private int capacity;
@@ -20,6 +18,10 @@ public class Boat {
 
     public int id() {
         return id;
+    }
+
+    public ReentrantLock boatLock() {
+        return boatLock;
     }
 
     public Boat setId(int id) {
@@ -83,7 +85,7 @@ public class Boat {
     public boolean ship(Integer berthId){
         if(MessageCenter.send(Command.ship(this.id,berthId))){
             this.pos = berthId;
-            logger.info("Boat "+this.id+" ship to "+berthId);
+//            logger.info("Boat "+this.id+" ship to "+berthId);
             return true;
         }
         return false;
@@ -103,7 +105,7 @@ public class Boat {
 
         if(MessageCenter.send(Command.go(this.id))){
             this.pos=-1;
-            logger.info("Boat "+this.id+" go to virtual point");
+//            logger.info("Boat "+this.id+" go to virtual point");
             reset();
 
             return true;

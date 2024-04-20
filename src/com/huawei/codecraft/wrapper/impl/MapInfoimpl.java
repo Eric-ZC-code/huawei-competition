@@ -4,8 +4,8 @@ import com.huawei.codecraft.entities.Berth;
 import com.huawei.codecraft.entities.Command;
 import com.huawei.codecraft.entities.Good;
 import com.huawei.codecraft.entities.Robot;
+import com.huawei.codecraft.enums.BerthStrategy;
 import com.huawei.codecraft.enums.GoodStrategy;
-import com.huawei.codecraft.util.MyLogger;
 import com.huawei.codecraft.util.Pair;
 import com.huawei.codecraft.util.Position;
 import com.huawei.codecraft.wrapper.MapInfo;
@@ -16,7 +16,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MapInfoimpl extends MapInfo {
 
-    private MyLogger logger = MyLogger.getLogger("MapInfoimpl");
     private ReadWriteLock goingPointLock = new ReentrantReadWriteLock();
 
     @Override
@@ -39,15 +38,12 @@ public class MapInfoimpl extends MapInfo {
                     bestGood = findGoodByManhattanDistance(robot);
                     break;
             }
-            logger.info("Robot: " + robot.id() + " BestGood: " + bestGood + " [x: " + robot.x() + ", y: " + robot.y() + "]" + "availableGoods: " + availableGoodsMap.size()+ " acquiredGoods: " + acquiredGoodsMap.size());
         } catch (Exception e) {
 
-            logger.info("availablegoods: " + availableGoodsMap);
             e.printStackTrace();
         } finally {
             goodRWLock.readLock().unlock();
         }
-        logger.info("BestGood: " + bestGood + " availableGoods: " + availableGoodsMap.size());
 
         return bestGood;
     }
@@ -229,14 +225,25 @@ public class MapInfoimpl extends MapInfo {
     }
 
     @Override
-    public Berth findBestBerth(int x, int y) {
+    public Berth findBestBerth(int x, int y, Set<Berth> blackList, BerthStrategy strategy) {
+        switch (strategy){
+            case LEAST_TIME:
+                return findBestBerthLeastTime(x,y,blackList);
+            default:
+                return findBestBerthManhanttan(x, y, blackList);
+        }
 
+
+    }
+    public Berth findBestBerthManhanttan(int x, int y, Set<Berth> blackList){
         Berth BestBerth = null;
-        goodRWLock.readLock().lock();
         try {
             int minDistance = Integer.MAX_VALUE;
             for (int i = 0; i < this.berths.length; i++) {
                 Berth berth = this.berths[i];
+                if(blackList!=null&&blackList.contains(berth)){
+                    continue;
+                }
 //                logger.info("Berth: " + berth);
                 int manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
                 if (minDistance > manhattanDistance) {
@@ -246,62 +253,76 @@ public class MapInfoimpl extends MapInfo {
             }
 
         } catch (Exception e) {
-            logger.info("berths: " + Arrays.toString(berths));
             e.printStackTrace();
-        } finally {
-            goodRWLock.readLock().unlock();
         }
-
         return BestBerth;
+    }
+    public Berth findBestBerthLeastTime(int x, int y,Set<Berth> blackList){
+        Berth bestBerth = null;
+        try {
+            double minTime = Integer.MAX_VALUE;
+            for (int i = 0; i < this.berths.length; i++) {
+                Berth berth = this.berths[i];
+                double manhattanDistance = Math.abs(x - berth.x()) + Math.abs(y - berth.y());
+                if(blackList!=null&&blackList.contains(berth)){
+                    continue;
+                }
+                double ratio = (manhattanDistance/400)*2+berth.transportTime()/2000;
+                if (minTime > ratio) {
+                    minTime = ratio;
+                    bestBerth = berth;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bestBerth;
     }
 
     // 获取最佳的可用泊位
     @Override
     public Integer getAvailableBerth() {
-        berthRWLock.writeLock().lock();
+        berthRWLock.readLock().lock();
         try {
-            boolean flag = false;
-            List<Berth> availableBerths = new ArrayList<>();
+            int maxGoodsNum = Integer.MIN_VALUE;
+            int id = 0;
             for (int i = 0; i < this.berths.length; i++) {
-                if (!this.berths[i].acquired()) {
-                    availableBerths.add(this.berths[i]);
-                }
-                if (this.berths[0].amount() != this.berths[i].amount()) {
-                    flag = true;
-                }
-            }
+                if(this.berths[i].acquired()){
+                    continue;
 
-//            for (Berth availableBerth : availableBerths) {
-//                logger.info("Available Berth: " + availableBerth.id() + " amount: " + availableBerth.amount());
-//            }
-
-            int j = 0, id = 0;
-            if (flag) {
-                // 选择货物最多的泊位
-                int maxGoodsNum = Integer.MIN_VALUE;
-                for (int i = 0; i < availableBerths.size(); i++) {
-                    if (availableBerths.get(i).amount() > maxGoodsNum) {
-                        maxGoodsNum = availableBerths.get(i).amount();
-                        j = i;
+                }else {
+                    if (this.berths[i].amount() > maxGoodsNum) {
+                        maxGoodsNum = this.berths[i].amount();
+                        id = i;
                     }
                 }
 
-            } else {
-                // 随机选择一个可用泊位
-                Random rand = new Random();
-                j = rand.nextInt(availableBerths.size());
             }
 
-            id = availableBerths.get(j).id();
-            logger.info("Get Berth: " + id + " amount: " + this.berths[id].amount());
-            this.berths[id].setAcquired(true);
             return id;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            berthRWLock.readLock().unlock();
+        }
+        return null;
+    }
+
+    public boolean acquireBerth(int id) {
+        berthRWLock.writeLock().lock();
+        try {
+            if(this.berths[id].acquired()){
+                return false;
+            }
+            this.berths[id].setAcquired(true);
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             berthRWLock.writeLock().unlock();
         }
-        return null;
+        return false;
     }
 
     // 释放泊位
@@ -310,7 +331,6 @@ public class MapInfoimpl extends MapInfo {
         berthRWLock.writeLock().lock();
         try {
             this.berths[id].setAcquired(false);
-            logger.info("Set Berth Free: " + id);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -327,79 +347,28 @@ public class MapInfoimpl extends MapInfo {
     @Override
     public List<Command> getFullPath(Robot robot, Good good, Berth berth) {
 
-        // 寻路逻辑
-        // 如果机器人没有搬运货物
-        if (robot.carrying() == 0) {
-            logger.info("Robot is not carrying good");
-            if (good == null) {
-                return new ArrayList<>();
-            }
-            // 判断货物是否已经被获取，获取了就返回空的命令数组
-            goodRWLock.readLock().lock();
-            try {
-                if (good.acquired()) {
-                    return new ArrayList<>();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                goodRWLock.readLock().unlock();
-            }
-
-            // 获取机器人到货物的路径
-            List<Command> pathToGood = getRobotToGoodPath(robot, good);
-
-            // 获取货物，acquire货物
-            Command getGood = getGood(robot, good);
-            if(getGood == null){
-                return new ArrayList<>();
-            }
-
-            // 获取货物到泊位的路径
-            List<Command> goodToBerth = getGoodToBerthPath(good, berth, robot);
-
-            // 如果机器人到货物的路径或者货物到泊位的路径为空，返回空的命令数组
-            if (pathToGood.isEmpty() || goodToBerth.isEmpty()) {
-                return new ArrayList<>();
-            }
-
-            // 合并路径
-            List<Command> fullPath = new ArrayList<>(pathToGood);
-            fullPath.add(getGood);
-            fullPath.addAll(goodToBerth);
-            Command pullGood = pullGood(robot, good, berth);
-            fullPath.add(pullGood);
-
-            return fullPath;
-
-        }
-        // 如果机器人正在搬运货物
-        else if (robot.carrying() == 1) {
-            logger.info("Robot is carrying good");
-
-            // 如果机器人不可达泊位，返回空的命令数组
-            List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
-            if (pathToBerth.isEmpty()) {
-                return new ArrayList<>();
-            }
-
-            // pull good
-            Command pullGood = pullGood(robot, good, berth);
-            pathToBerth.add(pullGood);
-
-            return pathToBerth;
+        // 寻路逻辑, 机器人携带货物
+        // 如果机器人不可达泊位，返回空的命令数组
+        List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
+        if (pathToBerth.isEmpty()) {
+            robot.berthBlackList().add(berth);
+            return new ArrayList<>();
         }
 
-        return new ArrayList<>();
+        // pull good
+        pathToBerth.add(Command.pull(robot.id()));
+
+        return pathToBerth;
     }
+
 
     // 无目标good bfs搜索
     @Override
     public List<Command> getFullPath(Robot robot) {
-//        // 如果货物数量小于20，返回空的命令数组
-//        if(availableGoodsMap.size()<20){
-//            return null;
-//        }
+        // 如果货物数量小于20，返回空的命令数组
+        if(availableGoodsMap.size()<20){
+            return null;
+        }
 
         // 获取货物和机器人到货物的路径
         Pair<Good, List<Command>> GoodAndPath = getGoodAndPath(robot);
@@ -408,66 +377,58 @@ public class MapInfoimpl extends MapInfo {
         }
         Good good = GoodAndPath.getKey();
         List<Command> pathToGood = GoodAndPath.getValue();
-        Berth berth = findBestBerth(good.x(), good.y());
+        Berth berth = findBestBerth(good.x(), good.y(),robot.berthBlackList(),BerthStrategy.LEAST_TIME);
+        if (berth == null) {
+            return new ArrayList<>();
+        }
 
         // 如果机器人不可达泊位，返回空的命令数组
         List<Command> pathToBerth = getRobotToBerthPath(robot, berth);
         if (pathToBerth.isEmpty()) {
+            robot.berthBlackList().add(berth);
             return new ArrayList<>();
         }
 
-        // 寻路逻辑
-        // 如果机器人没有搬运货物
-        if (robot.carrying() == 0) {
-            logger.info("Robot is not carrying good");
-            // 判断货物是否已经被获取，获取了就返回空的命令数组
-            goodRWLock.readLock().lock();
-            try {
-                if (good.acquired()) {
-                    return new ArrayList<>();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                goodRWLock.readLock().unlock();
-            }
-
-            // 获取货物，acquire货物
-            Command getGood = getGood(robot, good);
-            if(getGood == null){
+        // 寻路逻辑，机器人没有搬运货物
+        // 判断货物是否已经被获取，获取了就返回空的命令数组
+        goodRWLock.readLock().lock();
+        try {
+            if (good.acquired()) {
                 return new ArrayList<>();
             }
-
-            // 获取货物到泊位的路径
-            List<Command> goodToBerth = getGoodToBerthPath(good, berth, robot);
-
-            // 如果机器人到货物的路径或者货物到泊位的路径为空，返回空的命令数组
-            if (goodToBerth.isEmpty() || pathToGood.isEmpty()) {
-                return new ArrayList<>();
-            }
-
-            // 合并路径
-            List<Command> fullPath = new ArrayList<>(pathToGood);
-            fullPath.add(getGood);
-            fullPath.addAll(goodToBerth);
-            Command pullGood = pullGood(robot, good, berth);
-            fullPath.add(pullGood);
-
-            return fullPath;
-
-        }
-        // 如果机器人正在搬运货物
-        else if (robot.carrying() == 1) {
-            logger.info("Robot is carrying good");
-
-            // pull good
-            Command pullGood = pullGood(robot, null, berth);
-            pathToBerth.add(pullGood);
-
-            return pathToBerth;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            goodRWLock.readLock().unlock();
         }
 
-        return new ArrayList<>();
+        // 获取货物，acquire货物
+        Command getGood = getGood(robot, good);
+        if(getGood == null){
+            return new ArrayList<>();
+        }
+
+        // 获取货物到泊位的路径
+        List<Command> goodToBerth = getGoodToBerthPath(good, berth, robot);
+        if(goodToBerth.isEmpty()){
+            robot.berthBlackList().add(berth);
+            return new ArrayList<>();
+        }
+
+        // 如果机器人到货物的路径或者货物到泊位的路径为空，返回空的命令数组
+        if (pathToGood.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 合并路径
+        List<Command> fullPath = new ArrayList<>(pathToGood);
+        fullPath.add(getGood);
+        fullPath.addAll(goodToBerth);
+//            Command pullGood = pullGood(robot, good, berth);
+        fullPath.add(Command.pull(robot.id()));
+
+        return fullPath;
+
     }
 
     // bfs洪水泛滥法，无目的地四处搜索
@@ -483,8 +444,9 @@ public class MapInfoimpl extends MapInfo {
             Position start = new Position(startX, startY);
             queue.offer(start);
             visited.add(start);
-
-            while (!queue.isEmpty()) {
+            int maxDepth = Integer.MAX_VALUE;
+            while (!queue.isEmpty()&&maxDepth>0) {
+                maxDepth--;
                 Position pos = queue.poll();
                 if (this.availableGoods().get(pos) != null) {
                     Good good = this.availableGoods().get(pos);
@@ -577,11 +539,8 @@ public class MapInfoimpl extends MapInfo {
                 return reconstructPath(cameFrom, start, end);
             }
 
-            for (int i = 0; i < 4; i++) {
-                int nextX = current.x() + dx[i];
-                int nextY = current.y() + dy[i];
-                Position next = new Position(nextX, nextY);
-                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && !isObstacle(nextX, nextY) && (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next))) {
+            for (Position next : possibleNeighbours(maze, current.x(), current.y())){
+                if (!costSoFar.containsKey(next) || costSoFar.get(current) + 1 < costSoFar.get(next)) {
                     costSoFar.put(next, costSoFar.get(current) + 1);
                     frontier.add(next);
                     cameFrom.put(next, current);
@@ -591,6 +550,14 @@ public class MapInfoimpl extends MapInfo {
         }
 
         return Collections.emptyList(); // 未找到路径时返回空列表
+    }
+    public Berth whereAmI(Robot r){
+        for (Berth berth : berths) {
+            if(berth.x()<=r.x()&&r.x()<berth.x()+4&&berth.y()<=r.y()&&r.y()<berth.y()+4){
+                return berth;
+            }
+        }
+        return null;
     }
 
     // 启发式函数：曼哈顿距离
@@ -623,7 +590,7 @@ public class MapInfoimpl extends MapInfo {
 
     @Override
     public List<Command> getRobotToGoodPath(Robot robot, Good good) {
-        List<Position> path = mazePathBFS(this.map, robot.x(), robot.y(), good.x(), good.y());
+        List<Position> path = mazePathAStar(this.map, robot.x(), robot.y(), good.x(), good.y());
         List<Command> movePath = pathTransform(path, robot.id());
         return movePath;
     }
@@ -656,6 +623,9 @@ public class MapInfoimpl extends MapInfo {
         Position berthPoint = findBerthPoint(berth);
         List<Position> path = mazePathBFS(this.map, robot.x(), robot.y(), berthPoint.x(), berthPoint.y());
         List<Command> movePath = pathTransform(path, robot.id());
+        if(berthPoint.equals(robot.position())){
+            movePath.add(Command.pull(robot.id()));
+        }
         return movePath;
     }
 
@@ -667,7 +637,7 @@ public class MapInfoimpl extends MapInfo {
                 return null;
             }
             availableGoodsMap.remove(good.pair());
-            acquiredGoodsMap.add(good);
+
             good.setAcquired(true);
             return Command.get(robot.id());
         } catch (Exception e) {
@@ -682,7 +652,6 @@ public class MapInfoimpl extends MapInfo {
     public Command pullGood(Robot robot, Good good, Berth berth) {
         goodRWLock.writeLock().lock();
         try {
-            acquiredGoodsMap.remove(good);
             return Command.pull(robot.id());
         } catch (Exception e) {
             e.printStackTrace();
@@ -694,7 +663,7 @@ public class MapInfoimpl extends MapInfo {
 
     public boolean isObstacle(int x, int y) {
 
-        return this.map[x][y] == '#' || this.map[x][y] == '*' || this.map[x][y] == 'A';
+        return this.map[x][y] == '#' || this.map[x][y] == '*'||this.map[x][y] == 'A';
 
     }
 
@@ -719,12 +688,21 @@ public class MapInfoimpl extends MapInfo {
                 }
             }
         }
-        logger.info("Move Path: " + movePath);
+
         return movePath;
     }
     private Position findBerthPoint(Berth berth){
         Random rand = new Random();
-        return new Position(berth.x() + rand.nextInt(4), berth.y() + rand.nextInt(4));
+        List<Position> possiblePoints = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                Position pos = new Position(berth.x() + i, berth.y() + j);
+                if (map()[pos.x()][pos.y()] != 'A'){
+                    possiblePoints.add(pos);
+                }
+            }
+        }
+        return possiblePoints.get(rand.nextInt(possiblePoints.size()));
     }
 
     private Position findBestBerthPoint(Berth berth, Position position) {
